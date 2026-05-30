@@ -25,10 +25,24 @@ afterEach(() => {
 describe('Phase 4 admin login frontend', () => {
   it('logs in an admin, stores the bearer token, and opens the dashboard shell', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      expect(String(input)).toBe('/api/admin/login');
-      expect(init?.method).toBe('POST');
-      expect(JSON.parse(String(init?.body))).toEqual({ username: 'admin', password: 'secret' });
-      return jsonResponse({ access_token: 'admin-token', token_type: 'bearer' });
+      const url = String(input);
+      if (url === '/api/admin/login') {
+        expect(init?.method).toBe('POST');
+        expect(JSON.parse(String(init?.body))).toEqual({ username: 'admin', password: 'secret' });
+        return jsonResponse({ access_token: 'admin-token', token_type: 'bearer' });
+      }
+      if (url === '/api/admin/dashboard') {
+        expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+        return jsonResponse({
+          new_orders_count: 0,
+          preparing_orders_count: 0,
+          ready_orders_count: 0,
+          orders_open: true,
+          available_drinks_count: 0,
+          available_beans_count: 0,
+        });
+      }
+      throw new Error(`Unhandled fetch ${url}`);
     });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -40,7 +54,7 @@ describe('Phase 4 admin login frontend', () => {
 
     await waitFor(() => expect(window.localStorage.getItem('dom_admin_token')).toBe('admin-token'));
     expect(await screen.findByRole('heading', { name: /admin dashboard/i })).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/login', expect.objectContaining({ method: 'POST' }));
   });
 
   it('shows a friendly error when admin credentials are rejected', async () => {

@@ -15,6 +15,15 @@ class AdminTokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class AdminDashboardResponse(BaseModel):
+    new_orders_count: int
+    preparing_orders_count: int
+    ready_orders_count: int
+    orders_open: bool
+    available_drinks_count: int
+    available_beans_count: int
+
+
 class AdminOrderStatusUpdate(BaseModel):
     status: OrderStatus
 
