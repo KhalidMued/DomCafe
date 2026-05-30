@@ -1,37 +1,45 @@
 # Status
 
 ## Current phase
-Phase 2 — Public Guest API
+Phase 3 — Guest Frontend
 
 ## Current branch
-feature/public-guest-api
+feature/guest-frontend
 
 ## What works
-- Phase 1 PR #4 was merged into `main` and local `main` was fast-forwarded.
-- Local `feature/backend-foundation` was deleted after confirming it was merged into `main`.
-- Phase 2 branch exists from latest `main`.
-- Public settings API exists at `GET /api/settings/public`.
-- Public menu API exists at `GET /api/menu` and returns active categories with available drinks.
-- Guest order creation API exists at `POST /api/orders`.
-- Guest order status API exists at `GET /api/orders/{order_id}`.
-- Friendly public error shape is used for invalid guest order input.
-- Discord notification service remains a placeholder for a later phase.
-- Alembic Phase 2 migration adds `settings` plus guest note/order item snapshot fields.
-- Docker Compose build and runtime verification pass.
+- Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
+- Local `feature/public-guest-api` was deleted after confirming it was merged into `main`.
+- Phase 3 branch exists from latest `main`.
+- Uploaded brand PDFs were inspected for visual direction:
+  - Dark Nubian Night surfaces.
+  - Doum Gold accents.
+  - Palm Dust text.
+  - Quiet editorial spacing.
+  - Warm, unhurried copy.
+- Guest frontend pages are implemented:
+  - `/` welcome/name page.
+  - `/menu` public menu page with sticky category tabs and drink cards.
+  - `/cart` review and submit page.
+  - `/order/{order_id}` friendly order status page.
+- Frontend API client calls the Phase 2 public API routes.
+- Cart/session state stores the guest name locally and keeps selected drinks in memory.
+- Order status page polls every 15 seconds and cleans up its timer on unmount.
+- DŌM design tokens are applied as CSS variables.
+- Guest UI uses mobile-first, dark, quiet DŌM styling.
+- Frontend unit tests pass for welcome, menu/cart submission, and polling cleanup.
+- Frontend production build passes.
+- Backend tests still pass.
+- Docker Compose rebuild passes.
 - Health endpoint returns OK through Nginx.
-- Migrations apply inside the backend container.
-- Seed data inserts inside the backend container: categories=5, beans=1, drinks=22.
-- `GET /api/menu` through Nginx returns categories=5 and drinks=22.
-- `POST /api/orders` through Nginx creates a test order.
-- `GET /api/orders/{order_id}` through Nginx returns the test order with friendly status text.
-- Backend tests pass locally.
-- Alembic offline SQL generation passes.
+- Migrations apply and seed data inserts inside Docker.
+- Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
 
 ## What is pending
-- PR review and merge for Phase 2.
+- Commit, push, and open Phase 3 pull request.
 
 ## Known issues
 - No active blocker.
+- The frontend container still runs Vite dev server in Docker; production serving hardening remains a later deployment concern.
 
 ## Next recommended task
-Open and review the Phase 2 pull request, then merge before starting Phase 3 — Guest Frontend.
+Open the Phase 3 pull request for review and merge before starting Phase 4 — Admin Backend and Frontend.
