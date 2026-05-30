@@ -1,0 +1,14 @@
+:root {
+  --color-nubian-night: #2C2C2A;
+  --color-doum-gold: #BA7517;
+  --color-palm-dust: #F1EFE8;
+  --color-nile-mist: #5DCAA5;
+  --color-fired-clay: #D85A30;
+  --color-mid-tone: #888780;
+  --color-hint: #B4B2A9;
+  --color-light-rule: #D3D1C7;
+  font-family: Tajawal, Cairo, Almarai, system-ui, sans-serif;
+}
+body { margin: 0; background: var(--color-nubian-night); color: var(--color-palm-dust); }
+.dom-shell { min-height: 100vh; display: grid; place-content: center; text-align: center; }
+h1 { letter-spacing: 0.3em; font-weight: 300; }

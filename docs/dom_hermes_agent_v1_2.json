@@ -1,0 +1,667 @@
+{
+  "_meta": {
+    "document": "DŌM Home Café — Brand & Menu Data for Herms Agent",
+    "version": "1.2",
+    "prepared_for": "Herms Agent — DŌM Home Café OS Build",
+    "notes": "Corrected for the agreed MVP: DOM brand/UI only, operational home coffee categories, no prices, no small plates, no equipment field."
+  },
+  "brand": {
+    "name": "DŌM",
+    "name_ascii": "DOM",
+    "type": "Home Café",
+    "tagline": "Slow coffee. Deep roots.",
+    "tagline_alternates": [
+      "Brewed from memory.",
+      "Where the morning settles.",
+      "Rooted. Poured. Present."
+    ],
+    "origin": "Nubian-inspired — named after the Doum palm, commonly known botanically as Hyphaene thebaica. The brand uses the tree as a symbol of depth, patience, rootedness, and home.",
+    "philosophy": "Slowness is the condition under which quality becomes possible. Every item is made at the pace it requires, not the pace a clock demands.",
+    "voice": {
+      "tone": [
+        "Warm",
+        "Unhurried",
+        "Grounded",
+        "Friendly",
+        "Certain without arrogance"
+      ],
+      "style": "Short sentences. Concrete images. No jargon. Speak the way an old friend speaks.",
+      "avoid": [
+        "Trendy coffee jargon",
+        "Over-explanation",
+        "Urgency cues",
+        "Superlatives"
+      ]
+    }
+  },
+  "design_tokens": {
+    "colors": {
+      "nubian_night": {
+        "hex": "#2C2C2A",
+        "role": "primary background, headlines, dark surfaces"
+      },
+      "doum_gold": {
+        "hex": "#BA7517",
+        "role": "accent, dividers, macron mark, CTAs"
+      },
+      "palm_dust": {
+        "hex": "#F1EFE8",
+        "role": "page background, card surfaces, reversed text on dark"
+      },
+      "nile_mist": {
+        "hex": "#5DCAA5",
+        "role": "highlight, refreshing items, seasonal accents"
+      },
+      "fired_clay": {
+        "hex": "#D85A30",
+        "role": "warmth cues, spiced drinks, friendly alerts"
+      },
+      "mid_tone": {
+        "hex": "#888780",
+        "role": "secondary text, descriptions, labels"
+      },
+      "hint": {
+        "hex": "#B4B2A9",
+        "role": "tertiary text, placeholders, dividers"
+      },
+      "light_rule": {
+        "hex": "#D3D1C7",
+        "role": "hairline rules, borders"
+      }
+    },
+    "typography": {
+      "display": {
+        "font": "serif or thin sans",
+        "weight": 300,
+        "tracking": "0.3em+",
+        "use": "DŌM wordmark moments"
+      },
+      "heading": {
+        "font": "sans-serif",
+        "weight": 300,
+        "tracking": "0.15em",
+        "use": "section titles, category headers"
+      },
+      "subhead": {
+        "font": "sans-serif",
+        "weight": 400,
+        "tracking": "normal",
+        "use": "drink names"
+      },
+      "body": {
+        "font": "sans-serif",
+        "weight": 400,
+        "size": "14–16px",
+        "line_height": "1.7",
+        "use": "descriptions, story copy"
+      },
+      "label": {
+        "font": "sans-serif",
+        "weight": 400,
+        "tracking": "wide",
+        "case": "UPPERCASE",
+        "size": "11px",
+        "use": "tags, categories, metadata"
+      }
+    },
+    "arabic_fonts": {
+      "primary": "Tajawal",
+      "fallbacks": [
+        "Cairo",
+        "Almarai"
+      ],
+      "requirement": "Fonts must be loaded by the web app, not dependent on client-installed fonts."
+    },
+    "spacing": {
+      "base_unit": "8px",
+      "section_gap": "48px",
+      "item_gap": "24px",
+      "card_padding": "24px"
+    },
+    "border_radius": "8px",
+    "logo_clear_space": "equal to height of M character in the wordmark"
+  },
+  "mvp_rules": {
+    "pricing": "No prices in MVP. This is a private home café guest experience, not a sales menu.",
+    "photos": "Every drink must have a photo_url. Seed drinks may use placeholders until replaced by admin.",
+    "beans": "Admin selects a default bean for each drink. Guest sees the bean but cannot choose it in MVP.",
+    "equipment": "Do not include tool/equipment fields.",
+    "categories_editable": true,
+    "drinks_editable": true,
+    "availability": "Admin can toggle availability for categories, drinks, and beans.",
+    "order_progress": {
+      "controlled_by": "admin",
+      "guest_can_change_status": false,
+      "polling_seconds": 15,
+      "statuses": [
+        "new",
+        "received",
+        "preparing",
+        "ready",
+        "cancelled"
+      ],
+      "guest_labels": {
+        "new": "Your order was sent to the bar.",
+        "received": "Your order was received.",
+        "preparing": "Your drink is being prepared.",
+        "ready": "Your drink is ready — we’ll bring it to you shortly.",
+        "cancelled": "This order was cancelled. Please check with the coffee bar."
+      }
+    }
+  },
+  "menu": {
+    "language": "English first, Arabic/RTL ready",
+    "categories": [
+      {
+        "id": "espresso_bar",
+        "label": "Espresso Bar",
+        "label_ar": "بار الإسبريسو",
+        "display_order": 1,
+        "accent_color": "doum_gold",
+        "description": "Espresso-based drinks, from plain espresso to milk drinks and lattes.",
+        "items": [
+          {
+            "id": "espresso",
+            "name": "Espresso",
+            "name_ar": "إسبريسو",
+            "description": "A short, concentrated coffee with a bold flavor and rich crema.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "espresso"
+            ],
+            "estimated_time_minutes": 3,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "americano",
+            "name": "Americano",
+            "name_ar": "أمريكانو",
+            "description": "Espresso with hot water for a lighter black coffee.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "espresso",
+              "water"
+            ],
+            "estimated_time_minutes": 3,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "cortado",
+            "name": "Cortado",
+            "name_ar": "كورتادو",
+            "description": "Espresso balanced with a small amount of steamed milk.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "cappuccino",
+            "name": "Cappuccino",
+            "name_ar": "كابتشينو",
+            "description": "Espresso with steamed milk and thick milk foam.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk",
+              "foam"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "flat_white",
+            "name": "Flat White",
+            "name_ar": "فلات وايت",
+            "description": "A smooth espresso drink with velvety steamed milk.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "hot_latte",
+            "name": "Hot Latte",
+            "name_ar": "لاتيه ساخن",
+            "description": "Espresso with steamed milk for a soft and creamy cup.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "iced_latte",
+            "name": "Iced Latte",
+            "name_ar": "آيس لاتيه",
+            "description": "Espresso, cold milk, and ice for a refreshing milk coffee.",
+            "temperature_options": [
+              "iced"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk",
+              "ice"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "spanish_latte",
+            "name": "Spanish Latte",
+            "name_ar": "سبانش لاتيه",
+            "description": "A sweet milk coffee with espresso and condensed milk.",
+            "temperature_options": [
+              "hot",
+              "iced"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk",
+              "condensed milk"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "vanilla_latte",
+            "name": "Vanilla Latte",
+            "name_ar": "فانيلا لاتيه",
+            "description": "A latte with soft vanilla sweetness.",
+            "temperature_options": [
+              "hot",
+              "iced"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk",
+              "vanilla"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "caramel_latte",
+            "name": "Caramel Latte",
+            "name_ar": "كراميل لاتيه",
+            "description": "A latte with a warm caramel flavor.",
+            "temperature_options": [
+              "hot",
+              "iced"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "espresso",
+              "milk",
+              "caramel"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          }
+        ]
+      },
+      {
+        "id": "filter_bar",
+        "label": "Filter Bar",
+        "label_ar": "بار الفلتر",
+        "display_order": 2,
+        "accent_color": "doum_gold",
+        "description": "Hot manual and brewed filter coffee.",
+        "items": [
+          {
+            "id": "v60",
+            "name": "V60",
+            "name_ar": "في 60",
+            "description": "Clean manual brew highlighting the coffee bean’s flavor notes.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "filter coffee",
+              "water"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "chemex",
+            "name": "Chemex",
+            "name_ar": "كيمكس",
+            "description": "Smooth filter coffee with a clean body and elegant taste.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "filter coffee",
+              "water"
+            ],
+            "estimated_time_minutes": 5,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "batch_brew",
+            "name": "Batch Brew",
+            "name_ar": "باتش برو",
+            "description": "Simple brewed coffee, easy and comfortable for daily drinking.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "filter coffee",
+              "water"
+            ],
+            "estimated_time_minutes": 3,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          }
+        ]
+      },
+      {
+        "id": "cold_bar",
+        "label": "Cold Bar",
+        "label_ar": "بار البارد",
+        "display_order": 3,
+        "accent_color": "nile_mist",
+        "description": "Cold coffee drinks including iced filter and cold brew.",
+        "items": [
+          {
+            "id": "iced_v60",
+            "name": "Iced V60",
+            "name_ar": "آيس في 60",
+            "description": "Chilled manual brew with a clean and refreshing profile.",
+            "temperature_options": [
+              "iced"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "filter coffee",
+              "water",
+              "ice"
+            ],
+            "estimated_time_minutes": 5,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "iced_chemex",
+            "name": "Iced Chemex",
+            "name_ar": "آيس كيمكس",
+            "description": "Cold filter coffee with a smooth and light body.",
+            "temperature_options": [
+              "iced"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "filter coffee",
+              "water",
+              "ice"
+            ],
+            "estimated_time_minutes": 5,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "cold_brew",
+            "name": "Cold Brew",
+            "name_ar": "كولد برو",
+            "description": "Slow-steeped cold coffee with a smooth and low-acidity taste.",
+            "temperature_options": [
+              "iced"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "coffee",
+              "water"
+            ],
+            "estimated_time_minutes": 3,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          }
+        ]
+      },
+      {
+        "id": "capsule_bar",
+        "label": "Capsule Bar",
+        "label_ar": "بار الكبسولات",
+        "display_order": 4,
+        "accent_color": "fired_clay",
+        "description": "Quick capsule-based coffee options.",
+        "items": [
+          {
+            "id": "nespresso_espresso",
+            "name": "Nespresso Espresso",
+            "name_ar": "إسبريسو نسبريسو",
+            "description": "Quick capsule espresso with a bold concentrated taste.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "capsule espresso"
+            ],
+            "estimated_time_minutes": 2,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "nespresso_americano",
+            "name": "Nespresso Americano",
+            "name_ar": "أمريكانو نسبريسو",
+            "description": "Capsule espresso with hot water for a simple black coffee.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "capsule espresso",
+              "water"
+            ],
+            "estimated_time_minutes": 2,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "decaf_capsule",
+            "name": "Decaf Capsule",
+            "name_ar": "كبسولة منزوعة الكافيين",
+            "description": "A caffeine-light option for evening or relaxed drinking.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "decaf capsule"
+            ],
+            "estimated_time_minutes": 2,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          }
+        ]
+      },
+      {
+        "id": "special_menu",
+        "label": "Special Menu",
+        "label_ar": "القائمة الخاصة",
+        "display_order": 5,
+        "accent_color": "doum_gold",
+        "description": "Temporary, seasonal, experimental, or special drinks.",
+        "items": [
+          {
+            "id": "matcha_latte",
+            "name": "Matcha Latte",
+            "name_ar": "ماتشا لاتيه",
+            "description": "Creamy matcha with milk, served hot or iced.",
+            "temperature_options": [
+              "hot",
+              "iced"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "matcha",
+              "milk"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "hot_chocolate",
+            "name": "Hot Chocolate",
+            "name_ar": "شوكولاتة ساخنة",
+            "description": "Rich chocolate drink with milk, warm and comforting.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [
+              "whole milk",
+              "low-fat milk",
+              "oat milk"
+            ],
+            "ingredients": [
+              "chocolate",
+              "milk"
+            ],
+            "estimated_time_minutes": 4,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          },
+          {
+            "id": "tea",
+            "name": "Tea",
+            "name_ar": "شاي",
+            "description": "A simple non-coffee option for guests who prefer something lighter.",
+            "temperature_options": [
+              "hot"
+            ],
+            "milk_options": [],
+            "ingredients": [
+              "tea",
+              "water"
+            ],
+            "estimated_time_minutes": 3,
+            "photo_url": "/uploads/drinks/placeholder.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  "digital_menu_ui_rules": {
+    "layout": "Single-scroll vertical feed, category anchors in sticky nav",
+    "default_theme": "dark (nubian_night background, palm_dust text)",
+    "light_theme_available": true,
+    "navigation": {
+      "type": "sticky top bar, horizontal scroll tabs",
+      "tab_labels": "Use category label; Arabic label may appear below or beside it later.",
+      "active_tab_indicator": "doum_gold underline"
+    },
+    "item_card": {
+      "show_fields": [
+        "photo",
+        "name",
+        "name_ar",
+        "description",
+        "bean",
+        "temperature_options",
+        "milk_options",
+        "availability"
+      ],
+      "tap_item": "Expand to show full description, bean details, ingredients, and options."
+    },
+    "footer": {
+      "copy": "Slow coffee. Deep roots.",
+      "copy_ar": "قهوة بطيئة. جذور عميقة.",
+      "show_origin_note": true,
+      "origin_note": "DŌM is named after the Doum palm — a symbol of patience, depth, and home."
+    }
+  },
+  "three_js_rules": {
+    "enabled": "optional",
+    "allowed_locations": [
+      "welcome_page_only"
+    ],
+    "allowed_ideas": [
+      "Soft floating DŌM logo mark in the background",
+      "Gentle animated bean/palm-inspired object",
+      "Small interactive menu card tilt effect",
+      "Subtle rotating 3D coffee cup sleeve on the welcome page"
+    ],
+    "requirements": [
+      "Lazy load Three.js",
+      "Do not block page load",
+      "Provide static fallback if WebGL fails",
+      "Do not use Three.js on menu, cart, or order tracking"
+    ]
+  },
+  "copy_blocks": {
+    "welcome": "Welcome to DŌM. Take your time.",
+    "welcome_ar": "أهلاً في دوم. خذ وقتك.",
+    "empty_state": "Nothing here yet. Ask us about today's selection.",
+    "seasonal_default": "Ask about today's selection.",
+    "allergen_note": "Please tell us about any dietary requirements.",
+    "brewing_note": "Some drinks take a little longer. We’ll let you know.",
+    "menu_error": "We couldn’t load the menu right now. Please refresh or check with the coffee bar.",
+    "orders_closed": "The coffee bar is not taking orders right now. Please check again shortly.",
+    "drink_unavailable": "Sorry, this drink is currently unavailable. Please choose another one.",
+    "order_submit_error": "We couldn’t send your order. Please try again.",
+    "status_refresh_error": "We’re having trouble refreshing your order status. We’ll try again shortly."
+  }
+}
