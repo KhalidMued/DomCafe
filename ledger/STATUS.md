@@ -1,15 +1,21 @@
 # Status
 
 ## Current phase
-Phase 3 — Guest Frontend complete; ready for Phase 4 — Admin Backend and Frontend
+Phase 4 — Admin Backend and Frontend started
 
 ## Current branch
-main
+feature/admin-auth-foundation
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
 - Local `feature/public-guest-api` was deleted after confirming it was merged into `main`.
 - Phase 3 PR #6 was merged into `main`.
+- Phase 3 status PR #8 was merged into `main`; merged local/remote Phase 3 branches were deleted.
+- Phase 4 admin auth foundation is implemented:
+  - `POST /api/admin/login` accepts username/password.
+  - Valid admin credentials return a bearer JWT.
+  - Invalid credentials return `401` with a friendly message.
+  - Seed creates the default admin user from environment settings when missing.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -28,14 +34,16 @@ main
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
 - Frontend unit tests pass for welcome, menu/cart submission, and polling cleanup.
 - Frontend production build passes.
-- Backend tests still pass.
-- Docker Compose rebuild passes.
+- Backend tests pass, including admin login contract tests.
+- Docker Compose backend rebuild passes.
 - Health endpoint returns OK through Nginx.
 - Migrations apply and seed data inserts inside Docker.
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
+- Admin login was verified through Nginx inside Docker without printing credentials or tokens.
 
 ## What is pending
-- Human review/merge of this ledger-only status update PR.
+- Human review/merge of the admin auth foundation PR.
+- Remaining Phase 4 scope: admin frontend login, dashboard, orders/status controls, menu/bean/settings management, and photo upload.
 
 ## Known issues
 - No active blocker.
@@ -43,4 +51,4 @@ main
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After this ledger-only status update is merged, start Phase 4 — Admin Backend and Frontend from latest `main`.
+After the admin auth foundation PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin slice from latest `main`.
