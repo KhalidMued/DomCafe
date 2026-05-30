@@ -6,13 +6,14 @@ from app.db.session import get_session
 from app.schemas.admin import (
     AdminDashboardResponse,
     AdminLoginRequest,
+    AdminOrderListItem,
     AdminOrderStatusResponse,
     AdminOrderStatusUpdate,
     AdminTokenResponse,
 )
 from app.services.admin_auth import authenticate_admin, get_active_admin_id
 from app.services.admin_dashboard import get_dashboard_summary
-from app.services.admin_orders import update_order_status
+from app.services.admin_orders import list_recent_orders, update_order_status
 
 router = APIRouter(tags=["admin"])
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -60,6 +61,14 @@ async def admin_dashboard(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, int | bool]:
     return await get_dashboard_summary(session)
+
+
+@router.get("/admin/orders", response_model=list[AdminOrderListItem])
+async def admin_orders(
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> list[dict[str, object]]:
+    return await list_recent_orders(session)
 
 
 @router.patch("/admin/orders/{order_id}/status", response_model=AdminOrderStatusResponse)

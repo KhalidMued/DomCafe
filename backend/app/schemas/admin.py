@@ -24,6 +24,16 @@ class AdminDashboardResponse(BaseModel):
     available_beans_count: int
 
 
+class AdminOrderListItem(BaseModel):
+    id: str
+    order_number: int
+    guest_name: str
+    status: OrderStatus
+    status_label: str
+    items_count: int
+    created_at: str
+
+
 class AdminOrderStatusUpdate(BaseModel):
     status: OrderStatus
 

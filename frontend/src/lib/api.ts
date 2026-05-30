@@ -80,6 +80,25 @@ export type AdminDashboardSummary = {
   available_beans_count: number;
 };
 
+export type AdminOrderStatus = 'new' | 'received' | 'preparing' | 'ready' | 'cancelled';
+
+export type AdminOrderListItem = {
+  id: string;
+  order_number: number;
+  guest_name: string;
+  status: AdminOrderStatus;
+  status_label: string;
+  items_count: number;
+  created_at: string;
+};
+
+export type AdminOrderStatusResponse = {
+  id: string;
+  order_number: number;
+  status: AdminOrderStatus;
+  status_label: string;
+};
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const data = await response.json();
@@ -120,5 +139,19 @@ export function adminLogin(payload: AdminLoginPayload) {
 export function getAdminDashboard(token: string) {
   return request<AdminDashboardSummary>('/api/admin/dashboard', {
     headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getAdminOrders(token: string) {
+  return request<AdminOrderListItem[]>('/api/admin/orders', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function updateAdminOrderStatus(token: string, orderId: string, status: AdminOrderStatus) {
+  return request<AdminOrderStatusResponse>(`/api/admin/orders/${orderId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ status }),
   });
 }
