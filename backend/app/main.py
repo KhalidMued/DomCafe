@@ -1,10 +1,21 @@
+from typing import cast
+
 from fastapi import FastAPI, status
+from fastapi.exceptions import RequestValidationError
+from starlette.types import ExceptionHandler
 from sqlalchemy import text
 
+from app.api.public.routes import router as public_router
+from app.core.errors import GuestApiError, guest_api_error_handler, validation_exception_handler
 from app.db.redis import get_redis
 from app.db.session import AsyncSessionLocal
 
 app = FastAPI(title="DŌM Home Café OS")
+app.add_exception_handler(GuestApiError, cast(ExceptionHandler, guest_api_error_handler))
+app.add_exception_handler(
+    RequestValidationError, cast(ExceptionHandler, validation_exception_handler)
+)
+app.include_router(public_router, prefix="/api")
 
 
 async def check_database() -> bool:
