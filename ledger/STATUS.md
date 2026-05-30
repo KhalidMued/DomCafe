@@ -4,7 +4,7 @@
 Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-dashboard-summary
+feature/admin-orders-page
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -27,11 +27,17 @@ feature/admin-dashboard-summary
   - Successful login calls `POST /api/admin/login`, stores the bearer token locally, and opens the `/admin/dashboard` shell.
   - Invalid credentials show the backend’s friendly rejection message.
   - Local and remote `feature/admin-login-frontend` branches were deleted after merge.
-- Phase 4 admin dashboard summary is implemented:
+- Phase 4 admin dashboard summary is implemented and merged via PR #15:
   - `GET /api/admin/dashboard` requires a bearer admin token.
   - Dashboard summary returns counts for new/preparing/ready orders, orders open state, available drinks, and available beans.
   - `/admin/dashboard` loads those counts using the stored admin token.
   - Dashboard shows an admin-login-required state when no admin token is stored.
+  - Local `feature/admin-dashboard-summary` branch was deleted after merge; remote feature branches were already deleted by the owner.
+- Phase 4 admin orders page slice is implemented on this branch:
+  - `GET /api/admin/orders` requires a bearer admin token.
+  - The endpoint returns the 50 most recent orders with guest name, friendly status label, item count, and created time.
+  - `/admin/orders` loads recent orders using the stored admin token.
+  - Admins can change each order status from the orders page using the existing protected status API.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -43,15 +49,15 @@ feature/admin-dashboard-summary
   - `/menu` public menu page with sticky category tabs and drink cards.
   - `/cart` review and submit page.
   - `/order/{order_id}` friendly order status page.
-- Frontend API client calls the Phase 2 public API routes.
+- Frontend API client calls the Phase 2 public API routes and current Phase 4 admin routes.
 - Cart/session state stores the guest name locally and keeps selected drinks in memory.
 - Order status page polls every 15 seconds and cleans up its timer on unmount.
 - DŌM design tokens are applied as CSS variables.
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
-- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, and admin dashboard summary.
+- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, and admin orders.
 - Frontend production build passes.
-- Backend tests pass, including admin login, admin dashboard summary, and admin order status contract tests.
-- Docker Compose backend rebuild passes.
+- Backend tests pass, including admin login, admin dashboard summary, admin orders list, and admin order status contract tests.
+- Docker Compose backend/frontend rebuild passes.
 - Health endpoint returns OK through Nginx.
 - Migrations apply and seed data inserts inside Docker.
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
@@ -59,11 +65,11 @@ feature/admin-dashboard-summary
 - Admin login frontend was visually verified through Nginx at `/admin/login`.
 - Admin dashboard summary API was verified through Nginx without printing credentials or tokens.
 - Admin dashboard no-token state was visually verified through Nginx at `/admin/dashboard`.
-- Admin status update was verified through Nginx inside Docker: admin set an order to `preparing`, and the guest status endpoint returned `preparing` with friendly copy.
+- Admin orders list and status controls were verified through Nginx inside Docker: a guest order was created, listed in `/api/admin/orders`, updated to `ready`, and the guest status endpoint returned `ready`.
 
 ## What is pending
-- Human review/merge of the admin dashboard summary PR.
-- Remaining Phase 4 scope: admin orders page UI/status controls, menu/bean/settings management, and photo upload.
+- Human review/merge of the admin orders page PR.
+- Remaining Phase 4 scope: menu/bean/settings management and photo upload.
 
 ## Known issues
 - No active blocker.
@@ -71,4 +77,4 @@ feature/admin-dashboard-summary
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After the admin dashboard summary PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin orders page UI/status-controls slice from latest `main`.
+After the admin orders page PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin menu-management slice from latest `main`.

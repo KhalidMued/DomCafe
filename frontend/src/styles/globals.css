@@ -73,6 +73,9 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .admin-summary-card { padding: 18px; display: grid; gap: 8px; }
 .admin-summary-card strong { color: var(--color-doum-gold); font-size: 2rem; font-weight: 400; }
 .admin-summary-card span { color: var(--color-hint); }
+.admin-orders-list { display: grid; gap: 14px; }
+.admin-order-card { display: grid; gap: 16px; }
+.admin-order-card h2 { margin-bottom: 6px; letter-spacing: .04em; }
 
 @media (min-width: 720px) {
   .page-shell { padding-inline: 32px; }

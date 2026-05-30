@@ -41,6 +41,7 @@ export function AdminDashboardPage() {
           <p className="eyebrow">Admin</p>
           <h1>Admin dashboard</h1>
         </div>
+        <a href="/admin/orders">Orders</a>
       </section>
       {error ? <p className="error-text">{error}</p> : null}
       {!summary && !error ? <section className="skeleton-card">Loading dashboard…</section> : null}
