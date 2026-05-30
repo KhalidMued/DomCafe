@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&family=Cairo:wght@300;400;600;700&family=Tajawal:wght@300;400;500;700&display=swap');
+
 :root {
   --color-nubian-night: #2C2C2A;
   --color-doum-gold: #BA7517;
@@ -7,8 +9,69 @@
   --color-mid-tone: #888780;
   --color-hint: #B4B2A9;
   --color-light-rule: #D3D1C7;
+  color: var(--color-palm-dust);
+  background: var(--color-nubian-night);
   font-family: Tajawal, Cairo, Almarai, system-ui, sans-serif;
+  font-synthesis: none;
 }
-body { margin: 0; background: var(--color-nubian-night); color: var(--color-palm-dust); }
-.dom-shell { min-height: 100vh; display: grid; place-content: center; text-align: center; }
-h1 { letter-spacing: 0.3em; font-weight: 300; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: radial-gradient(circle at top, #3b332d 0, var(--color-nubian-night) 42rem); }
+a { color: inherit; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.page-shell { min-height: 100vh; width: min(100%, 980px); margin-inline: auto; padding: 24px 18px 64px; }
+.welcome-page { display: grid; place-items: center; }
+.hero-card, .status-card, .cart-item, .drink-card, .skeleton-card { border: 1px solid color-mix(in srgb, var(--color-light-rule) 24%, transparent); background: color-mix(in srgb, var(--color-nubian-night) 88%, black); border-radius: 28px; box-shadow: 0 24px 80px rgba(0,0,0,.24); }
+.hero-card { width: min(100%, 520px); padding: 42px 28px; text-align: center; position: relative; overflow: hidden; }
+.hero-card::before { content: ''; position: absolute; inset: 18px; border: 1px solid color-mix(in srgb, var(--color-doum-gold) 30%, transparent); border-radius: 22px; pointer-events: none; }
+.eyebrow { margin: 0 0 12px; color: var(--color-doum-gold); text-transform: uppercase; letter-spacing: .28em; font-size: .75rem; }
+h1, h2, h3, p { margin-block-start: 0; }
+h1 { font-weight: 300; letter-spacing: .26em; font-size: clamp(2.6rem, 14vw, 5.4rem); line-height: 1; }
+h2 { font-weight: 400; letter-spacing: .08em; }
+h3 { font-size: 1.2rem; margin-bottom: 8px; }
+.tagline { color: var(--color-palm-dust); font-size: 1.1rem; letter-spacing: .08em; }
+.hero-copy { color: var(--color-hint); line-height: 1.8; }
+.name-form { display: grid; gap: 12px; margin-top: 30px; text-align: start; }
+label { color: var(--color-hint); display: grid; gap: 8px; font-size: .95rem; }
+input, select, textarea { width: 100%; border: 1px solid color-mix(in srgb, var(--color-light-rule) 34%, transparent); border-radius: 16px; padding: 14px 16px; color: var(--color-palm-dust); background: color-mix(in srgb, var(--color-nubian-night) 72%, black); }
+textarea { min-height: 96px; resize: vertical; }
+button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color: var(--color-nubian-night); background: var(--color-doum-gold); border-radius: 999px; padding: 12px 18px; text-decoration: none; font-weight: 700; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.top-bar h1 { font-size: clamp(2rem, 10vw, 4rem); }
+.top-bar a { background: transparent; color: var(--color-doum-gold); }
+.category-tabs { position: sticky; top: 0; z-index: 4; display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; background: color-mix(in srgb, var(--color-nubian-night) 94%, transparent); backdrop-filter: blur(16px); }
+.category-tabs a { flex: 0 0 auto; padding: 10px 14px; text-decoration: none; color: var(--color-hint); border-bottom: 2px solid transparent; }
+.category-tabs a:focus, .category-tabs a:hover { color: var(--color-palm-dust); border-bottom-color: var(--color-doum-gold); }
+.menu-section { padding-block: 28px; scroll-margin-top: 68px; }
+.menu-section > p { color: var(--color-hint); line-height: 1.7; }
+.drink-grid { display: grid; gap: 16px; }
+.drink-card { overflow: hidden; display: grid; grid-template-columns: 104px 1fr; }
+.drink-image-button { border: 0; padding: 0; border-radius: 0; background: var(--color-palm-dust); }
+.drink-image-button img { width: 100%; height: 100%; object-fit: cover; display: block; filter: sepia(.18) saturate(.7); }
+.drink-content { padding: 16px; }
+.drink-content p, .bean-line, .detail-copy { color: var(--color-hint); line-height: 1.65; }
+.option-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
+.option-row span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 28%, transparent); color: var(--color-palm-dust); border-radius: 999px; padding: 4px 9px; font-size: .8rem; }
+.error-text { color: var(--color-fired-clay); background: color-mix(in srgb, var(--color-fired-clay) 16%, transparent); border: 1px solid color-mix(in srgb, var(--color-fired-clay) 42%, transparent); padding: 12px 14px; border-radius: 16px; }
+.skeleton-card { padding: 28px; color: var(--color-hint); }
+.cart-page, .status-page { max-width: 720px; }
+.guest-line { color: var(--color-nile-mist); }
+.cart-item { padding: 18px; margin-block: 14px; display: grid; gap: 12px; }
+.full-label { margin-block: 18px; }
+.status-card { padding: 22px; }
+.status-label { font-size: 1.3rem; color: var(--color-palm-dust); }
+.progress-track { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; }
+.progress-track span { color: var(--color-hint); border-block-start: 3px solid color-mix(in srgb, var(--color-light-rule) 30%, transparent); padding-top: 10px; text-transform: capitalize; font-size: .78rem; }
+.progress-track span.active { color: var(--color-doum-gold); border-color: var(--color-doum-gold); }
+.status-item { display: grid; gap: 4px; padding-block: 12px; border-block-start: 1px solid color-mix(in srgb, var(--color-light-rule) 24%, transparent); }
+.status-item span { color: var(--color-hint); }
+
+@media (min-width: 720px) {
+  .page-shell { padding-inline: 32px; }
+  .drink-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .drink-card { grid-template-columns: 140px 1fr; }
+}
