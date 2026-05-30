@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.types import ExceptionHandler
 from sqlalchemy import text
 
+from app.api.admin.routes import router as admin_router
 from app.api.public.routes import router as public_router
 from app.core.errors import GuestApiError, guest_api_error_handler, validation_exception_handler
 from app.db.redis import get_redis
@@ -15,6 +16,7 @@ app.add_exception_handler(GuestApiError, cast(ExceptionHandler, guest_api_error_
 app.add_exception_handler(
     RequestValidationError, cast(ExceptionHandler, validation_exception_handler)
 )
+app.include_router(admin_router, prefix="/api")
 app.include_router(public_router, prefix="/api")
 
 

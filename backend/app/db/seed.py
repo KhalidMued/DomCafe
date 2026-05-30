@@ -5,8 +5,11 @@ from typing import Any
 
 from sqlalchemy.dialects.postgresql import insert
 
+from app.core.config import get_settings
+from app.core.security import hash_password
 from app.db.session import AsyncSessionLocal
 from app.models.menu import Bean, Category, Drink
+from app.models.user import AdminUser
 
 
 @dataclass(frozen=True)
@@ -114,6 +117,7 @@ def build_seed_data() -> SeedData:
 
 async def seed_database() -> None:
     seed = build_seed_data()
+    settings = get_settings()
     async with AsyncSessionLocal() as session:
         for model, rows in ((Category, seed.categories), (Bean, seed.beans), (Drink, seed.drinks)):
             if not rows:
@@ -121,6 +125,13 @@ async def seed_database() -> None:
             statement = insert(model).values(_rows_for_insert(rows))
             statement = statement.on_conflict_do_nothing(index_elements=["id"])
             await session.execute(statement)
+        admin_statement = insert(AdminUser).values(
+            username=settings.admin_default_username,
+            password_hash=hash_password(settings.admin_default_password),
+            is_active=True,
+        )
+        admin_statement = admin_statement.on_conflict_do_nothing(index_elements=["username"])
+        await session.execute(admin_statement)
         await session.commit()
 
 

@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str = "postgresql+asyncpg://dom_cafe_user:change_me@pgbouncer:6432/dom_cafe"
     redis_url: str = "redis://" + "redis" + ":" + "6379" + "/0"
+    jwt_secret: str = "change_me_long_random"
+    jwt_expires_minutes: int = 1440
+    admin_default_username: str = "admin"
+    admin_default_password: str = "change_me"
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
