@@ -35,7 +35,8 @@ services:
       - "5432"
 
   pgbouncer:
-    image: pgbouncer/pgbouncer:latest
+    build:
+      context: ./pgbouncer
     environment:
       DATABASES_HOST: postgres
       DATABASES_PORT: 5432

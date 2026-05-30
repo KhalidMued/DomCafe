@@ -11,6 +11,15 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        if "prepared_statement_cache_size" in self.database_url:
+            return self.database_url
+        if not self.database_url.startswith("postgresql+asyncpg://"):
+            return self.database_url
+        separator = "&" if "?" in self.database_url else "?"
+        return f"{self.database_url}{separator}prepared_statement_cache_size=0"
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -33,7 +33,11 @@ def _rows_for_insert(rows: list[SeedRow]) -> list[dict[str, Any]]:
 
 
 def _brand_document_path() -> Path:
-    return Path(__file__).resolve().parents[3] / "docs" / "dom_hermes_agent_v1_2.json"
+    for parent in Path(__file__).resolve().parents:
+        candidate = parent / "docs" / "dom_hermes_agent_v1_2.json"
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError("docs/dom_hermes_agent_v1_2.json")
 
 
 def build_seed_data() -> SeedData:
