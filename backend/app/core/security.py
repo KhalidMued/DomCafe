@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 
 import bcrypt
-from jose import jwt
+from jose import JWTError, jwt
 
 from app.core.config import get_settings
 
@@ -24,3 +24,14 @@ def create_access_token(subject: str) -> str:
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expires_minutes)
     payload = {"sub": subject, "exp": expires_at, "scope": "admin"}
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
+
+
+def decode_admin_subject(token: str) -> str | None:
+    try:
+        payload = jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
+    except JWTError:
+        return None
+    if payload.get("scope") != "admin":
+        return None
+    subject = payload.get("sub")
+    return subject if isinstance(subject, str) and subject else None

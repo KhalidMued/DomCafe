@@ -1,21 +1,26 @@
 # Status
 
 ## Current phase
-Phase 4 — Admin Backend and Frontend started
+Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-auth-foundation
+feature/admin-order-status-api
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
 - Local `feature/public-guest-api` was deleted after confirming it was merged into `main`.
 - Phase 3 PR #6 was merged into `main`.
 - Phase 3 status PR #8 was merged into `main`; merged local/remote Phase 3 branches were deleted.
-- Phase 4 admin auth foundation is implemented:
+- Phase 4 admin auth foundation is implemented and merged via PR #10:
   - `POST /api/admin/login` accepts username/password.
   - Valid admin credentials return a bearer JWT.
   - Invalid credentials return `401` with a friendly message.
   - Seed creates the default admin user from environment settings when missing.
+  - Local and remote `feature/admin-auth-foundation` branches were deleted after merge.
+- Phase 4 admin order status API is implemented:
+  - `PATCH /api/admin/orders/{order_id}/status` requires a bearer admin token.
+  - Admin can update order status to `new`, `received`, `preparing`, `ready`, or `cancelled`.
+  - Guest order status reflects admin updates.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -34,16 +39,17 @@ feature/admin-auth-foundation
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
 - Frontend unit tests pass for welcome, menu/cart submission, and polling cleanup.
 - Frontend production build passes.
-- Backend tests pass, including admin login contract tests.
+- Backend tests pass, including admin login and admin order status contract tests.
 - Docker Compose backend rebuild passes.
 - Health endpoint returns OK through Nginx.
 - Migrations apply and seed data inserts inside Docker.
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
 - Admin login was verified through Nginx inside Docker without printing credentials or tokens.
+- Admin status update was verified through Nginx inside Docker: admin set an order to `preparing`, and the guest status endpoint returned `preparing` with friendly copy.
 
 ## What is pending
-- Human review/merge of the admin auth foundation PR.
-- Remaining Phase 4 scope: admin frontend login, dashboard, orders/status controls, menu/bean/settings management, and photo upload.
+- Human review/merge of the admin order status API PR.
+- Remaining Phase 4 scope: admin frontend login, dashboard, orders page UI/status controls, menu/bean/settings management, and photo upload.
 
 ## Known issues
 - No active blocker.
@@ -51,4 +57,4 @@ feature/admin-auth-foundation
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After the admin auth foundation PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin slice from latest `main`.
+After the admin order status API PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin frontend slice from latest `main`.
