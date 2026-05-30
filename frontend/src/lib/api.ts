@@ -71,6 +71,15 @@ export type AdminTokenResponse = {
   token_type: 'bearer';
 };
 
+export type AdminDashboardSummary = {
+  new_orders_count: number;
+  preparing_orders_count: number;
+  ready_orders_count: number;
+  orders_open: boolean;
+  available_drinks_count: number;
+  available_beans_count: number;
+};
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const data = await response.json();
@@ -105,5 +114,11 @@ export function adminLogin(payload: AdminLoginPayload) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  });
+}
+
+export function getAdminDashboard(token: string) {
+  return request<AdminDashboardSummary>('/api/admin/dashboard', {
+    headers: { Authorization: `Bearer ${token}` },
   });
 }

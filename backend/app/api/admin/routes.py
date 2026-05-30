@@ -4,12 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
 from app.schemas.admin import (
+    AdminDashboardResponse,
     AdminLoginRequest,
     AdminOrderStatusResponse,
     AdminOrderStatusUpdate,
     AdminTokenResponse,
 )
 from app.services.admin_auth import authenticate_admin, get_active_admin_id
+from app.services.admin_dashboard import get_dashboard_summary
 from app.services.admin_orders import update_order_status
 
 router = APIRouter(tags=["admin"])
@@ -50,6 +52,14 @@ async def _current_admin_dependency(
         return await require_admin(credentials, session)
     except TypeError:
         return await require_admin()
+
+
+@router.get("/admin/dashboard", response_model=AdminDashboardResponse)
+async def admin_dashboard(
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, int | bool]:
+    return await get_dashboard_summary(session)
 
 
 @router.patch("/admin/orders/{order_id}/status", response_model=AdminOrderStatusResponse)

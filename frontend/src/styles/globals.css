@@ -69,6 +69,10 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .progress-track span.active { color: var(--color-doum-gold); border-color: var(--color-doum-gold); }
 .status-item { display: grid; gap: 4px; padding-block: 12px; border-block-start: 1px solid color-mix(in srgb, var(--color-light-rule) 24%, transparent); }
 .status-item span { color: var(--color-hint); }
+.admin-summary-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.admin-summary-card { padding: 18px; display: grid; gap: 8px; }
+.admin-summary-card strong { color: var(--color-doum-gold); font-size: 2rem; font-weight: 400; }
+.admin-summary-card span { color: var(--color-hint); }
 
 @media (min-width: 720px) {
   .page-shell { padding-inline: 32px; }
