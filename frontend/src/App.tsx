@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
+import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import { CartPage } from './pages/public/CartPage';
 import { MenuPage } from './pages/public/MenuPage';
 import { OrderStatusPage } from './pages/public/OrderStatusPage';
@@ -24,6 +26,8 @@ export function App() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  if (path === '/admin/login') return <AdminLoginPage navigate={navigate} />;
+  if (path === '/admin/dashboard') return <AdminDashboardPage />;
   if (path === '/menu') return <MenuPage navigate={navigate} />;
   if (path === '/cart') return <CartPage navigate={navigate} />;
   if (path.startsWith('/order/')) return <OrderStatusPage orderId={path.split('/').pop() ?? ''} navigate={navigate} />;
