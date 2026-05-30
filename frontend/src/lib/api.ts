@@ -61,11 +61,21 @@ export type CreateOrderResponse = {
   message: string;
 };
 
+export type AdminLoginPayload = {
+  username: string;
+  password: string;
+};
+
+export type AdminTokenResponse = {
+  access_token: string;
+  token_type: 'bearer';
+};
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data?.message || 'We couldn’t reach DŌM right now.');
+    throw new Error(data?.message || data?.detail || 'We couldn’t reach DŌM right now.');
   }
   return data as T;
 }
@@ -88,4 +98,12 @@ export function createOrder(payload: CreateOrderPayload) {
 
 export function getOrderStatus(orderId: string) {
   return request<OrderStatus>(`/api/orders/${orderId}`);
+}
+
+export function adminLogin(payload: AdminLoginPayload) {
+  return request<AdminTokenResponse>('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 }

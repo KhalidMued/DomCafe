@@ -4,7 +4,7 @@
 Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-order-status-api
+feature/admin-login-frontend
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -17,10 +17,15 @@ feature/admin-order-status-api
   - Invalid credentials return `401` with a friendly message.
   - Seed creates the default admin user from environment settings when missing.
   - Local and remote `feature/admin-auth-foundation` branches were deleted after merge.
-- Phase 4 admin order status API is implemented:
+- Phase 4 admin order status API is implemented and merged via PR #11:
   - `PATCH /api/admin/orders/{order_id}/status` requires a bearer admin token.
   - Admin can update order status to `new`, `received`, `preparing`, `ready`, or `cancelled`.
   - Guest order status reflects admin updates.
+  - Local and remote `feature/admin-order-status-api` branches were deleted after merge.
+- Phase 4 admin login frontend is implemented:
+  - `/admin/login` renders a dark DŌM admin sign-in form.
+  - Successful login calls `POST /api/admin/login`, stores the bearer token locally, and opens the `/admin/dashboard` shell.
+  - Invalid credentials show the backend’s friendly rejection message.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -37,7 +42,7 @@ feature/admin-order-status-api
 - Order status page polls every 15 seconds and cleans up its timer on unmount.
 - DŌM design tokens are applied as CSS variables.
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
-- Frontend unit tests pass for welcome, menu/cart submission, and polling cleanup.
+- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, and admin login.
 - Frontend production build passes.
 - Backend tests pass, including admin login and admin order status contract tests.
 - Docker Compose backend rebuild passes.
@@ -45,11 +50,12 @@ feature/admin-order-status-api
 - Migrations apply and seed data inserts inside Docker.
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
 - Admin login was verified through Nginx inside Docker without printing credentials or tokens.
+- Admin login frontend was visually verified through Nginx at `/admin/login`.
 - Admin status update was verified through Nginx inside Docker: admin set an order to `preparing`, and the guest status endpoint returned `preparing` with friendly copy.
 
 ## What is pending
-- Human review/merge of the admin order status API PR.
-- Remaining Phase 4 scope: admin frontend login, dashboard, orders page UI/status controls, menu/bean/settings management, and photo upload.
+- Human review/merge of the admin login frontend PR.
+- Remaining Phase 4 scope: admin dashboard data, orders page UI/status controls, menu/bean/settings management, and photo upload.
 
 ## Known issues
 - No active blocker.
@@ -57,4 +63,4 @@ feature/admin-order-status-api
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After the admin order status API PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin frontend slice from latest `main`.
+After the admin login frontend PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin dashboard/orders slice from latest `main`.
