@@ -43,3 +43,42 @@ class AdminOrderStatusResponse(BaseModel):
     order_number: int
     status: OrderStatus
     status_label: str
+
+
+class AdminAvailabilityUpdate(BaseModel):
+    is_available: bool
+
+
+class AdminAvailabilityResponse(BaseModel):
+    id: str
+    is_available: bool
+
+
+class AdminOrdersOpenUpdate(BaseModel):
+    orders_open: bool
+
+
+class AdminOrdersOpenResponse(BaseModel):
+    orders_open: bool
+
+
+class AdminMenuDrink(BaseModel):
+    id: str
+    name: str
+    category_name: str
+    bean_name: str | None
+    photo_url: str
+    is_available: bool
+
+
+class AdminMenuBean(BaseModel):
+    id: str
+    name: str
+    origin: str | None
+    is_available: bool
+
+
+class AdminMenuManagementResponse(BaseModel):
+    orders_open: bool
+    drinks: list[AdminMenuDrink]
+    beans: list[AdminMenuBean]

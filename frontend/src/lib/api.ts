@@ -99,6 +99,24 @@ export type AdminOrderStatusResponse = {
   status_label: string;
 };
 
+export type AdminMenuManagement = {
+  orders_open: boolean;
+  drinks: Array<{
+    id: string;
+    name: string;
+    category_name: string;
+    bean_name: string | null;
+    photo_url: string;
+    is_available: boolean;
+  }>;
+  beans: Array<{
+    id: string;
+    name: string;
+    origin: string | null;
+    is_available: boolean;
+  }>;
+};
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const data = await response.json();
@@ -153,5 +171,35 @@ export function updateAdminOrderStatus(token: string, orderId: string, status: A
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ status }),
+  });
+}
+
+export function getAdminMenu(token: string) {
+  return request<AdminMenuManagement>('/api/admin/menu', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function updateAdminDrinkAvailability(token: string, drinkId: string, isAvailable: boolean) {
+  return request<{ id: string; is_available: boolean }>(`/api/admin/menu/drinks/${drinkId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ is_available: isAvailable }),
+  });
+}
+
+export function updateAdminBeanAvailability(token: string, beanId: string, isAvailable: boolean) {
+  return request<{ id: string; is_available: boolean }>(`/api/admin/menu/beans/${beanId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ is_available: isAvailable }),
+  });
+}
+
+export function updateAdminOrdersOpen(token: string, ordersOpen: boolean) {
+  return request<{ orders_open: boolean }>('/api/admin/menu/settings/orders-open', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ orders_open: ordersOpen }),
   });
 }

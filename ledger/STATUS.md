@@ -4,7 +4,7 @@
 Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-orders-page
+feature/admin-menu-management
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -33,11 +33,18 @@ feature/admin-orders-page
   - `/admin/dashboard` loads those counts using the stored admin token.
   - Dashboard shows an admin-login-required state when no admin token is stored.
   - Local `feature/admin-dashboard-summary` branch was deleted after merge; remote feature branches were already deleted by the owner.
-- Phase 4 admin orders page slice is implemented on this branch:
+- Phase 4 admin orders page is implemented and merged via PR #16:
   - `GET /api/admin/orders` requires a bearer admin token.
   - The endpoint returns the 50 most recent orders with guest name, friendly status label, item count, and created time.
   - `/admin/orders` loads recent orders using the stored admin token.
   - Admins can change each order status from the orders page using the existing protected status API.
+  - Local/remote `feature/admin-orders-page` branches were deleted after merge.
+- Phase 4 admin menu management is implemented on this branch:
+  - `GET /api/admin/menu` requires a bearer admin token and returns orders-open state, drinks, and beans.
+  - Admin can toggle orders open/closed.
+  - Admin can toggle drink availability.
+  - Admin can toggle bean availability.
+  - `/admin/menu` exposes the above controls with DŌM styling.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -54,22 +61,19 @@ feature/admin-orders-page
 - Order status page polls every 15 seconds and cleans up its timer on unmount.
 - DŌM design tokens are applied as CSS variables.
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
-- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, and admin orders.
+- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, admin orders, and admin menu management.
 - Frontend production build passes.
-- Backend tests pass, including admin login, admin dashboard summary, admin orders list, and admin order status contract tests.
+- Backend tests pass, including admin login, admin dashboard summary, admin orders list, admin order status, and admin menu management contract tests.
 - Docker Compose backend/frontend rebuild passes.
 - Health endpoint returns OK through Nginx.
 - Migrations apply and seed data inserts inside Docker.
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
 - Admin login was verified through Nginx inside Docker without printing credentials or tokens.
-- Admin login frontend was visually verified through Nginx at `/admin/login`.
-- Admin dashboard summary API was verified through Nginx without printing credentials or tokens.
-- Admin dashboard no-token state was visually verified through Nginx at `/admin/dashboard`.
-- Admin orders list and status controls were verified through Nginx inside Docker: a guest order was created, listed in `/api/admin/orders`, updated to `ready`, and the guest status endpoint returned `ready`.
+- Admin menu management was verified through Nginx inside Docker: admin menu returned 22 drinks and 1 bean; orders-open, one drink, and one bean were toggled off and restored.
 
 ## What is pending
-- Human review/merge of the admin orders page PR.
-- Remaining Phase 4 scope: menu/bean/settings management and photo upload.
+- Human review/merge of the admin menu management PR.
+- Remaining Phase 4 scope: photo upload and deeper edit forms for full drink/bean/settings content management.
 
 ## Known issues
 - No active blocker.
@@ -77,4 +81,4 @@ feature/admin-orders-page
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After the admin orders page PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin menu-management slice from latest `main`.
+After the admin menu management PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin photo-upload/editing slice from latest `main`.
