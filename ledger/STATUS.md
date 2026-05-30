@@ -1,15 +1,15 @@
 # Status
 
 ## Current phase
-Phase 3 — Guest Frontend
+Phase 3 — Guest Frontend complete; ready for Phase 4 — Admin Backend and Frontend
 
 ## Current branch
-feature/guest-frontend
+main
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
 - Local `feature/public-guest-api` was deleted after confirming it was merged into `main`.
-- Phase 3 branch exists from latest `main`.
+- Phase 3 PR #6 was merged into `main`.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -35,11 +35,12 @@ feature/guest-frontend
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
 
 ## What is pending
-- Commit, push, and open Phase 3 pull request.
+- Human review/merge of this ledger-only status update PR.
 
 ## Known issues
 - No active blocker.
 - The frontend container still runs Vite dev server in Docker; production serving hardening remains a later deployment concern.
+- Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-Open the Phase 3 pull request for review and merge before starting Phase 4 — Admin Backend and Frontend.
+After this ledger-only status update is merged, start Phase 4 — Admin Backend and Frontend from latest `main`.
