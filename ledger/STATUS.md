@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 4 — Admin Backend and Frontend in progress
+Phase 5 — Agent API foundation in progress
 
 ## Current branch
-feature/admin-create-archive-catalog
+feature/agent-order-controls
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -24,31 +24,33 @@ feature/admin-create-archive-catalog
 - Phase 4 PR #19 added protected admin drink copy/options editing.
 - Phase 4 PR #20 added protected bean detail editing and cafe settings management.
 - Phase 4 PR #21 added protected category editing, category availability, and expanded drink catalog editing.
-- Current branch extends admin catalog management by another coherent notch:
-  - protected create endpoints for categories, beans, and drinks;
-  - protected archive endpoints for categories, beans, and drinks that mark items unavailable instead of hard-deleting;
-  - admin menu UI add forms for categories, beans, and drinks;
-  - admin menu UI archive actions for categories, beans, and drinks;
-  - API docs describe create/archive catalog endpoints.
+- Phase 4 PR #22 added protected create/archive endpoints and `/admin/menu` UI controls for categories, beans, and drinks.
+- Current branch starts the dedicated Herms/agent API surface without exposing admin JWT routes:
+  - `GET /api/agent/status` returns operational status, `orders_open`, and pending order count;
+  - `GET /api/agent/orders/pending` returns active orders for Herms in oldest-first order;
+  - `PATCH /api/agent/orders/{order_id}/status` lets Herms move orders through allowed statuses;
+  - all `/api/agent/*` routes require the dedicated `AGENT_API_KEY` bearer token.
 
 ## Verification
-- Backend tests: `45 passed`.
+- Focused agent API contract tests: `6 passed`.
+- Full backend tests: `51 passed`.
 - Frontend tests: `22 passed`.
 - Frontend production build: passed.
 - Docker Compose rebuild for backend/frontend/nginx: passed.
 - Runtime verification through Nginx passed:
-  - admin login succeeded without printing secrets;
-  - `POST /api/admin/categories`, `POST /api/admin/beans`, and `POST /api/admin/drinks` created runtime catalog rows;
-  - `/api/admin/menu` reflected the created category, bean, and drink;
-  - `DELETE /api/admin/categories/{category_id}`, `DELETE /api/admin/drinks/{drink_id}`, and `DELETE /api/admin/beans/{bean_id}` archived rows by marking them unavailable;
-  - runtime verification rows were removed directly from the local dev database after assertions.
+  - created a temporary public order without printing secrets;
+  - authenticated `/api/agent/*` with `AGENT_API_KEY` without printing it;
+  - verified `GET /api/agent/status`;
+  - verified `GET /api/agent/orders/pending` included the temporary order;
+  - verified `PATCH /api/agent/orders/{order_id}/status` moved the order to `ready`;
+  - removed the temporary order and order items from the local dev database after assertions.
 
 ## What is pending
-- Commit, push, and open a PR for the admin create/archive catalog branch.
-- Continue Phase 4 after merge with slightly larger, coherent PR slices where safe.
+- Commit, push, and open a PR for the agent order-control branch.
+- Continue with the remaining agent menu/bean routes after merge.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
-- Do not expose local admin credentials, database passwords, JWTs, or connection strings.
+- Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, or connection strings.
 - Runtime verification scripts should construct authorization headers without printing tokens.
 - Keep local dev data clean: restore any runtime verification edits immediately after assertions.

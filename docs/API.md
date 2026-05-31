@@ -347,6 +347,80 @@ Response:
 
 Settings changes are reflected in the public settings endpoint. `orders_open` also controls whether new guest orders can be created.
 
+## Agent routes
+
+All agent routes require the dedicated `AGENT_API_KEY` bearer token, not an admin JWT:
+
+```http
+Authorization: Bearer ***
+```
+
+### Agent operational status
+
+```http
+GET /api/agent/status
+```
+
+Response:
+
+```json
+{
+  "status": "ok",
+  "orders_open": true,
+  "pending_orders_count": 2
+}
+```
+
+### Pending orders for Herms
+
+```http
+GET /api/agent/orders/pending
+```
+
+Returns up to 50 active orders in oldest-first order. Active statuses are `new`, `received`, and `preparing`.
+
+Response:
+
+```json
+[
+  {
+    "id": "18",
+    "order_number": 18,
+    "guest_name": "Mona",
+    "status": "new",
+    "status_label": "Your order was sent to the bar.",
+    "items_count": 2,
+    "created_at": "2026-05-30T18:00:00Z"
+  }
+]
+```
+
+### Update order status from Herms
+
+```http
+PATCH /api/agent/orders/{order_id}/status
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "status": "ready"
+}
+```
+
+Allowed statuses are `new`, `received`, `preparing`, `ready`, and `cancelled`. Response matches the order status shape:
+
+```json
+{
+  "id": "18",
+  "order_number": 18,
+  "status": "ready",
+  "status_label": "Your drink is ready."
+}
+```
+
 ## Friendly error shape
 
 Public guest errors use this shape:

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://" + "redis" + ":" + "6379" + "/0"
     jwt_secret: str = "change_me_long_random"
     jwt_expires_minutes: int = 1440
+    agent_api_key: str = "change_me_long_random_agent_key"
     admin_default_username: str = "admin"
     admin_default_password: str = "change_me"
     upload_dir: str = "/app/uploads"
