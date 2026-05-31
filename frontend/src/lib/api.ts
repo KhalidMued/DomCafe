@@ -203,3 +203,14 @@ export function updateAdminOrdersOpen(token: string, ordersOpen: boolean) {
     body: JSON.stringify({ orders_open: ordersOpen }),
   });
 }
+
+export function uploadAdminDrinkPhoto(token: string, drinkId: string, photo: File) {
+  const body = new FormData();
+  body.append('drink_id', drinkId);
+  body.append('photo', photo);
+  return request<{ id: string; photo_url: string }>('/api/admin/uploads/drink-photo', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body,
+  });
+}

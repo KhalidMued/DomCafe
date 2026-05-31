@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,6 +7,7 @@ from app.schemas.admin import (
     AdminAvailabilityResponse,
     AdminAvailabilityUpdate,
     AdminDashboardResponse,
+    AdminDrinkPhotoResponse,
     AdminLoginRequest,
     AdminMenuManagementResponse,
     AdminOrderListItem,
@@ -25,6 +26,7 @@ from app.services.admin_menu import (
     set_orders_open,
 )
 from app.services.admin_orders import list_recent_orders, update_order_status
+from app.services.admin_uploads import upload_drink_photo
 
 router = APIRouter(tags=["admin"])
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -117,6 +119,16 @@ async def update_admin_orders_open(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, bool]:
     return await set_orders_open(session, payload.orders_open)
+
+
+@router.post("/admin/uploads/drink-photo", response_model=AdminDrinkPhotoResponse)
+async def upload_admin_drink_photo(
+    drink_id: str = Form(...),
+    photo: UploadFile = File(...),
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, str]:
+    return await upload_drink_photo(session, drink_id, photo)
 
 
 @router.patch("/admin/orders/{order_id}/status", response_model=AdminOrderStatusResponse)

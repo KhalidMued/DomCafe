@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     jwt_expires_minutes: int = 1440
     admin_default_username: str = "admin"
     admin_default_password: str = "change_me"
+    upload_dir: str = "/app/uploads"
+    max_upload_mb: int = 5
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 

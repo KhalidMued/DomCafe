@@ -102,6 +102,36 @@ describe('Phase 4 admin menu management page', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
 
+  it('uploads a replacement drink photo from the menu page', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const uploadResponse = {
+      id: 'iced-doum-latte',
+      photo_url: '/uploads/drinks/iced-doum-latte-new.jpg',
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(url).toBe('/api/admin/uploads/drink-photo');
+      expect(init?.method).toBe('POST');
+      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.body).toBeInstanceOf(FormData);
+      const body = init?.body as FormData;
+      expect(body.get('drink_id')).toBe('iced-doum-latte');
+      expect((body.get('photo') as File).name).toBe('replacement.jpg');
+      return jsonResponse(uploadResponse);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    const drinkCard = await screen.findByLabelText('Iced Doum Latte controls');
+    const file = new File(['replacement'], 'replacement.jpg', { type: 'image/jpeg' });
+    fireEvent.change(within(drinkCard).getByLabelText('Replace photo'), { target: { files: [file] } });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(within(drinkCard).getByAltText('Iced Doum Latte photo')).toHaveAttribute('src', uploadResponse.photo_url);
+  });
+
   it('asks the admin to log in when no token is stored', () => {
     render(<App />);
 

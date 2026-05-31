@@ -5,6 +5,7 @@ import {
   updateAdminBeanAvailability,
   updateAdminDrinkAvailability,
   updateAdminOrdersOpen,
+  uploadAdminDrinkPhoto,
   type AdminMenuManagement,
 } from '../../lib/api';
 
@@ -58,6 +59,14 @@ export function AdminMenuPage() {
     setUpdatingId('');
   }
 
+  async function replaceDrinkPhoto(drinkId: string, photo: File | undefined) {
+    if (!token || !menu || !photo) return;
+    setUpdatingId(`${drinkId}-photo`);
+    const updated = await uploadAdminDrinkPhoto(token, drinkId, photo);
+    setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? { ...drink, photo_url: updated.photo_url } : drink) });
+    setUpdatingId('');
+  }
+
   return (
     <main className="page-shell admin-page">
       <section className="top-bar">
@@ -81,16 +90,27 @@ export function AdminMenuPage() {
             <h2>Drinks</h2>
             {menu.drinks.map((drink) => (
               <article className="status-card admin-menu-card" key={drink.id} aria-label={`${drink.name} controls`}>
-                <img src={drink.photo_url} alt="" />
+                <img src={drink.photo_url} alt={`${drink.name} photo`} />
                 <div>
                   <h3>{drink.name}</h3>
                   <p className="detail-copy">{drink.category_name}</p>
                   {drink.bean_name ? <p className="detail-copy">{drink.bean_name}</p> : null}
                   <p>{drink.is_available ? 'Available' : 'Unavailable'}</p>
                 </div>
-                <button disabled={updatingId === drink.id} onClick={() => toggleDrink(drink.id, !drink.is_available)} type="button">
-                  {drink.is_available ? 'Mark unavailable' : 'Mark available'}
-                </button>
+                <div className="admin-menu-actions">
+                  <label>
+                    Replace photo
+                    <input
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={updatingId === `${drink.id}-photo`}
+                      onChange={(event) => replaceDrinkPhoto(drink.id, event.currentTarget.files?.[0])}
+                      type="file"
+                    />
+                  </label>
+                  <button disabled={updatingId === drink.id} onClick={() => toggleDrink(drink.id, !drink.is_available)} type="button">
+                    {drink.is_available ? 'Mark unavailable' : 'Mark available'}
+                  </button>
+                </div>
               </article>
             ))}
           </section>
