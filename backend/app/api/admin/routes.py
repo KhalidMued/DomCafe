@@ -6,10 +6,12 @@ from app.db.session import get_session
 from app.schemas.admin import (
     AdminAvailabilityResponse,
     AdminAvailabilityUpdate,
+    AdminBeanUpdate,
     AdminDashboardResponse,
     AdminDrinkPhotoResponse,
     AdminDrinkUpdate,
     AdminLoginRequest,
+    AdminMenuBean,
     AdminMenuDrink,
     AdminMenuManagementResponse,
     AdminOrderListItem,
@@ -17,15 +19,20 @@ from app.schemas.admin import (
     AdminOrderStatusUpdate,
     AdminOrdersOpenResponse,
     AdminOrdersOpenUpdate,
+    AdminSettingsResponse,
+    AdminSettingsUpdate,
     AdminTokenResponse,
 )
 from app.services.admin_auth import authenticate_admin, get_active_admin_id
 from app.services.admin_dashboard import get_dashboard_summary
 from app.services.admin_menu import (
+    get_admin_settings,
     get_menu_management_summary,
     set_bean_availability,
     set_drink_availability,
     set_orders_open,
+    update_admin_settings,
+    update_bean_details,
     update_drink_details,
 )
 from app.services.admin_orders import list_recent_orders, update_order_status
@@ -124,6 +131,23 @@ async def update_admin_orders_open(
     return await set_orders_open(session, payload.orders_open)
 
 
+@router.get("/admin/settings", response_model=AdminSettingsResponse)
+async def admin_settings(
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await get_admin_settings(session)
+
+
+@router.patch("/admin/settings", response_model=AdminSettingsResponse)
+async def patch_admin_settings(
+    payload: AdminSettingsUpdate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await update_admin_settings(session, payload)
+
+
 @router.post("/admin/uploads/drink-photo", response_model=AdminDrinkPhotoResponse)
 async def upload_admin_drink_photo(
     drink_id: str = Form(...),
@@ -142,6 +166,16 @@ async def update_admin_drink_details(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, object]:
     return await update_drink_details(session, drink_id, payload)
+
+
+@router.patch("/admin/beans/{bean_id}", response_model=AdminMenuBean)
+async def update_admin_bean_details(
+    bean_id: str,
+    payload: AdminBeanUpdate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await update_bean_details(session, bean_id, payload)
 
 
 @router.patch("/admin/orders/{order_id}/status", response_model=AdminOrderStatusResponse)

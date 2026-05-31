@@ -43,6 +43,7 @@ export function AdminDashboardPage() {
         </div>
         <a href="/admin/orders">Orders</a>
         <a href="/admin/menu">Menu</a>
+        <a href="/admin/settings">Settings</a>
       </section>
       {error ? <p className="error-text">{error}</p> : null}
       {!summary && !error ? <section className="skeleton-card">Loading dashboard…</section> : null}

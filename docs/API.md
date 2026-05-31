@@ -155,6 +155,67 @@ Response:
 
 Fields are partial at the API layer, but the admin menu form submits all editable copy/options together. Estimated time must be between 1 and 30 minutes.
 
+### Edit bean details
+
+```http
+PATCH /api/admin/beans/{bean_id}
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "name": "DŌM House Beans",
+  "origin": "Sudan / Brazil",
+  "process": "Natural washed blend",
+  "tasting_notes": ["date", "cocoa", "almond"]
+}
+```
+
+Response:
+
+```json
+{
+  "id": "dom-house-beans",
+  "name": "DŌM House Beans",
+  "origin": "Sudan / Brazil",
+  "process": "Natural washed blend",
+  "tasting_notes": ["date", "cocoa", "almond"],
+  "is_available": true
+}
+```
+
+### Read and update cafe settings
+
+```http
+GET /api/admin/settings
+PATCH /api/admin/settings
+Content-Type: application/json
+```
+
+Patch request:
+
+```json
+{
+  "cafe_name": "DŌM Home Café",
+  "welcome_message": "Welcome in. Take your time.",
+  "orders_open": false
+}
+```
+
+Response:
+
+```json
+{
+  "cafe_name": "DŌM Home Café",
+  "welcome_message": "Welcome in. Take your time.",
+  "orders_open": false
+}
+```
+
+Settings changes are reflected in the public settings endpoint. `orders_open` also controls whether new guest orders can be created.
+
 ## Friendly error shape
 
 Public guest errors use this shape:

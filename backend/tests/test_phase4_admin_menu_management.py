@@ -29,6 +29,8 @@ def menu_payload():
                 "id": "dom-house-beans",
                 "name": "DŌM House Beans",
                 "origin": "Sudan",
+                "process": "Natural",
+                "tasting_notes": ["date", "cocoa"],
                 "is_available": True,
             }
         ],
