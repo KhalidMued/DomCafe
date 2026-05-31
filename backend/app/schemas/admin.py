@@ -67,13 +67,25 @@ class AdminDrinkPhotoResponse(BaseModel):
     photo_url: str
 
 
+class AdminDrinkUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    description: str | None = Field(default=None, max_length=600)
+    temperature_options: list[str] | None = None
+    milk_options: list[str] | None = None
+    estimated_time_minutes: int | None = Field(default=None, ge=1, le=30)
+
+
 class AdminMenuDrink(BaseModel):
     id: str
     name: str
     category_name: str
     bean_name: str | None
+    description: str | None
     photo_url: str
     is_available: bool
+    temperature_options: list[str]
+    milk_options: list[str]
+    estimated_time_minutes: int
 
 
 class AdminMenuBean(BaseModel):

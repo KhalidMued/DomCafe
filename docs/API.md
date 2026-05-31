@@ -117,6 +117,44 @@ Response:
 
 The uploaded file is stored under `/uploads/drinks/`, the drink photo URL is updated, and the public menu uses the new photo URL.
 
+### Edit drink details
+
+```http
+PATCH /api/admin/drinks/{drink_id}
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "name": "Iced DŌM Latte",
+  "description": "Cold milk, espresso, and a quiet Doum finish.",
+  "temperature_options": ["iced"],
+  "milk_options": ["whole milk", "oat milk"],
+  "estimated_time_minutes": 6
+}
+```
+
+Response:
+
+```json
+{
+  "id": "iced-doum-latte",
+  "name": "Iced DŌM Latte",
+  "category_name": "Signature",
+  "bean_name": "DŌM House Beans",
+  "description": "Cold milk, espresso, and a quiet Doum finish.",
+  "photo_url": "/uploads/drinks/placeholder.jpg",
+  "is_available": true,
+  "temperature_options": ["iced"],
+  "milk_options": ["whole milk", "oat milk"],
+  "estimated_time_minutes": 6
+}
+```
+
+Fields are partial at the API layer, but the admin menu form submits all editable copy/options together. Estimated time must be between 1 and 30 minutes.
+
 ## Friendly error shape
 
 Public guest errors use this shape:

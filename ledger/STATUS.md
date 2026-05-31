@@ -4,7 +4,7 @@
 Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-drink-photo-upload
+feature/admin-drink-edit
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -46,11 +46,16 @@ feature/admin-drink-photo-upload
   - Admin can toggle bean availability.
   - `/admin/menu` exposes the above controls with DŌM styling.
   - Local `feature/admin-menu-management` branch was deleted after merge; the remote branch was already deleted.
-- Phase 4 admin drink photo upload is implemented on this branch:
+- Phase 4 admin drink photo upload is implemented and merged via PR #18:
   - `POST /api/admin/uploads/drink-photo` requires a bearer admin token.
   - Admin can upload JPEG, PNG, or WebP drink photos up to 5 MB.
   - Uploads are verified as real images, stored under `/uploads/drinks/`, and applied to the selected drink.
   - `/admin/menu` includes a replacement photo picker per drink.
+  - Local `feature/admin-drink-photo-upload` branch was deleted after merge; the remote branch was already deleted.
+- Phase 4 admin drink detail editing is implemented on this branch:
+  - `PATCH /api/admin/drinks/{drink_id}` requires a bearer admin token.
+  - Admin can edit drink name, description, temperature options, milk options, and estimated minutes.
+  - `/admin/menu` exposes an inline edit form per drink and updates local state after save.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -67,9 +72,9 @@ feature/admin-drink-photo-upload
 - Order status page polls every 15 seconds and cleans up its timer on unmount.
 - DŌM design tokens are applied as CSS variables.
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
-- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, admin orders, admin menu management, and admin drink photo upload.
+- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, admin orders, admin menu management, admin drink photo upload, and admin drink detail editing.
 - Frontend production build passes.
-- Backend tests pass, including admin login, admin dashboard summary, admin orders list, admin order status, admin menu management, and admin drink photo upload contract tests.
+- Backend tests pass, including admin login, admin dashboard summary, admin orders list, admin order status, admin menu management, admin drink photo upload, and admin drink edit contract tests.
 - Docker Compose backend/frontend rebuild passes.
 - Health endpoint returns OK through Nginx.
 - Migrations apply and seed data inserts inside Docker.
@@ -78,9 +83,11 @@ feature/admin-drink-photo-upload
 - Admin menu management was verified through Nginx inside Docker: admin menu returned 22 drinks and 1 bean; orders-open, one drink, and one bean were toggled off and restored.
 - Admin drink photo upload was verified through Nginx inside Docker: upload returned a `/uploads/drinks/` URL and Nginx served the uploaded JPEG.
 
+- Runtime verification for the admin drink edit branch through Nginx is complete: a drink was edited via `PATCH /api/admin/drinks/{drink_id}`, reflected in `/api/menu`, and restored immediately.
+
 ## What is pending
-- Human review/merge of the admin drink photo upload PR.
-- Remaining Phase 4 scope: deeper edit forms for full drink/bean/settings content management.
+- Commit and PR for the admin drink edit branch.
+- Remaining Phase 4 scope: bean detail editing and broader settings/content management.
 
 ## Known issues
 - No active blocker.
@@ -88,4 +95,4 @@ feature/admin-drink-photo-upload
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After the admin drink photo upload PR is merged, delete the merged branch and continue Phase 4 with a focused drink edit form or bean/settings management slice from latest `main`.
+Finish verifying the admin drink edit branch, open its PR, then continue Phase 4 with a focused bean edit or settings management slice from latest `main` after merge.

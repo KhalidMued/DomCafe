@@ -16,8 +16,12 @@ def menu_payload():
                 "name": "Iced Doum Latte",
                 "category_name": "Signature",
                 "bean_name": "DŌM House Beans",
+                "description": "A cold espresso milk drink.",
                 "photo_url": "/uploads/drinks/placeholder.jpg",
                 "is_available": True,
+                "temperature_options": ["iced"],
+                "milk_options": ["whole milk", "oat milk"],
+                "estimated_time_minutes": 5,
             }
         ],
         "beans": [
