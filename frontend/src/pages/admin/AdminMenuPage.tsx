@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   getAdminMenu,
   updateAdminBeanAvailability,
+  updateAdminBeanDetails,
   updateAdminDrinkAvailability,
   updateAdminDrinkDetails,
   updateAdminOrdersOpen,
@@ -29,6 +30,13 @@ type DrinkDraft = {
   estimatedMinutes: string;
 };
 
+type BeanDraft = {
+  name: string;
+  origin: string;
+  process: string;
+  tastingNotes: string;
+};
+
 function listText(values: string[]) {
   return values.join(', ');
 }
@@ -43,6 +51,8 @@ export function AdminMenuPage() {
   const [updatingId, setUpdatingId] = useState('');
   const [editingDrinkId, setEditingDrinkId] = useState('');
   const [drinkDraft, setDrinkDraft] = useState<DrinkDraft | null>(null);
+  const [editingBeanId, setEditingBeanId] = useState('');
+  const [beanDraft, setBeanDraft] = useState<BeanDraft | null>(null);
   const token = window.localStorage.getItem('dom_admin_token');
 
   useEffect(() => {
@@ -114,6 +124,35 @@ export function AdminMenuPage() {
     setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? updated : drink) });
     setEditingDrinkId('');
     setDrinkDraft(null);
+    setUpdatingId('');
+  }
+
+  function startBeanEdit(bean: AdminMenuManagement['beans'][number]) {
+    setEditingBeanId(bean.id);
+    setBeanDraft({
+      name: bean.name,
+      origin: bean.origin ?? '',
+      process: bean.process ?? '',
+      tastingNotes: listText(bean.tasting_notes),
+    });
+  }
+
+  function updateBeanDraft(field: keyof BeanDraft, value: string) {
+    setBeanDraft((draft) => draft ? { ...draft, [field]: value } : draft);
+  }
+
+  async function saveBeanEdit(beanId: string) {
+    if (!token || !menu || !beanDraft) return;
+    setUpdatingId(`${beanId}-details`);
+    const updated = await updateAdminBeanDetails(token, beanId, {
+      name: beanDraft.name,
+      origin: beanDraft.origin,
+      process: beanDraft.process,
+      tasting_notes: parseList(beanDraft.tastingNotes),
+    });
+    setMenu({ ...menu, beans: menu.beans.map((bean) => bean.id === beanId ? updated : bean) });
+    setEditingBeanId('');
+    setBeanDraft(null);
     setUpdatingId('');
   }
 
@@ -202,11 +241,37 @@ export function AdminMenuPage() {
                 <div>
                   <h3>{bean.name}</h3>
                   {bean.origin ? <p className="detail-copy">{bean.origin}</p> : null}
+                  {bean.process ? <p>{bean.process}</p> : null}
+                  {bean.tasting_notes.length ? <p className="detail-copy">{listText(bean.tasting_notes)}</p> : null}
                   <p>{bean.is_available ? 'Available' : 'Unavailable'}</p>
                 </div>
-                <button disabled={updatingId === bean.id} onClick={() => toggleBean(bean.id, !bean.is_available)} type="button">
-                  {bean.is_available ? 'Mark unavailable' : 'Mark available'}
-                </button>
+                {editingBeanId === bean.id && beanDraft ? (
+                  <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveBeanEdit(bean.id); }}>
+                    <label>
+                      Bean name
+                      <input value={beanDraft.name} onChange={(event) => updateBeanDraft('name', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Origin
+                      <input value={beanDraft.origin} onChange={(event) => updateBeanDraft('origin', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Process
+                      <input value={beanDraft.process} onChange={(event) => updateBeanDraft('process', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Tasting notes
+                      <input value={beanDraft.tastingNotes} onChange={(event) => updateBeanDraft('tastingNotes', event.currentTarget.value)} />
+                    </label>
+                    <button disabled={updatingId === `${bean.id}-details`} type="submit">Save bean</button>
+                  </form>
+                ) : null}
+                <div className="admin-menu-actions">
+                  <button onClick={() => startBeanEdit(bean)} type="button">Edit bean</button>
+                  <button disabled={updatingId === bean.id} onClick={() => toggleBean(bean.id, !bean.is_available)} type="button">
+                    {bean.is_available ? 'Mark unavailable' : 'Mark available'}
+                  </button>
+                </div>
               </article>
             ))}
           </section>

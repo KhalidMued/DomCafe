@@ -85,8 +85,12 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .admin-menu-actions input { color: var(--color-hint); max-width: 100%; }
 .admin-edit-form { border-top: 1px solid color-mix(in srgb, var(--color-light-rule) 20%, transparent); display: grid; gap: 10px; padding-top: 12px; }
 .admin-edit-form label { color: var(--color-palm-dust); display: grid; font-size: .82rem; gap: 7px; letter-spacing: .04em; }
-.admin-edit-form input, .admin-edit-form textarea { background: rgba(241,239,232,.06); border: 1px solid rgba(211,209,199,.22); border-radius: 12px; color: var(--color-palm-dust); padding: 10px; }
-.admin-edit-form textarea { min-height: 88px; resize: vertical; }
+.admin-edit-form input, .admin-edit-form textarea, .admin-settings-form input, .admin-settings-form textarea { background: rgba(241,239,232,.06); border: 1px solid rgba(211,209,199,.22); border-radius: 12px; color: var(--color-palm-dust); padding: 10px; }
+.admin-edit-form textarea, .admin-settings-form textarea { min-height: 88px; resize: vertical; }
+.admin-settings-form { display: grid; gap: 14px; max-width: 680px; }
+.admin-settings-form label { color: var(--color-palm-dust); display: grid; font-size: .88rem; gap: 8px; letter-spacing: .04em; }
+.admin-checkbox-label { align-items: center; display: flex !important; gap: 10px !important; }
+.admin-checkbox-label input { width: auto; }
 
 @media (min-width: 720px) {
   .page-shell { padding-inline: 32px; }

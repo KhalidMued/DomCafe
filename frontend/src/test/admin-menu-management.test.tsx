@@ -31,6 +31,8 @@ const menuPayload = {
       id: 'dom-house-beans',
       name: 'DŌM House Beans',
       origin: 'Sudan',
+      process: 'Natural',
+      tasting_notes: ['date', 'cocoa'],
       is_available: true,
     },
   ],
@@ -177,6 +179,47 @@ describe('Phase 4 admin menu management page', () => {
     expect(await within(drinkCard).findByText('Iced DŌM Latte')).toBeInTheDocument();
     expect(within(drinkCard).getByText('Cold milk, espresso, and a quiet Doum finish.')).toBeInTheDocument();
     expect(within(drinkCard).getByText('iced · whole milk, oat milk, almond milk · 6 min')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it('edits bean details from the menu page', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const updatedBean = {
+      ...menuPayload.beans[0],
+      name: 'DŌM House Beans',
+      origin: 'Sudan / Brazil',
+      process: 'Natural washed blend',
+      tasting_notes: ['date', 'cocoa', 'almond'],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(url).toBe('/api/admin/beans/dom-house-beans');
+      expect(init?.method).toBe('PATCH');
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.body).toBe(JSON.stringify({
+        name: 'DŌM House Beans',
+        origin: 'Sudan / Brazil',
+        process: 'Natural washed blend',
+        tasting_notes: ['date', 'cocoa', 'almond'],
+      }));
+      return jsonResponse(updatedBean);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    const beanCard = await screen.findByLabelText('DŌM House Beans controls');
+    fireEvent.click(within(beanCard).getByRole('button', { name: 'Edit bean' }));
+    fireEvent.change(within(beanCard).getByLabelText('Bean name'), { target: { value: 'DŌM House Beans' } });
+    fireEvent.change(within(beanCard).getByLabelText('Origin'), { target: { value: 'Sudan / Brazil' } });
+    fireEvent.change(within(beanCard).getByLabelText('Process'), { target: { value: 'Natural washed blend' } });
+    fireEvent.change(within(beanCard).getByLabelText('Tasting notes'), { target: { value: 'date, cocoa, almond' } });
+    fireEvent.click(within(beanCard).getByRole('button', { name: 'Save bean' }));
+
+    expect(await within(beanCard).findByText('Sudan / Brazil')).toBeInTheDocument();
+    expect(within(beanCard).getByText('Natural washed blend')).toBeInTheDocument();
+    expect(within(beanCard).getByText('date, cocoa, almond')).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 

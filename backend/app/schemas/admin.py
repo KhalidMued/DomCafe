@@ -75,6 +75,25 @@ class AdminDrinkUpdate(BaseModel):
     estimated_time_minutes: int | None = Field(default=None, ge=1, le=30)
 
 
+class AdminBeanUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    origin: str | None = Field(default=None, max_length=160)
+    process: str | None = Field(default=None, max_length=120)
+    tasting_notes: list[str] | None = None
+
+
+class AdminSettingsUpdate(BaseModel):
+    cafe_name: str | None = Field(default=None, min_length=1, max_length=120)
+    welcome_message: str | None = Field(default=None, min_length=1, max_length=300)
+    orders_open: bool | None = None
+
+
+class AdminSettingsResponse(BaseModel):
+    cafe_name: str
+    welcome_message: str
+    orders_open: bool
+
+
 class AdminMenuDrink(BaseModel):
     id: str
     name: str
@@ -92,6 +111,8 @@ class AdminMenuBean(BaseModel):
     id: str
     name: str
     origin: str | None
+    process: str | None
+    tasting_notes: list[str]
     is_available: bool
 
 

@@ -117,8 +117,16 @@ export type AdminMenuManagement = {
     id: string;
     name: string;
     origin: string | null;
+    process: string | null;
+    tasting_notes: string[];
     is_available: boolean;
   }>;
+};
+
+export type AdminSettings = {
+  cafe_name: string;
+  welcome_message: string;
+  orders_open: boolean;
 };
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
@@ -231,6 +239,37 @@ export function updateAdminDrinkDetails(
   },
 ) {
   return request<AdminMenuManagement['drinks'][number]>(`/api/admin/drinks/${drinkId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAdminBeanDetails(
+  token: string,
+  beanId: string,
+  payload: {
+    name: string;
+    origin: string;
+    process: string;
+    tasting_notes: string[];
+  },
+) {
+  return request<AdminMenuManagement['beans'][number]>(`/api/admin/beans/${beanId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getAdminSettings(token: string) {
+  return request<AdminSettings>('/api/admin/settings', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function updateAdminSettings(token: string, payload: AdminSettings) {
+  return request<AdminSettings>('/api/admin/settings', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
