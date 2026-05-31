@@ -18,8 +18,12 @@ const menuPayload = {
       name: 'Iced Doum Latte',
       category_name: 'Signature',
       bean_name: 'DŌM House Beans',
+      description: 'A cold espresso milk drink.',
       photo_url: '/uploads/drinks/placeholder.jpg',
       is_available: true,
+      temperature_options: ['iced'],
+      milk_options: ['whole milk', 'oat milk'],
+      estimated_time_minutes: 5,
     },
   ],
   beans: [
@@ -130,6 +134,50 @@ describe('Phase 4 admin menu management page', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     expect(within(drinkCard).getByAltText('Iced Doum Latte photo')).toHaveAttribute('src', uploadResponse.photo_url);
+  });
+
+  it('edits drink copy and options from the menu page', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const updatedDrink = {
+      ...menuPayload.drinks[0],
+      name: 'Iced DŌM Latte',
+      description: 'Cold milk, espresso, and a quiet Doum finish.',
+      temperature_options: ['iced'],
+      milk_options: ['whole milk', 'oat milk', 'almond milk'],
+      estimated_time_minutes: 6,
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(url).toBe('/api/admin/drinks/iced-doum-latte');
+      expect(init?.method).toBe('PATCH');
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.body).toBe(JSON.stringify({
+        name: 'Iced DŌM Latte',
+        description: 'Cold milk, espresso, and a quiet Doum finish.',
+        temperature_options: ['iced'],
+        milk_options: ['whole milk', 'oat milk', 'almond milk'],
+        estimated_time_minutes: 6,
+      }));
+      return jsonResponse(updatedDrink);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    const drinkCard = await screen.findByLabelText('Iced Doum Latte controls');
+    fireEvent.click(within(drinkCard).getByRole('button', { name: 'Edit drink' }));
+    fireEvent.change(within(drinkCard).getByLabelText('Drink name'), { target: { value: 'Iced DŌM Latte' } });
+    fireEvent.change(within(drinkCard).getByLabelText('Description'), { target: { value: 'Cold milk, espresso, and a quiet Doum finish.' } });
+    fireEvent.change(within(drinkCard).getByLabelText('Temperature options'), { target: { value: 'iced' } });
+    fireEvent.change(within(drinkCard).getByLabelText('Milk options'), { target: { value: 'whole milk, oat milk, almond milk' } });
+    fireEvent.change(within(drinkCard).getByLabelText('Estimated minutes'), { target: { value: '6' } });
+    fireEvent.click(within(drinkCard).getByRole('button', { name: 'Save drink' }));
+
+    expect(await within(drinkCard).findByText('Iced DŌM Latte')).toBeInTheDocument();
+    expect(within(drinkCard).getByText('Cold milk, espresso, and a quiet Doum finish.')).toBeInTheDocument();
+    expect(within(drinkCard).getByText('iced · whole milk, oat milk, almond milk · 6 min')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
   it('asks the admin to log in when no token is stored', () => {

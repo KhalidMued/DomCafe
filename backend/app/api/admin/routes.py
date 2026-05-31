@@ -8,7 +8,9 @@ from app.schemas.admin import (
     AdminAvailabilityUpdate,
     AdminDashboardResponse,
     AdminDrinkPhotoResponse,
+    AdminDrinkUpdate,
     AdminLoginRequest,
+    AdminMenuDrink,
     AdminMenuManagementResponse,
     AdminOrderListItem,
     AdminOrderStatusResponse,
@@ -24,6 +26,7 @@ from app.services.admin_menu import (
     set_bean_availability,
     set_drink_availability,
     set_orders_open,
+    update_drink_details,
 )
 from app.services.admin_orders import list_recent_orders, update_order_status
 from app.services.admin_uploads import upload_drink_photo
@@ -129,6 +132,16 @@ async def upload_admin_drink_photo(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, str]:
     return await upload_drink_photo(session, drink_id, photo)
+
+
+@router.patch("/admin/drinks/{drink_id}", response_model=AdminMenuDrink)
+async def update_admin_drink_details(
+    drink_id: str,
+    payload: AdminDrinkUpdate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await update_drink_details(session, drink_id, payload)
 
 
 @router.patch("/admin/orders/{order_id}/status", response_model=AdminOrderStatusResponse)

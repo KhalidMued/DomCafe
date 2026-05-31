@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models.menu import Bean, Drink
 from app.models.setting import Setting
+from app.schemas.admin import AdminDrinkUpdate
 from app.services.public import _as_bool, DEFAULT_PUBLIC_SETTINGS
 
 
@@ -20,17 +21,7 @@ async def get_menu_management_summary(session: AsyncSession) -> dict[str, object
     beans = (await session.execute(select(Bean).order_by(Bean.name))).scalars().all()
     return {
         "orders_open": orders_open,
-        "drinks": [
-            {
-                "id": drink.id,
-                "name": drink.name,
-                "category_name": drink.category.label,
-                "bean_name": drink.default_bean.name if drink.default_bean else None,
-                "photo_url": drink.photo_url,
-                "is_available": drink.is_available,
-            }
-            for drink in drinks
-        ],
+        "drinks": [_drink_payload(drink) for drink in drinks],
         "beans": [
             {
                 "id": bean.id,
@@ -41,6 +32,24 @@ async def get_menu_management_summary(session: AsyncSession) -> dict[str, object
             for bean in beans
         ],
     }
+
+
+async def update_drink_details(
+    session: AsyncSession, drink_id: str, payload: AdminDrinkUpdate
+) -> dict[str, object]:
+    drink = await session.get(
+        Drink,
+        drink_id,
+        options=(selectinload(Drink.category), selectinload(Drink.default_bean)),
+    )
+    if drink is None:
+        raise HTTPException(status_code=404, detail="Drink not found.")
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(drink, field, value)
+    await session.commit()
+    await session.refresh(drink, attribute_names=["category", "default_bean"])
+    return _drink_payload(drink)
 
 
 async def set_drink_availability(
@@ -82,3 +91,18 @@ async def _get_orders_open(session: AsyncSession) -> bool:
         setting.value if setting else None,
         bool(DEFAULT_PUBLIC_SETTINGS["orders_open"]),
     )
+
+
+def _drink_payload(drink: Drink) -> dict[str, object]:
+    return {
+        "id": drink.id,
+        "name": drink.name,
+        "category_name": drink.category.label,
+        "bean_name": drink.default_bean.name if drink.default_bean else None,
+        "description": drink.description,
+        "photo_url": drink.photo_url,
+        "is_available": drink.is_available,
+        "temperature_options": drink.temperature_options,
+        "milk_options": drink.milk_options,
+        "estimated_time_minutes": drink.estimated_time_minutes,
+    }

@@ -106,8 +106,12 @@ export type AdminMenuManagement = {
     name: string;
     category_name: string;
     bean_name: string | null;
+    description: string | null;
     photo_url: string;
     is_available: boolean;
+    temperature_options: string[];
+    milk_options: string[];
+    estimated_time_minutes: number;
   }>;
   beans: Array<{
     id: string;
@@ -212,5 +216,23 @@ export function uploadAdminDrinkPhoto(token: string, drinkId: string, photo: Fil
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body,
+  });
+}
+
+export function updateAdminDrinkDetails(
+  token: string,
+  drinkId: string,
+  payload: {
+    name: string;
+    description: string;
+    temperature_options: string[];
+    milk_options: string[];
+    estimated_time_minutes: number;
+  },
+) {
+  return request<AdminMenuManagement['drinks'][number]>(`/api/admin/drinks/${drinkId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
   });
 }
