@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 5 — Agent API foundation in progress
+Phase 5 — Agent API and Discord notification in progress
 
 ## Current branch
-feature/agent-menu-controls
+feature/discord-order-notifications
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -26,34 +26,34 @@ feature/agent-menu-controls
 - Phase 4 PR #21 added protected category editing, category availability, and expanded drink catalog editing.
 - Phase 4 PR #22 added protected create/archive endpoints and `/admin/menu` UI controls for categories, beans, and drinks.
 - Phase 5 PR #23 added the dedicated Herms/agent order-control API surface.
-- Current branch extends the dedicated Herms/agent API surface for menu/catalog commands:
-  - `GET /api/agent/menu` returns categories, drinks, and beans for Herms menu lookup;
-  - `GET /api/agent/drinks/search?q=...` searches drinks by name;
-  - `PATCH /api/agent/drinks/{drink_id}/availability` lets Herms toggle drink availability;
-  - `GET /api/agent/beans` returns beans for Herms;
-  - `GET /api/agent/beans/search?q=...` searches beans by name/origin;
-  - `PATCH /api/agent/beans/{bean_id}/availability` lets Herms toggle bean availability;
-  - all `/api/agent/*` routes require the dedicated `AGENT_API_KEY` bearer token.
+- Phase 5 PR #24 added the dedicated Herms/agent menu/bean lookup and availability-control API surface.
+- Current branch adds Discord order notifications:
+  - `DISCORD_WEBHOOK_URL` configures the target webhook;
+  - `DISCORD_NOTIFICATIONS_ENABLED` controls default enablement;
+  - `discord_notifications_enabled` setting row can enable/disable notifications at runtime;
+  - new public orders send a clean Discord message after commit when configured/enabled;
+  - webhook failures are logged and do not fail guest order creation.
 
 ## Verification
-- Focused agent menu/control API contract tests: `8 passed`.
-- Full backend tests: `59 passed`.
+- Focused Discord notification tests: `5 passed`.
+- Full backend tests: `64 passed`.
 - Frontend tests: `22 passed`.
 - Frontend production build: passed.
 - Docker Compose rebuild for backend/frontend/nginx: passed.
 - Runtime verification through Nginx passed:
-  - authenticated `/api/agent/*` with `AGENT_API_KEY` without printing it;
-  - verified `GET /api/agent/menu` returned categories, drinks, and beans;
-  - verified drink and bean search endpoints;
-  - toggled one drink and one bean availability through agent routes;
-  - restored the original availability values immediately after assertions.
+  - temporarily pointed `DISCORD_WEBHOOK_URL` at an isolated local capture container without printing the URL;
+  - enabled notifications through local runtime env only;
+  - created a temporary public order;
+  - verified the capture container received the Discord message;
+  - verified the guest note was not included in the notification;
+  - deleted the temporary order/order items, restored `.env`, recreated the backend, and removed the capture container.
 
 ## What is pending
-- Commit, push, and open a PR for the agent menu-control branch.
-- Continue with Discord notification or remaining Phase 5 work after merge.
+- Commit, push, and open a PR for this branch.
+- Remaining project work after this branch: Phase 6 hardening/final QA, dependency audits, rate-limit polish if not already sufficient, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
-- Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, or connection strings.
-- Runtime verification scripts should construct authorization headers without printing tokens.
+- Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, or connection strings.
+- Runtime verification scripts should construct secrets in memory without printing them.
 - Keep local dev data clean: restore any runtime verification edits immediately after assertions.

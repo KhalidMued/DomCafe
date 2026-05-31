@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     admin_default_password: str = "change_me"
     upload_dir: str = "/app/uploads"
     max_upload_mb: int = 5
+    discord_webhook_url: str = ""
+    discord_notifications_enabled: bool = False
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
