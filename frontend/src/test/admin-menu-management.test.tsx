@@ -12,13 +12,34 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 
 const menuPayload = {
   orders_open: true,
+  categories: [
+    {
+      id: 'signature',
+      label: 'Signature',
+      description: 'House drinks with a quiet Doum finish.',
+      accent_color: '#BA7517',
+      display_order: 1,
+      is_available: true,
+    },
+    {
+      id: 'cold-bar',
+      label: 'Cold Bar',
+      description: 'Cold coffee for long afternoons.',
+      accent_color: '#5DCAA5',
+      display_order: 2,
+      is_available: true,
+    },
+  ],
   drinks: [
     {
       id: 'iced-doum-latte',
       name: 'Iced Doum Latte',
+      category_id: 'signature',
       category_name: 'Signature',
+      bean_id: 'dom-house-beans',
       bean_name: 'DŌM House Beans',
       description: 'A cold espresso milk drink.',
+      ingredients: ['espresso', 'milk'],
       photo_url: '/uploads/drinks/placeholder.jpg',
       is_available: true,
       temperature_options: ['iced'],
@@ -69,6 +90,9 @@ describe('Phase 4 admin menu management page', () => {
     const beans = screen.getByLabelText('Admin beans management');
     expect(within(beans).getByText('DŌM House Beans')).toBeInTheDocument();
     expect(within(beans).getByText('Sudan')).toBeInTheDocument();
+    const categories = screen.getByLabelText('Admin categories management');
+    expect(within(categories).getByText('Cold Bar')).toBeInTheDocument();
+    expect(within(categories).getByText('Cold coffee for long afternoons.')).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 
@@ -156,7 +180,10 @@ describe('Phase 4 admin menu management page', () => {
       expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
       expect(init?.body).toBe(JSON.stringify({
         name: 'Iced DŌM Latte',
+        category_id: 'signature',
+        default_bean_id: 'dom-house-beans',
         description: 'Cold milk, espresso, and a quiet Doum finish.',
+        ingredients: ['espresso', 'milk'],
         temperature_options: ['iced'],
         milk_options: ['whole milk', 'oat milk', 'almond milk'],
         estimated_time_minutes: 6,
@@ -179,6 +206,89 @@ describe('Phase 4 admin menu management page', () => {
     expect(await within(drinkCard).findByText('Iced DŌM Latte')).toBeInTheDocument();
     expect(within(drinkCard).getByText('Cold milk, espresso, and a quiet Doum finish.')).toBeInTheDocument();
     expect(within(drinkCard).getByText('iced · whole milk, oat milk, almond milk · 6 min')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it('edits drink catalog fields from the menu page', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const updatedDrink = {
+      ...menuPayload.drinks[0],
+      category_id: 'cold-bar',
+      category_name: 'Cold Bar',
+      bean_id: 'dom-house-beans',
+      ingredients: ['espresso', 'milk', 'doum'],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(url).toBe('/api/admin/drinks/iced-doum-latte');
+      expect(init?.method).toBe('PATCH');
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.body).toBe(JSON.stringify({
+        name: 'Iced Doum Latte',
+        category_id: 'cold-bar',
+        default_bean_id: 'dom-house-beans',
+        description: 'A cold espresso milk drink.',
+        ingredients: ['espresso', 'milk', 'doum'],
+        temperature_options: ['iced'],
+        milk_options: ['whole milk', 'oat milk'],
+        estimated_time_minutes: 5,
+      }));
+      return jsonResponse(updatedDrink);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    const drinkCard = await screen.findByLabelText('Iced Doum Latte controls');
+    fireEvent.click(within(drinkCard).getByRole('button', { name: 'Edit drink' }));
+    fireEvent.change(within(drinkCard).getByLabelText('Category'), { target: { value: 'cold-bar' } });
+    fireEvent.change(within(drinkCard).getByLabelText('Default bean'), { target: { value: 'dom-house-beans' } });
+    fireEvent.change(within(drinkCard).getByLabelText('Ingredients'), { target: { value: 'espresso, milk, doum' } });
+    fireEvent.click(within(drinkCard).getByRole('button', { name: 'Save drink' }));
+
+    expect(await screen.findAllByText('Cold Bar')).toHaveLength(2);
+    expect(screen.getByText('espresso, milk, doum')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it('edits category details from the menu page', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const updatedCategory = {
+      ...menuPayload.categories[1],
+      label: 'Slow Cold Bar',
+      description: 'Quiet iced coffee for warm afternoons.',
+      accent_color: '#5DCAA5',
+      display_order: 4,
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(url).toBe('/api/admin/categories/cold-bar');
+      expect(init?.method).toBe('PATCH');
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.body).toBe(JSON.stringify({
+        label: 'Slow Cold Bar',
+        description: 'Quiet iced coffee for warm afternoons.',
+        accent_color: '#5DCAA5',
+        display_order: 4,
+      }));
+      return jsonResponse(updatedCategory);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    const categoryCard = await screen.findByLabelText('Cold Bar controls');
+    fireEvent.click(within(categoryCard).getByRole('button', { name: 'Edit category' }));
+    fireEvent.change(within(categoryCard).getByLabelText('Category name'), { target: { value: 'Slow Cold Bar' } });
+    fireEvent.change(within(categoryCard).getByLabelText('Category description'), { target: { value: 'Quiet iced coffee for warm afternoons.' } });
+    fireEvent.change(within(categoryCard).getByLabelText('Accent color'), { target: { value: '#5DCAA5' } });
+    fireEvent.change(within(categoryCard).getByLabelText('Display order'), { target: { value: '4' } });
+    fireEvent.click(within(categoryCard).getByRole('button', { name: 'Save category' }));
+
+    expect(await within(categoryCard).findByText('Slow Cold Bar')).toBeInTheDocument();
+    expect(within(categoryCard).getByText('Quiet iced coffee for warm afternoons.')).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 

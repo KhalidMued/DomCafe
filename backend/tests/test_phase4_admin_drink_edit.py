@@ -11,9 +11,12 @@ def updated_drink_payload():
     return {
         "id": "iced-doum-latte",
         "name": "Iced DŌM Latte",
+        "category_id": "signature",
         "category_name": "Signature",
+        "bean_id": "dom-house-beans",
         "bean_name": "DŌM House Beans",
         "description": "Cold milk, espresso, and a quiet Doum finish.",
+        "ingredients": ["espresso", "milk"],
         "photo_url": "/uploads/drinks/placeholder.jpg",
         "is_available": True,
         "temperature_options": ["iced"],

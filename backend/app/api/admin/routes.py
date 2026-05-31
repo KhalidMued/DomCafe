@@ -7,11 +7,13 @@ from app.schemas.admin import (
     AdminAvailabilityResponse,
     AdminAvailabilityUpdate,
     AdminBeanUpdate,
+    AdminCategoryUpdate,
     AdminDashboardResponse,
     AdminDrinkPhotoResponse,
     AdminDrinkUpdate,
     AdminLoginRequest,
     AdminMenuBean,
+    AdminMenuCategory,
     AdminMenuDrink,
     AdminMenuManagementResponse,
     AdminOrderListItem,
@@ -29,10 +31,12 @@ from app.services.admin_menu import (
     get_admin_settings,
     get_menu_management_summary,
     set_bean_availability,
+    set_category_availability,
     set_drink_availability,
     set_orders_open,
     update_admin_settings,
     update_bean_details,
+    update_category_details,
     update_drink_details,
 )
 from app.services.admin_orders import list_recent_orders, update_order_status
@@ -122,6 +126,16 @@ async def update_admin_bean_availability(
     return await set_bean_availability(session, bean_id, payload.is_available)
 
 
+@router.patch("/admin/menu/categories/{category_id}", response_model=AdminAvailabilityResponse)
+async def update_admin_category_availability(
+    category_id: str,
+    payload: AdminAvailabilityUpdate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await set_category_availability(session, category_id, payload.is_available)
+
+
 @router.patch("/admin/menu/settings/orders-open", response_model=AdminOrdersOpenResponse)
 async def update_admin_orders_open(
     payload: AdminOrdersOpenUpdate,
@@ -176,6 +190,16 @@ async def update_admin_bean_details(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, object]:
     return await update_bean_details(session, bean_id, payload)
+
+
+@router.patch("/admin/categories/{category_id}", response_model=AdminMenuCategory)
+async def update_admin_category_details(
+    category_id: str,
+    payload: AdminCategoryUpdate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await update_category_details(session, category_id, payload)
 
 
 @router.patch("/admin/orders/{order_id}/status", response_model=AdminOrderStatusResponse)
