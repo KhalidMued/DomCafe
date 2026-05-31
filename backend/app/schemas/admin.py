@@ -62,6 +62,11 @@ class AdminOrdersOpenResponse(BaseModel):
     orders_open: bool
 
 
+class AdminDrinkPhotoResponse(BaseModel):
+    id: str
+    photo_url: str
+
+
 class AdminMenuDrink(BaseModel):
     id: str
     name: str

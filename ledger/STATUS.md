@@ -4,7 +4,7 @@
 Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-menu-management
+feature/admin-drink-photo-upload
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -39,12 +39,18 @@ feature/admin-menu-management
   - `/admin/orders` loads recent orders using the stored admin token.
   - Admins can change each order status from the orders page using the existing protected status API.
   - Local/remote `feature/admin-orders-page` branches were deleted after merge.
-- Phase 4 admin menu management is implemented on this branch:
+- Phase 4 admin menu management is implemented and merged via PR #17:
   - `GET /api/admin/menu` requires a bearer admin token and returns orders-open state, drinks, and beans.
   - Admin can toggle orders open/closed.
   - Admin can toggle drink availability.
   - Admin can toggle bean availability.
   - `/admin/menu` exposes the above controls with DŌM styling.
+  - Local `feature/admin-menu-management` branch was deleted after merge; the remote branch was already deleted.
+- Phase 4 admin drink photo upload is implemented on this branch:
+  - `POST /api/admin/uploads/drink-photo` requires a bearer admin token.
+  - Admin can upload JPEG, PNG, or WebP drink photos up to 5 MB.
+  - Uploads are verified as real images, stored under `/uploads/drinks/`, and applied to the selected drink.
+  - `/admin/menu` includes a replacement photo picker per drink.
 - Uploaded brand PDFs were inspected for visual direction:
   - Dark Nubian Night surfaces.
   - Doum Gold accents.
@@ -61,19 +67,20 @@ feature/admin-menu-management
 - Order status page polls every 15 seconds and cleans up its timer on unmount.
 - DŌM design tokens are applied as CSS variables.
 - Guest UI uses mobile-first, dark, quiet DŌM styling.
-- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, admin orders, and admin menu management.
+- Frontend unit tests pass for welcome, menu/cart submission, polling cleanup, admin login, admin dashboard summary, admin orders, admin menu management, and admin drink photo upload.
 - Frontend production build passes.
-- Backend tests pass, including admin login, admin dashboard summary, admin orders list, admin order status, and admin menu management contract tests.
+- Backend tests pass, including admin login, admin dashboard summary, admin orders list, admin order status, admin menu management, and admin drink photo upload contract tests.
 - Docker Compose backend/frontend rebuild passes.
 - Health endpoint returns OK through Nginx.
 - Migrations apply and seed data inserts inside Docker.
 - Browser verification through Nginx completed a guest flow: welcome → menu → cart → order status.
 - Admin login was verified through Nginx inside Docker without printing credentials or tokens.
 - Admin menu management was verified through Nginx inside Docker: admin menu returned 22 drinks and 1 bean; orders-open, one drink, and one bean were toggled off and restored.
+- Admin drink photo upload was verified through Nginx inside Docker: upload returned a `/uploads/drinks/` URL and Nginx served the uploaded JPEG.
 
 ## What is pending
-- Human review/merge of the admin menu management PR.
-- Remaining Phase 4 scope: photo upload and deeper edit forms for full drink/bean/settings content management.
+- Human review/merge of the admin drink photo upload PR.
+- Remaining Phase 4 scope: deeper edit forms for full drink/bean/settings content management.
 
 ## Known issues
 - No active blocker.
@@ -81,4 +88,4 @@ feature/admin-menu-management
 - Browser verification showed a Vite HMR websocket warning through Nginx in development mode; the guest flow still completed successfully.
 
 ## Next recommended task
-After the admin menu management PR is merged, delete the merged branch and continue Phase 4 with the smallest next admin photo-upload/editing slice from latest `main`.
+After the admin drink photo upload PR is merged, delete the merged branch and continue Phase 4 with a focused drink edit form or bean/settings management slice from latest `main`.

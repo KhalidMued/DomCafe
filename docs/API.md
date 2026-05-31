@@ -84,6 +84,39 @@ GET /api/orders/{order_id}
 
 Returns guest-safe order details, item snapshots, and a friendly status label.
 
+## Admin routes
+
+All admin routes require:
+
+```http
+Authorization: Bearer ADMIN_TOKEN
+```
+
+### Upload and replace drink photo
+
+```http
+POST /api/admin/uploads/drink-photo
+Content-Type: multipart/form-data
+```
+
+Form fields:
+
+```text
+drink_id=<drink-id>
+photo=<JPEG, PNG, or WebP file up to 5 MB>
+```
+
+Response:
+
+```json
+{
+  "id": "spanish_latte",
+  "photo_url": "/uploads/drinks/spanish_latte-generated-name.jpg"
+}
+```
+
+The uploaded file is stored under `/uploads/drinks/`, the drink photo URL is updated, and the public menu uses the new photo URL.
+
 ## Friendly error shape
 
 Public guest errors use this shape:
