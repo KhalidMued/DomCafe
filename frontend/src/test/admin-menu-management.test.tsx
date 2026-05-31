@@ -252,6 +252,152 @@ describe('Phase 4 admin menu management page', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it('creates category, bean, and drink entries from the menu page', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const newCategory = {
+      id: 'slow-bar',
+      label: 'Slow Bar',
+      description: 'Manual brews and quiet cups.',
+      accent_color: '#8B5E34',
+      display_order: 9,
+      is_available: true,
+    };
+    const newBean = {
+      id: 'ethiopia-guji',
+      name: 'Ethiopia Guji',
+      origin: 'Ethiopia',
+      process: 'Natural',
+      tasting_notes: ['berry', 'jasmine'],
+      is_available: true,
+    };
+    const newDrink = {
+      id: 'slow-doum-brew',
+      name: 'Slow DŌM Brew',
+      category_id: 'slow-bar',
+      category_name: 'Slow Bar',
+      bean_id: 'ethiopia-guji',
+      bean_name: 'Ethiopia Guji',
+      description: 'A slow filter with a soft Doum finish.',
+      ingredients: ['filter coffee', 'doum'],
+      photo_url: '/uploads/drinks/slow-doum-brew.jpg',
+      is_available: true,
+      temperature_options: ['hot'],
+      milk_options: ['none'],
+      estimated_time_minutes: 7,
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(init?.method).toBe('POST');
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      if (url === '/api/admin/categories') {
+        expect(init?.body).toBe(JSON.stringify({
+          id: 'slow-bar',
+          label: 'Slow Bar',
+          description: 'Manual brews and quiet cups.',
+          accent_color: '#8B5E34',
+          display_order: 9,
+        }));
+        return jsonResponse(newCategory, { status: 201 });
+      }
+      if (url === '/api/admin/beans') {
+        expect(init?.body).toBe(JSON.stringify({
+          id: 'ethiopia-guji',
+          name: 'Ethiopia Guji',
+          origin: 'Ethiopia',
+          process: 'Natural',
+          tasting_notes: ['berry', 'jasmine'],
+        }));
+        return jsonResponse(newBean, { status: 201 });
+      }
+      expect(url).toBe('/api/admin/drinks');
+      expect(init?.body).toBe(JSON.stringify({
+        id: 'slow-doum-brew',
+        name: 'Slow DŌM Brew',
+        category_id: 'slow-bar',
+        default_bean_id: 'ethiopia-guji',
+        description: 'A slow filter with a soft Doum finish.',
+        ingredients: ['filter coffee', 'doum'],
+        photo_url: '/uploads/drinks/slow-doum-brew.jpg',
+        temperature_options: ['hot'],
+        milk_options: ['none'],
+        estimated_time_minutes: 7,
+      }));
+      return jsonResponse(newDrink, { status: 201 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add category' }));
+    fireEvent.change(screen.getByLabelText('New category id'), { target: { value: 'slow-bar' } });
+    fireEvent.change(screen.getByLabelText('New category name'), { target: { value: 'Slow Bar' } });
+    fireEvent.change(screen.getByLabelText('New category description'), { target: { value: 'Manual brews and quiet cups.' } });
+    fireEvent.change(screen.getByLabelText('New category accent color'), { target: { value: '#8B5E34' } });
+    fireEvent.change(screen.getByLabelText('New category display order'), { target: { value: '9' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create category' }));
+    expect(await screen.findByLabelText('Slow Bar controls')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add bean' }));
+    fireEvent.change(screen.getByLabelText('New bean id'), { target: { value: 'ethiopia-guji' } });
+    fireEvent.change(screen.getByLabelText('New bean name'), { target: { value: 'Ethiopia Guji' } });
+    fireEvent.change(screen.getByLabelText('New bean origin'), { target: { value: 'Ethiopia' } });
+    fireEvent.change(screen.getByLabelText('New bean process'), { target: { value: 'Natural' } });
+    fireEvent.change(screen.getByLabelText('New bean tasting notes'), { target: { value: 'berry, jasmine' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create bean' }));
+    expect(await screen.findByLabelText('Ethiopia Guji controls')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add drink' }));
+    fireEvent.change(screen.getByLabelText('New drink id'), { target: { value: 'slow-doum-brew' } });
+    fireEvent.change(screen.getByLabelText('New drink name'), { target: { value: 'Slow DŌM Brew' } });
+    fireEvent.change(screen.getByLabelText('New drink category'), { target: { value: 'slow-bar' } });
+    fireEvent.change(screen.getByLabelText('New drink default bean'), { target: { value: 'ethiopia-guji' } });
+    fireEvent.change(screen.getByLabelText('New drink description'), { target: { value: 'A slow filter with a soft Doum finish.' } });
+    fireEvent.change(screen.getByLabelText('New drink ingredients'), { target: { value: 'filter coffee, doum' } });
+    fireEvent.change(screen.getByLabelText('New drink photo URL'), { target: { value: '/uploads/drinks/slow-doum-brew.jpg' } });
+    fireEvent.change(screen.getByLabelText('New drink temperature options'), { target: { value: 'hot' } });
+    fireEvent.change(screen.getByLabelText('New drink milk options'), { target: { value: 'none' } });
+    fireEvent.change(screen.getByLabelText('New drink estimated minutes'), { target: { value: '7' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create drink' }));
+
+    expect(await screen.findByLabelText('Slow DŌM Brew controls')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+  });
+
+  it('archives catalog items from the menu page without hard delete wording', async () => {
+    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === '/api/admin/menu') return jsonResponse(menuPayload);
+      expect(init?.method).toBe('DELETE');
+      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      if (url === '/api/admin/categories/cold-bar') {
+        return jsonResponse({ ...menuPayload.categories[1], is_available: false });
+      }
+      if (url === '/api/admin/drinks/iced-doum-latte') {
+        return jsonResponse({ ...menuPayload.drinks[0], is_available: false });
+      }
+      expect(url).toBe('/api/admin/beans/dom-house-beans');
+      return jsonResponse({ ...menuPayload.beans[0], is_available: false });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<App />);
+
+    const categoryCard = await screen.findByLabelText('Cold Bar controls');
+    fireEvent.click(within(categoryCard).getByRole('button', { name: 'Archive category' }));
+    expect(await within(categoryCard).findByText('Unavailable')).toBeInTheDocument();
+
+    const drinkCard = screen.getByLabelText('Iced Doum Latte controls');
+    fireEvent.click(within(drinkCard).getByRole('button', { name: 'Archive drink' }));
+    expect(await within(drinkCard).findByText('Unavailable')).toBeInTheDocument();
+
+    const beanCard = screen.getByLabelText('DŌM House Beans controls');
+    fireEvent.click(within(beanCard).getByRole('button', { name: 'Archive bean' }));
+    expect(await within(beanCard).findByText('Unavailable')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+  });
+
   it('edits category details from the menu page', async () => {
     window.localStorage.setItem('dom_admin_token', 'admin-token');
     const updatedCategory = {

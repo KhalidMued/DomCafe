@@ -5,7 +5,15 @@ from sqlalchemy.orm import selectinload
 
 from app.models.menu import Bean, Category, Drink
 from app.models.setting import Setting
-from app.schemas.admin import AdminBeanUpdate, AdminCategoryUpdate, AdminDrinkUpdate, AdminSettingsUpdate
+from app.schemas.admin import (
+    AdminBeanCreate,
+    AdminBeanUpdate,
+    AdminCategoryCreate,
+    AdminCategoryUpdate,
+    AdminDrinkCreate,
+    AdminDrinkUpdate,
+    AdminSettingsUpdate,
+)
 from app.services.public import _as_bool, DEFAULT_PUBLIC_SETTINGS
 
 
@@ -30,6 +38,16 @@ async def get_menu_management_summary(session: AsyncSession) -> dict[str, object
     }
 
 
+async def create_category(session: AsyncSession, payload: AdminCategoryCreate) -> dict[str, object]:
+    if await session.get(Category, payload.id) is not None:
+        raise HTTPException(status_code=409, detail="Category already exists.")
+    category = Category(**payload.model_dump(), is_available=True)
+    session.add(category)
+    await session.commit()
+    await session.refresh(category)
+    return _category_payload(category)
+
+
 async def update_category_details(
     session: AsyncSession, category_id: str, payload: AdminCategoryUpdate
 ) -> dict[str, object]:
@@ -44,6 +62,26 @@ async def update_category_details(
     return _category_payload(category)
 
 
+async def archive_category(session: AsyncSession, category_id: str) -> dict[str, object]:
+    category = await session.get(Category, category_id)
+    if category is None:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    category.is_available = False
+    await session.commit()
+    await session.refresh(category)
+    return _category_payload(category)
+
+
+async def create_bean(session: AsyncSession, payload: AdminBeanCreate) -> dict[str, object]:
+    if await session.get(Bean, payload.id) is not None:
+        raise HTTPException(status_code=409, detail="Bean already exists.")
+    bean = Bean(**payload.model_dump(), is_available=True)
+    session.add(bean)
+    await session.commit()
+    await session.refresh(bean)
+    return _bean_payload(bean)
+
+
 async def update_bean_details(
     session: AsyncSession, bean_id: str, payload: AdminBeanUpdate
 ) -> dict[str, object]:
@@ -53,6 +91,16 @@ async def update_bean_details(
     updates = payload.model_dump(exclude_unset=True)
     for field, value in updates.items():
         setattr(bean, field, value)
+    await session.commit()
+    await session.refresh(bean)
+    return _bean_payload(bean)
+
+
+async def archive_bean(session: AsyncSession, bean_id: str) -> dict[str, object]:
+    bean = await session.get(Bean, bean_id)
+    if bean is None:
+        raise HTTPException(status_code=404, detail="Bean not found.")
+    bean.is_available = False
     await session.commit()
     await session.refresh(bean)
     return _bean_payload(bean)
@@ -89,6 +137,20 @@ async def update_admin_settings(
     return await get_admin_settings(session)
 
 
+async def create_drink(session: AsyncSession, payload: AdminDrinkCreate) -> dict[str, object]:
+    if await session.get(Drink, payload.id) is not None:
+        raise HTTPException(status_code=409, detail="Drink already exists.")
+    if await session.get(Category, payload.category_id) is None:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    if payload.default_bean_id and await session.get(Bean, payload.default_bean_id) is None:
+        raise HTTPException(status_code=404, detail="Bean not found.")
+    drink = Drink(**payload.model_dump(), is_available=True)
+    session.add(drink)
+    await session.commit()
+    await session.refresh(drink, attribute_names=["category", "default_bean"])
+    return _drink_payload(drink)
+
+
 async def update_drink_details(
     session: AsyncSession, drink_id: str, payload: AdminDrinkUpdate
 ) -> dict[str, object]:
@@ -106,6 +168,20 @@ async def update_drink_details(
         raise HTTPException(status_code=404, detail="Bean not found.")
     for field, value in updates.items():
         setattr(drink, field, value)
+    await session.commit()
+    await session.refresh(drink, attribute_names=["category", "default_bean"])
+    return _drink_payload(drink)
+
+
+async def archive_drink(session: AsyncSession, drink_id: str) -> dict[str, object]:
+    drink = await session.get(
+        Drink,
+        drink_id,
+        options=(selectinload(Drink.category), selectinload(Drink.default_bean)),
+    )
+    if drink is None:
+        raise HTTPException(status_code=404, detail="Drink not found.")
+    drink.is_available = False
     await session.commit()
     await session.refresh(drink, attribute_names=["category", "default_bean"])
     return _drink_payload(drink)

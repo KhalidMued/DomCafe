@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import {
+  archiveAdminBean,
+  archiveAdminCategory,
+  archiveAdminDrink,
+  createAdminBean,
+  createAdminCategory,
+  createAdminDrink,
   getAdminMenu,
   updateAdminBeanAvailability,
   updateAdminBeanDetails,
@@ -42,12 +48,18 @@ type CategoryDraft = {
   displayOrder: string;
 };
 
+type NewCategoryDraft = CategoryDraft & { id: string };
+
+type NewDrinkDraft = DrinkDraft & { id: string; photoUrl: string };
+
 type BeanDraft = {
   name: string;
   origin: string;
   process: string;
   tastingNotes: string;
 };
+
+type NewBeanDraft = BeanDraft & { id: string };
 
 function listText(values: string[]) {
   return values.join(', ');
@@ -67,6 +79,9 @@ export function AdminMenuPage() {
   const [categoryDraft, setCategoryDraft] = useState<CategoryDraft | null>(null);
   const [editingBeanId, setEditingBeanId] = useState('');
   const [beanDraft, setBeanDraft] = useState<BeanDraft | null>(null);
+  const [newDrinkDraft, setNewDrinkDraft] = useState<NewDrinkDraft | null>(null);
+  const [newCategoryDraft, setNewCategoryDraft] = useState<NewCategoryDraft | null>(null);
+  const [newBeanDraft, setNewBeanDraft] = useState<NewBeanDraft | null>(null);
   const token = window.localStorage.getItem('dom_admin_token');
 
   useEffect(() => {
@@ -213,6 +228,68 @@ export function AdminMenuPage() {
     setUpdatingId('');
   }
 
+  async function saveNewCategory() {
+    if (!token || !menu || !newCategoryDraft) return;
+    const created = await createAdminCategory(token, {
+      id: newCategoryDraft.id,
+      label: newCategoryDraft.label,
+      description: newCategoryDraft.description,
+      accent_color: newCategoryDraft.accentColor,
+      display_order: Number(newCategoryDraft.displayOrder),
+    });
+    setMenu({ ...menu, categories: [...menu.categories, created] });
+    setNewCategoryDraft(null);
+  }
+
+  async function saveNewBean() {
+    if (!token || !menu || !newBeanDraft) return;
+    const created = await createAdminBean(token, {
+      id: newBeanDraft.id,
+      name: newBeanDraft.name,
+      origin: newBeanDraft.origin,
+      process: newBeanDraft.process,
+      tasting_notes: parseList(newBeanDraft.tastingNotes),
+    });
+    setMenu({ ...menu, beans: [...menu.beans, created] });
+    setNewBeanDraft(null);
+  }
+
+  async function saveNewDrink() {
+    if (!token || !menu || !newDrinkDraft) return;
+    const created = await createAdminDrink(token, {
+      id: newDrinkDraft.id,
+      name: newDrinkDraft.name,
+      category_id: newDrinkDraft.categoryId,
+      default_bean_id: newDrinkDraft.beanId,
+      description: newDrinkDraft.description,
+      ingredients: parseList(newDrinkDraft.ingredients),
+      photo_url: newDrinkDraft.photoUrl,
+      temperature_options: parseList(newDrinkDraft.temperatureOptions),
+      milk_options: parseList(newDrinkDraft.milkOptions),
+      estimated_time_minutes: Number(newDrinkDraft.estimatedMinutes),
+    });
+    setMenu({ ...menu, drinks: [...menu.drinks, created] });
+    setNewDrinkDraft(null);
+  }
+
+  async function archiveDrink(drinkId: string) {
+    if (!token || !menu) return;
+    const archived = await archiveAdminDrink(token, drinkId);
+    setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? archived : drink) });
+  }
+
+  async function archiveCategory(categoryId: string) {
+    if (!token || !menu) return;
+    const archived = await archiveAdminCategory(token, categoryId);
+    setMenu({ ...menu, categories: menu.categories.map((category) => category.id === categoryId ? archived : category) });
+  }
+
+  async function archiveBean(beanId: string) {
+    if (!token || !menu) return;
+    const archived = await archiveAdminBean(token, beanId);
+    setMenu({ ...menu, beans: menu.beans.map((bean) => bean.id === beanId ? archived : bean) });
+  }
+
   return (
     <main className="page-shell admin-page">
       <section className="top-bar">
@@ -234,6 +311,22 @@ export function AdminMenuPage() {
           </section>
           <section className="admin-management-grid" aria-label="Admin drinks management">
             <h2>Drinks</h2>
+            <button onClick={() => setNewDrinkDraft({ id: '', name: '', categoryId: menu.categories[0]?.id ?? '', beanId: menu.beans[0]?.id ?? '', description: '', ingredients: '', photoUrl: '', temperatureOptions: '', milkOptions: '', estimatedMinutes: '5' })} type="button">Add drink</button>
+            {newDrinkDraft ? (
+              <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewDrink(); }}>
+                <label>New drink id<input value={newDrinkDraft.id} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, id: event.currentTarget.value })} /></label>
+                <label>New drink name<input value={newDrinkDraft.name} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, name: event.currentTarget.value })} /></label>
+                <label>New drink category<select value={newDrinkDraft.categoryId} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, categoryId: event.currentTarget.value })}>{menu.categories.map((category) => <option key={category.id} value={category.id}>{category.label}</option>)}</select></label>
+                <label>New drink default bean<select value={newDrinkDraft.beanId} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, beanId: event.currentTarget.value })}>{menu.beans.map((bean) => <option key={bean.id} value={bean.id}>{bean.name}</option>)}</select></label>
+                <label>New drink description<textarea value={newDrinkDraft.description} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, description: event.currentTarget.value })} /></label>
+                <label>New drink ingredients<input value={newDrinkDraft.ingredients} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, ingredients: event.currentTarget.value })} /></label>
+                <label>New drink photo URL<input value={newDrinkDraft.photoUrl} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, photoUrl: event.currentTarget.value })} /></label>
+                <label>New drink temperature options<input value={newDrinkDraft.temperatureOptions} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, temperatureOptions: event.currentTarget.value })} /></label>
+                <label>New drink milk options<input value={newDrinkDraft.milkOptions} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, milkOptions: event.currentTarget.value })} /></label>
+                <label>New drink estimated minutes<input min="1" max="30" type="number" value={newDrinkDraft.estimatedMinutes} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, estimatedMinutes: event.currentTarget.value })} /></label>
+                <button type="submit">Create drink</button>
+              </form>
+            ) : null}
             {menu.drinks.map((drink) => {
               const drinkMeta = `${listText(drink.temperature_options)} · ${listText(drink.milk_options)} · ${drink.estimated_time_minutes} min`;
               return (
@@ -303,6 +396,7 @@ export function AdminMenuPage() {
                   <button disabled={updatingId === drink.id} onClick={() => toggleDrink(drink.id, !drink.is_available)} type="button">
                     {drink.is_available ? 'Mark unavailable' : 'Mark available'}
                   </button>
+                  <button onClick={() => archiveDrink(drink.id)} type="button">Archive drink</button>
                 </div>
               </article>
               );
@@ -310,6 +404,17 @@ export function AdminMenuPage() {
           </section>
           <section className="admin-management-grid" aria-label="Admin categories management">
             <h2>Categories</h2>
+            <button onClick={() => setNewCategoryDraft({ id: '', label: '', description: '', accentColor: '', displayOrder: '0' })} type="button">Add category</button>
+            {newCategoryDraft ? (
+              <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewCategory(); }}>
+                <label>New category id<input value={newCategoryDraft.id} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, id: event.currentTarget.value })} /></label>
+                <label>New category name<input value={newCategoryDraft.label} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, label: event.currentTarget.value })} /></label>
+                <label>New category description<textarea value={newCategoryDraft.description} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, description: event.currentTarget.value })} /></label>
+                <label>New category accent color<input value={newCategoryDraft.accentColor} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, accentColor: event.currentTarget.value })} /></label>
+                <label>New category display order<input min="0" max="1000" type="number" value={newCategoryDraft.displayOrder} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, displayOrder: event.currentTarget.value })} /></label>
+                <button type="submit">Create category</button>
+              </form>
+            ) : null}
             {menu.categories.map((category) => (
               <article className="status-card admin-menu-card" key={category.id} aria-label={`${category.label} controls`}>
                 <div>
@@ -345,12 +450,24 @@ export function AdminMenuPage() {
                   <button disabled={updatingId === category.id} onClick={() => toggleCategory(category.id, !category.is_available)} type="button">
                     {category.is_available ? 'Mark unavailable' : 'Mark available'}
                   </button>
+                  <button onClick={() => archiveCategory(category.id)} type="button">Archive category</button>
                 </div>
               </article>
             ))}
           </section>
           <section className="admin-management-grid" aria-label="Admin beans management">
             <h2>Beans</h2>
+            <button onClick={() => setNewBeanDraft({ id: '', name: '', origin: '', process: '', tastingNotes: '' })} type="button">Add bean</button>
+            {newBeanDraft ? (
+              <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewBean(); }}>
+                <label>New bean id<input value={newBeanDraft.id} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, id: event.currentTarget.value })} /></label>
+                <label>New bean name<input value={newBeanDraft.name} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, name: event.currentTarget.value })} /></label>
+                <label>New bean origin<input value={newBeanDraft.origin} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, origin: event.currentTarget.value })} /></label>
+                <label>New bean process<input value={newBeanDraft.process} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, process: event.currentTarget.value })} /></label>
+                <label>New bean tasting notes<input value={newBeanDraft.tastingNotes} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, tastingNotes: event.currentTarget.value })} /></label>
+                <button type="submit">Create bean</button>
+              </form>
+            ) : null}
             {menu.beans.map((bean) => (
               <article className="status-card admin-menu-card" key={bean.id} aria-label={`${bean.name} controls`}>
                 <div>
@@ -386,6 +503,7 @@ export function AdminMenuPage() {
                   <button disabled={updatingId === bean.id} onClick={() => toggleBean(bean.id, !bean.is_available)} type="button">
                     {bean.is_available ? 'Mark unavailable' : 'Mark available'}
                   </button>
+                  <button onClick={() => archiveBean(bean.id)} type="button">Archive bean</button>
                 </div>
               </article>
             ))}

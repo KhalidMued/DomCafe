@@ -78,11 +78,32 @@ class AdminDrinkUpdate(BaseModel):
     estimated_time_minutes: int | None = Field(default=None, ge=1, le=30)
 
 
+class AdminDrinkCreate(BaseModel):
+    id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=160)
+    category_id: str = Field(min_length=1, max_length=80)
+    default_bean_id: str | None = Field(default=None, min_length=1, max_length=80)
+    description: str = Field(min_length=1, max_length=600)
+    ingredients: list[str] = Field(default_factory=list)
+    photo_url: str = Field(min_length=1, max_length=300)
+    temperature_options: list[str] = Field(default_factory=list)
+    milk_options: list[str] = Field(default_factory=list)
+    estimated_time_minutes: int = Field(ge=1, le=30)
+
+
 class AdminCategoryUpdate(BaseModel):
     label: str | None = Field(default=None, min_length=1, max_length=120)
     description: str | None = Field(default=None, max_length=600)
     accent_color: str | None = Field(default=None, max_length=40)
     display_order: int | None = Field(default=None, ge=0, le=1000)
+
+
+class AdminCategoryCreate(BaseModel):
+    id: str = Field(min_length=1, max_length=80)
+    label: str = Field(min_length=1, max_length=120)
+    description: str | None = Field(default=None, max_length=600)
+    accent_color: str | None = Field(default=None, max_length=40)
+    display_order: int = Field(default=0, ge=0, le=1000)
 
 
 class AdminMenuCategory(BaseModel):
@@ -99,6 +120,14 @@ class AdminBeanUpdate(BaseModel):
     origin: str | None = Field(default=None, max_length=160)
     process: str | None = Field(default=None, max_length=120)
     tasting_notes: list[str] | None = None
+
+
+class AdminBeanCreate(BaseModel):
+    id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=160)
+    origin: str | None = Field(default=None, max_length=160)
+    process: str | None = Field(default=None, max_length=120)
+    tasting_notes: list[str] = Field(default_factory=list)
 
 
 class AdminSettingsUpdate(BaseModel):
