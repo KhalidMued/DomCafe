@@ -3,9 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.menu import Bean, Drink
+from app.models.menu import Bean, Category, Drink
 from app.models.setting import Setting
-from app.schemas.admin import AdminBeanUpdate, AdminDrinkUpdate, AdminSettingsUpdate
+from app.schemas.admin import AdminBeanUpdate, AdminCategoryUpdate, AdminDrinkUpdate, AdminSettingsUpdate
 from app.services.public import _as_bool, DEFAULT_PUBLIC_SETTINGS
 
 
@@ -19,11 +19,29 @@ async def get_menu_management_summary(session: AsyncSession) -> dict[str, object
         )
     ).scalars().all()
     beans = (await session.execute(select(Bean).order_by(Bean.name))).scalars().all()
+    categories = (
+        await session.execute(select(Category).order_by(Category.display_order, Category.label))
+    ).scalars().all()
     return {
         "orders_open": orders_open,
+        "categories": [_category_payload(category) for category in categories],
         "drinks": [_drink_payload(drink) for drink in drinks],
         "beans": [_bean_payload(bean) for bean in beans],
     }
+
+
+async def update_category_details(
+    session: AsyncSession, category_id: str, payload: AdminCategoryUpdate
+) -> dict[str, object]:
+    category = await session.get(Category, category_id)
+    if category is None:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(category, field, value)
+    await session.commit()
+    await session.refresh(category)
+    return _category_payload(category)
 
 
 async def update_bean_details(
@@ -82,6 +100,10 @@ async def update_drink_details(
     if drink is None:
         raise HTTPException(status_code=404, detail="Drink not found.")
     updates = payload.model_dump(exclude_unset=True)
+    if "category_id" in updates and await session.get(Category, updates["category_id"]) is None:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    if "default_bean_id" in updates and await session.get(Bean, updates["default_bean_id"]) is None:
+        raise HTTPException(status_code=404, detail="Bean not found.")
     for field, value in updates.items():
         setattr(drink, field, value)
     await session.commit()
@@ -111,6 +133,17 @@ async def set_bean_availability(
     return {"id": bean.id, "is_available": bean.is_available}
 
 
+async def set_category_availability(
+    session: AsyncSession, category_id: str, is_available: bool
+) -> dict[str, object]:
+    category = await session.get(Category, category_id)
+    if category is None:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    category.is_available = is_available
+    await session.commit()
+    return {"id": category.id, "is_available": category.is_available}
+
+
 async def set_orders_open(session: AsyncSession, orders_open: bool) -> dict[str, bool]:
     setting = await session.get(Setting, "orders_open")
     if setting is None:
@@ -134,14 +167,28 @@ def _drink_payload(drink: Drink) -> dict[str, object]:
     return {
         "id": drink.id,
         "name": drink.name,
+        "category_id": drink.category_id,
         "category_name": drink.category.label,
+        "bean_id": drink.default_bean_id,
         "bean_name": drink.default_bean.name if drink.default_bean else None,
         "description": drink.description,
+        "ingredients": drink.ingredients,
         "photo_url": drink.photo_url,
         "is_available": drink.is_available,
         "temperature_options": drink.temperature_options,
         "milk_options": drink.milk_options,
         "estimated_time_minutes": drink.estimated_time_minutes,
+    }
+
+
+def _category_payload(category: Category) -> dict[str, object]:
+    return {
+        "id": category.id,
+        "label": category.label,
+        "description": category.description,
+        "accent_color": category.accent_color,
+        "display_order": category.display_order,
+        "is_available": category.is_available,
     }
 
 

@@ -129,7 +129,10 @@ Request:
 ```json
 {
   "name": "Iced DŌM Latte",
+  "category_id": "cold-bar",
+  "default_bean_id": "dom-house-beans",
   "description": "Cold milk, espresso, and a quiet Doum finish.",
+  "ingredients": ["espresso", "milk", "doum"],
   "temperature_options": ["iced"],
   "milk_options": ["whole milk", "oat milk"],
   "estimated_time_minutes": 6
@@ -142,9 +145,12 @@ Response:
 {
   "id": "iced-doum-latte",
   "name": "Iced DŌM Latte",
-  "category_name": "Signature",
+  "category_id": "cold-bar",
+  "category_name": "Cold Bar",
+  "bean_id": "dom-house-beans",
   "bean_name": "DŌM House Beans",
   "description": "Cold milk, espresso, and a quiet Doum finish.",
+  "ingredients": ["espresso", "milk", "doum"],
   "photo_url": "/uploads/drinks/placeholder.jpg",
   "is_available": true,
   "temperature_options": ["iced"],
@@ -153,7 +159,40 @@ Response:
 }
 ```
 
-Fields are partial at the API layer, but the admin menu form submits all editable copy/options together. Estimated time must be between 1 and 30 minutes.
+Fields are partial at the API layer, but the admin menu form submits all editable catalog/copy/options together. Estimated time must be between 1 and 30 minutes. Category and default bean IDs must already exist.
+
+### Edit category details
+
+```http
+PATCH /api/admin/categories/{category_id}
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "label": "Cold Bar",
+  "description": "Cold coffee for long afternoons.",
+  "accent_color": "#5DCAA5",
+  "display_order": 3
+}
+```
+
+Response:
+
+```json
+{
+  "id": "cold-bar",
+  "label": "Cold Bar",
+  "description": "Cold coffee for long afternoons.",
+  "accent_color": "#5DCAA5",
+  "display_order": 3,
+  "is_available": true
+}
+```
+
+Category availability can also be toggled from the admin menu with `PATCH /api/admin/menu/categories/{category_id}` and `{ "is_available": false }`.
 
 ### Edit bean details
 

@@ -69,10 +69,29 @@ class AdminDrinkPhotoResponse(BaseModel):
 
 class AdminDrinkUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=160)
+    category_id: str | None = Field(default=None, min_length=1, max_length=80)
+    default_bean_id: str | None = Field(default=None, min_length=1, max_length=80)
     description: str | None = Field(default=None, max_length=600)
+    ingredients: list[str] | None = None
     temperature_options: list[str] | None = None
     milk_options: list[str] | None = None
     estimated_time_minutes: int | None = Field(default=None, ge=1, le=30)
+
+
+class AdminCategoryUpdate(BaseModel):
+    label: str | None = Field(default=None, min_length=1, max_length=120)
+    description: str | None = Field(default=None, max_length=600)
+    accent_color: str | None = Field(default=None, max_length=40)
+    display_order: int | None = Field(default=None, ge=0, le=1000)
+
+
+class AdminMenuCategory(BaseModel):
+    id: str
+    label: str
+    description: str | None
+    accent_color: str | None
+    display_order: int
+    is_available: bool
 
 
 class AdminBeanUpdate(BaseModel):
@@ -97,9 +116,12 @@ class AdminSettingsResponse(BaseModel):
 class AdminMenuDrink(BaseModel):
     id: str
     name: str
+    category_id: str
     category_name: str
+    bean_id: str | None
     bean_name: str | None
     description: str | None
+    ingredients: list[str]
     photo_url: str
     is_available: bool
     temperature_options: list[str]
@@ -118,5 +140,6 @@ class AdminMenuBean(BaseModel):
 
 class AdminMenuManagementResponse(BaseModel):
     orders_open: bool
+    categories: list[AdminMenuCategory]
     drinks: list[AdminMenuDrink]
     beans: list[AdminMenuBean]

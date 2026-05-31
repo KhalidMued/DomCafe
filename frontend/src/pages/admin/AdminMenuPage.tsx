@@ -4,6 +4,8 @@ import {
   getAdminMenu,
   updateAdminBeanAvailability,
   updateAdminBeanDetails,
+  updateAdminCategoryAvailability,
+  updateAdminCategoryDetails,
   updateAdminDrinkAvailability,
   updateAdminDrinkDetails,
   updateAdminOrdersOpen,
@@ -24,10 +26,20 @@ function AdminLoginRequired() {
 
 type DrinkDraft = {
   name: string;
+  categoryId: string;
+  beanId: string;
   description: string;
+  ingredients: string;
   temperatureOptions: string;
   milkOptions: string;
   estimatedMinutes: string;
+};
+
+type CategoryDraft = {
+  label: string;
+  description: string;
+  accentColor: string;
+  displayOrder: string;
 };
 
 type BeanDraft = {
@@ -51,6 +63,8 @@ export function AdminMenuPage() {
   const [updatingId, setUpdatingId] = useState('');
   const [editingDrinkId, setEditingDrinkId] = useState('');
   const [drinkDraft, setDrinkDraft] = useState<DrinkDraft | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState('');
+  const [categoryDraft, setCategoryDraft] = useState<CategoryDraft | null>(null);
   const [editingBeanId, setEditingBeanId] = useState('');
   const [beanDraft, setBeanDraft] = useState<BeanDraft | null>(null);
   const token = window.localStorage.getItem('dom_admin_token');
@@ -88,6 +102,14 @@ export function AdminMenuPage() {
     setUpdatingId('');
   }
 
+  async function toggleCategory(categoryId: string, nextValue: boolean) {
+    if (!token || !menu) return;
+    setUpdatingId(categoryId);
+    const updated = await updateAdminCategoryAvailability(token, categoryId, nextValue);
+    setMenu({ ...menu, categories: menu.categories.map((category) => category.id === categoryId ? { ...category, is_available: updated.is_available } : category) });
+    setUpdatingId('');
+  }
+
   async function replaceDrinkPhoto(drinkId: string, photo: File | undefined) {
     if (!token || !menu || !photo) return;
     setUpdatingId(`${drinkId}-photo`);
@@ -100,7 +122,10 @@ export function AdminMenuPage() {
     setEditingDrinkId(drink.id);
     setDrinkDraft({
       name: drink.name,
+      categoryId: drink.category_id,
+      beanId: drink.bean_id ?? '',
       description: drink.description ?? '',
+      ingredients: listText(drink.ingredients),
       temperatureOptions: listText(drink.temperature_options),
       milkOptions: listText(drink.milk_options),
       estimatedMinutes: String(drink.estimated_time_minutes),
@@ -116,7 +141,10 @@ export function AdminMenuPage() {
     setUpdatingId(`${drinkId}-details`);
     const updated = await updateAdminDrinkDetails(token, drinkId, {
       name: drinkDraft.name,
+      category_id: drinkDraft.categoryId,
+      default_bean_id: drinkDraft.beanId,
       description: drinkDraft.description,
+      ingredients: parseList(drinkDraft.ingredients),
       temperature_options: parseList(drinkDraft.temperatureOptions),
       milk_options: parseList(drinkDraft.milkOptions),
       estimated_time_minutes: Number(drinkDraft.estimatedMinutes),
@@ -124,6 +152,35 @@ export function AdminMenuPage() {
     setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? updated : drink) });
     setEditingDrinkId('');
     setDrinkDraft(null);
+    setUpdatingId('');
+  }
+
+  function startCategoryEdit(category: AdminMenuManagement['categories'][number]) {
+    setEditingCategoryId(category.id);
+    setCategoryDraft({
+      label: category.label,
+      description: category.description ?? '',
+      accentColor: category.accent_color ?? '',
+      displayOrder: String(category.display_order),
+    });
+  }
+
+  function updateCategoryDraft(field: keyof CategoryDraft, value: string) {
+    setCategoryDraft((draft) => draft ? { ...draft, [field]: value } : draft);
+  }
+
+  async function saveCategoryEdit(categoryId: string) {
+    if (!token || !menu || !categoryDraft) return;
+    setUpdatingId(`${categoryId}-details`);
+    const updated = await updateAdminCategoryDetails(token, categoryId, {
+      label: categoryDraft.label,
+      description: categoryDraft.description,
+      accent_color: categoryDraft.accentColor,
+      display_order: Number(categoryDraft.displayOrder),
+    });
+    setMenu({ ...menu, categories: menu.categories.map((category) => category.id === categoryId ? updated : category) });
+    setEditingCategoryId('');
+    setCategoryDraft(null);
     setUpdatingId('');
   }
 
@@ -187,6 +244,7 @@ export function AdminMenuPage() {
                   <p className="detail-copy">{drink.category_name}</p>
                   {drink.bean_name ? <p className="detail-copy">{drink.bean_name}</p> : null}
                   {drink.description ? <p>{drink.description}</p> : null}
+                  {drink.ingredients.length ? <p className="detail-copy">{listText(drink.ingredients)}</p> : null}
                   <p className="detail-copy">{drinkMeta}</p>
                   <p>{drink.is_available ? 'Available' : 'Unavailable'}</p>
                 </div>
@@ -197,8 +255,24 @@ export function AdminMenuPage() {
                       <input value={drinkDraft.name} onChange={(event) => updateDrinkDraft('name', event.currentTarget.value)} />
                     </label>
                     <label>
+                      Category
+                      <select value={drinkDraft.categoryId} onChange={(event) => updateDrinkDraft('categoryId', event.currentTarget.value)}>
+                        {menu.categories.map((category) => <option key={category.id} value={category.id}>{category.label}</option>)}
+                      </select>
+                    </label>
+                    <label>
+                      Default bean
+                      <select value={drinkDraft.beanId} onChange={(event) => updateDrinkDraft('beanId', event.currentTarget.value)}>
+                        {menu.beans.map((bean) => <option key={bean.id} value={bean.id}>{bean.name}</option>)}
+                      </select>
+                    </label>
+                    <label>
                       Description
                       <textarea value={drinkDraft.description} onChange={(event) => updateDrinkDraft('description', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Ingredients
+                      <input value={drinkDraft.ingredients} onChange={(event) => updateDrinkDraft('ingredients', event.currentTarget.value)} />
                     </label>
                     <label>
                       Temperature options
@@ -233,6 +307,47 @@ export function AdminMenuPage() {
               </article>
               );
             })}
+          </section>
+          <section className="admin-management-grid" aria-label="Admin categories management">
+            <h2>Categories</h2>
+            {menu.categories.map((category) => (
+              <article className="status-card admin-menu-card" key={category.id} aria-label={`${category.label} controls`}>
+                <div>
+                  <h3>{category.label}</h3>
+                  {category.description ? <p>{category.description}</p> : null}
+                  {category.accent_color ? <p className="detail-copy">{category.accent_color}</p> : null}
+                  <p className="detail-copy">Order {category.display_order}</p>
+                  <p>{category.is_available ? 'Available' : 'Unavailable'}</p>
+                </div>
+                {editingCategoryId === category.id && categoryDraft ? (
+                  <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveCategoryEdit(category.id); }}>
+                    <label>
+                      Category name
+                      <input value={categoryDraft.label} onChange={(event) => updateCategoryDraft('label', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Category description
+                      <textarea value={categoryDraft.description} onChange={(event) => updateCategoryDraft('description', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Accent color
+                      <input value={categoryDraft.accentColor} onChange={(event) => updateCategoryDraft('accentColor', event.currentTarget.value)} />
+                    </label>
+                    <label>
+                      Display order
+                      <input min="0" max="1000" type="number" value={categoryDraft.displayOrder} onChange={(event) => updateCategoryDraft('displayOrder', event.currentTarget.value)} />
+                    </label>
+                    <button disabled={updatingId === `${category.id}-details`} type="submit">Save category</button>
+                  </form>
+                ) : null}
+                <div className="admin-menu-actions">
+                  <button onClick={() => startCategoryEdit(category)} type="button">Edit category</button>
+                  <button disabled={updatingId === category.id} onClick={() => toggleCategory(category.id, !category.is_available)} type="button">
+                    {category.is_available ? 'Mark unavailable' : 'Mark available'}
+                  </button>
+                </div>
+              </article>
+            ))}
           </section>
           <section className="admin-management-grid" aria-label="Admin beans management">
             <h2>Beans</h2>

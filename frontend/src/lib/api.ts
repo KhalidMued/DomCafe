@@ -101,12 +101,23 @@ export type AdminOrderStatusResponse = {
 
 export type AdminMenuManagement = {
   orders_open: boolean;
+  categories: Array<{
+    id: string;
+    label: string;
+    description: string | null;
+    accent_color: string | null;
+    display_order: number;
+    is_available: boolean;
+  }>;
   drinks: Array<{
     id: string;
     name: string;
+    category_id: string;
     category_name: string;
+    bean_id: string | null;
     bean_name: string | null;
     description: string | null;
+    ingredients: string[];
     photo_url: string;
     is_available: boolean;
     temperature_options: string[];
@@ -208,6 +219,14 @@ export function updateAdminBeanAvailability(token: string, beanId: string, isAva
   });
 }
 
+export function updateAdminCategoryAvailability(token: string, categoryId: string, isAvailable: boolean) {
+  return request<{ id: string; is_available: boolean }>(`/api/admin/menu/categories/${categoryId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ is_available: isAvailable }),
+  });
+}
+
 export function updateAdminOrdersOpen(token: string, ordersOpen: boolean) {
   return request<{ orders_open: boolean }>('/api/admin/menu/settings/orders-open', {
     method: 'PATCH',
@@ -232,7 +251,10 @@ export function updateAdminDrinkDetails(
   drinkId: string,
   payload: {
     name: string;
+    category_id: string;
+    default_bean_id: string;
     description: string;
+    ingredients: string[];
     temperature_options: string[];
     milk_options: string[];
     estimated_time_minutes: number;
@@ -256,6 +278,23 @@ export function updateAdminBeanDetails(
   },
 ) {
   return request<AdminMenuManagement['beans'][number]>(`/api/admin/beans/${beanId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAdminCategoryDetails(
+  token: string,
+  categoryId: string,
+  payload: {
+    label: string;
+    description: string;
+    accent_color: string;
+    display_order: number;
+  },
+) {
+  return request<AdminMenuManagement['categories'][number]>(`/api/admin/categories/${categoryId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),

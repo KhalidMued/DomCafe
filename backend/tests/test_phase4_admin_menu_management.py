@@ -10,13 +10,26 @@ def client():
 def menu_payload():
     return {
         "orders_open": True,
+        "categories": [
+            {
+                "id": "signature",
+                "label": "Signature",
+                "description": "House drinks.",
+                "accent_color": "#BA7517",
+                "display_order": 1,
+                "is_available": True,
+            }
+        ],
         "drinks": [
             {
                 "id": "iced-doum-latte",
                 "name": "Iced Doum Latte",
+                "category_id": "signature",
                 "category_name": "Signature",
+                "bean_id": "dom-house-beans",
                 "bean_name": "DŌM House Beans",
                 "description": "A cold espresso milk drink.",
+                "ingredients": ["espresso", "milk"],
                 "photo_url": "/uploads/drinks/placeholder.jpg",
                 "is_available": True,
                 "temperature_options": ["iced"],
