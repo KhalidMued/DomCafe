@@ -2,6 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.menu import Bean, Category, Drink
 from app.models.order import Order
 from app.models.setting import Setting
 from app.services.public import DEFAULT_PUBLIC_SETTINGS, STATUS_LABELS
@@ -31,6 +32,94 @@ def _order_summary(order: Order) -> dict[str, object]:
         "created_at": order.created_at.isoformat().replace("+00:00", "Z"),
     }
 
+
+def _drink_payload(drink: Drink) -> dict[str, object]:
+    return {
+        "id": drink.id,
+        "name": drink.name,
+        "category_id": drink.category_id,
+        "category_name": drink.category.label,
+        "bean_id": drink.default_bean_id,
+        "bean_name": drink.default_bean.name if drink.default_bean else None,
+        "description": drink.description,
+        "ingredients": drink.ingredients,
+        "photo_url": drink.photo_url,
+        "is_available": drink.is_available,
+        "temperature_options": drink.temperature_options,
+        "milk_options": drink.milk_options,
+        "estimated_time_minutes": drink.estimated_time_minutes,
+    }
+
+
+def _bean_payload(bean: Bean) -> dict[str, object]:
+    return {
+        "id": bean.id,
+        "name": bean.name,
+        "origin": bean.origin,
+        "process": bean.process,
+        "tasting_notes": bean.tasting_notes,
+        "is_available": bean.is_available,
+    }
+
+
+def _category_payload(category: Category) -> dict[str, object]:
+    return {
+        "id": category.id,
+        "label": category.label,
+        "description": category.description,
+        "is_available": category.is_available,
+    }
+
+
+async def get_agent_menu(session: AsyncSession) -> dict[str, object]:
+    categories = (
+        await session.execute(select(Category).order_by(Category.display_order, Category.label))
+    ).scalars().all()
+    drinks = (
+        await session.execute(
+            select(Drink)
+            .options(selectinload(Drink.category), selectinload(Drink.default_bean))
+            .order_by(Drink.category_id, Drink.name)
+        )
+    ).scalars().all()
+    beans = (await session.execute(select(Bean).order_by(Bean.name))).scalars().all()
+    return {
+        "categories": [_category_payload(category) for category in categories],
+        "drinks": [_drink_payload(drink) for drink in drinks],
+        "beans": [_bean_payload(bean) for bean in beans],
+    }
+
+
+async def search_agent_drinks(session: AsyncSession, query: str) -> list[dict[str, object]]:
+    pattern = f"%{query.strip()}%"
+    drinks = (
+        await session.execute(
+            select(Drink)
+            .options(selectinload(Drink.category), selectinload(Drink.default_bean))
+            .where(Drink.name.ilike(pattern))
+            .order_by(Drink.name)
+            .limit(25)
+        )
+    ).scalars().all()
+    return [_drink_payload(drink) for drink in drinks]
+
+
+async def list_agent_beans(session: AsyncSession) -> list[dict[str, object]]:
+    beans = (await session.execute(select(Bean).order_by(Bean.name))).scalars().all()
+    return [_bean_payload(bean) for bean in beans]
+
+
+async def search_agent_beans(session: AsyncSession, query: str) -> list[dict[str, object]]:
+    pattern = f"%{query.strip()}%"
+    beans = (
+        await session.execute(
+            select(Bean)
+            .where(Bean.name.ilike(pattern) | Bean.origin.ilike(pattern))
+            .order_by(Bean.name)
+            .limit(25)
+        )
+    ).scalars().all()
+    return [_bean_payload(bean) for bean in beans]
 
 async def get_agent_status(session: AsyncSession) -> dict[str, object]:
     pending_count = await session.scalar(
