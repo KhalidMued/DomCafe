@@ -421,6 +421,81 @@ Allowed statuses are `new`, `received`, `preparing`, `ready`, and `cancelled`. R
 }
 ```
 
+### Agent menu
+
+```http
+GET /api/agent/menu
+```
+
+Returns categories, drinks, and beans for Herms menu lookup. Unlike the public menu, this includes unavailable items so Herms can answer availability questions and re-enable items.
+
+Drink records include `category_id`, `category_name`, `bean_id`, `bean_name`, copy/options, and `is_available`. Bean records include origin, process, tasting notes, and `is_available`.
+
+### Search drinks from Herms
+
+```http
+GET /api/agent/drinks/search?q=spanish
+```
+
+Returns up to 25 drinks matching the drink name. `q` is required and must not be empty.
+
+### Update drink availability from Herms
+
+```http
+PATCH /api/agent/drinks/{drink_id}/availability
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "is_available": false
+}
+```
+
+Response:
+
+```json
+{
+  "id": "spanish_latte",
+  "is_available": false
+}
+```
+
+### List and search beans from Herms
+
+```http
+GET /api/agent/beans
+GET /api/agent/beans/search?q=colombia
+```
+
+Bean search matches bean name and origin. `q` is required and must not be empty.
+
+### Update bean availability from Herms
+
+```http
+PATCH /api/agent/beans/{bean_id}/availability
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "is_available": true
+}
+```
+
+Response:
+
+```json
+{
+  "id": "colombia_house",
+  "is_available": true
+}
+```
+
 ## Friendly error shape
 
 Public guest errors use this shape:

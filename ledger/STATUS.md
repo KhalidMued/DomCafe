@@ -4,7 +4,7 @@
 Phase 5 — Agent API foundation in progress
 
 ## Current branch
-feature/agent-order-controls
+feature/agent-menu-controls
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -25,29 +25,32 @@ feature/agent-order-controls
 - Phase 4 PR #20 added protected bean detail editing and cafe settings management.
 - Phase 4 PR #21 added protected category editing, category availability, and expanded drink catalog editing.
 - Phase 4 PR #22 added protected create/archive endpoints and `/admin/menu` UI controls for categories, beans, and drinks.
-- Current branch starts the dedicated Herms/agent API surface without exposing admin JWT routes:
-  - `GET /api/agent/status` returns operational status, `orders_open`, and pending order count;
-  - `GET /api/agent/orders/pending` returns active orders for Herms in oldest-first order;
-  - `PATCH /api/agent/orders/{order_id}/status` lets Herms move orders through allowed statuses;
+- Phase 5 PR #23 added the dedicated Herms/agent order-control API surface.
+- Current branch extends the dedicated Herms/agent API surface for menu/catalog commands:
+  - `GET /api/agent/menu` returns categories, drinks, and beans for Herms menu lookup;
+  - `GET /api/agent/drinks/search?q=...` searches drinks by name;
+  - `PATCH /api/agent/drinks/{drink_id}/availability` lets Herms toggle drink availability;
+  - `GET /api/agent/beans` returns beans for Herms;
+  - `GET /api/agent/beans/search?q=...` searches beans by name/origin;
+  - `PATCH /api/agent/beans/{bean_id}/availability` lets Herms toggle bean availability;
   - all `/api/agent/*` routes require the dedicated `AGENT_API_KEY` bearer token.
 
 ## Verification
-- Focused agent API contract tests: `6 passed`.
-- Full backend tests: `51 passed`.
+- Focused agent menu/control API contract tests: `8 passed`.
+- Full backend tests: `59 passed`.
 - Frontend tests: `22 passed`.
 - Frontend production build: passed.
 - Docker Compose rebuild for backend/frontend/nginx: passed.
 - Runtime verification through Nginx passed:
-  - created a temporary public order without printing secrets;
   - authenticated `/api/agent/*` with `AGENT_API_KEY` without printing it;
-  - verified `GET /api/agent/status`;
-  - verified `GET /api/agent/orders/pending` included the temporary order;
-  - verified `PATCH /api/agent/orders/{order_id}/status` moved the order to `ready`;
-  - removed the temporary order and order items from the local dev database after assertions.
+  - verified `GET /api/agent/menu` returned categories, drinks, and beans;
+  - verified drink and bean search endpoints;
+  - toggled one drink and one bean availability through agent routes;
+  - restored the original availability values immediately after assertions.
 
 ## What is pending
-- Commit, push, and open a PR for the agent order-control branch.
-- Continue with the remaining agent menu/bean routes after merge.
+- Commit, push, and open a PR for the agent menu-control branch.
+- Continue with Discord notification or remaining Phase 5 work after merge.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
