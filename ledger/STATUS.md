@@ -4,7 +4,7 @@
 Phase 4 — Admin Backend and Frontend in progress
 
 ## Current branch
-feature/admin-catalog-management
+feature/admin-create-archive-catalog
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -23,29 +23,28 @@ feature/admin-catalog-management
 - Phase 4 PR #18 added protected admin drink photo uploads.
 - Phase 4 PR #19 added protected admin drink copy/options editing.
 - Phase 4 PR #20 added protected bean detail editing and cafe settings management.
-- Current branch extends admin catalog management by a larger notch:
-  - protected category detail editing via `PATCH /api/admin/categories/{category_id}`;
-  - protected category availability toggles via `PATCH /api/admin/menu/categories/{category_id}`;
-  - admin menu payloads now include categories plus drink category IDs, bean IDs, and ingredients;
-  - admin drink editing can reassign category/default bean and edit ingredients;
-  - admin menu UI includes category cards with inline edit and availability controls;
-  - API docs describe the expanded drink payload and category endpoints.
+- Phase 4 PR #21 added protected category editing, category availability, and expanded drink catalog editing.
+- Current branch extends admin catalog management by another coherent notch:
+  - protected create endpoints for categories, beans, and drinks;
+  - protected archive endpoints for categories, beans, and drinks that mark items unavailable instead of hard-deleting;
+  - admin menu UI add forms for categories, beans, and drinks;
+  - admin menu UI archive actions for categories, beans, and drinks;
+  - API docs describe create/archive catalog endpoints.
 
 ## Verification
-- Backend tests: `39 passed`.
-- Frontend tests: `20 passed`.
+- Backend tests: `45 passed`.
+- Frontend tests: `22 passed`.
 - Frontend production build: passed.
 - Docker Compose rebuild for backend/frontend/nginx: passed.
 - Runtime verification through Nginx passed:
   - admin login succeeded without printing secrets;
-  - `PATCH /api/admin/categories/{category_id}` updated category details;
-  - `PATCH /api/admin/menu/categories/{category_id}` toggled category availability;
-  - `PATCH /api/admin/drinks/{drink_id}` updated drink category/default bean/ingredients;
-  - `/api/admin/menu` reflected the category and drink catalog updates;
-  - original category and drink values were restored immediately.
+  - `POST /api/admin/categories`, `POST /api/admin/beans`, and `POST /api/admin/drinks` created runtime catalog rows;
+  - `/api/admin/menu` reflected the created category, bean, and drink;
+  - `DELETE /api/admin/categories/{category_id}`, `DELETE /api/admin/drinks/{drink_id}`, and `DELETE /api/admin/beans/{bean_id}` archived rows by marking them unavailable;
+  - runtime verification rows were removed directly from the local dev database after assertions.
 
 ## What is pending
-- Commit, push, and open a PR for the admin catalog-management branch.
+- Commit, push, and open a PR for the admin create/archive catalog branch.
 - Continue Phase 4 after merge with slightly larger, coherent PR slices where safe.
 
 ## Notes

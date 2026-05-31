@@ -117,6 +117,40 @@ Response:
 
 The uploaded file is stored under `/uploads/drinks/`, the drink photo URL is updated, and the public menu uses the new photo URL.
 
+### Create drink
+
+```http
+POST /api/admin/drinks
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "id": "slow-doum-brew",
+  "name": "Slow DŌM Brew",
+  "category_id": "slow-bar",
+  "default_bean_id": "ethiopia-guji",
+  "description": "A slow filter with a soft Doum finish.",
+  "ingredients": ["filter coffee", "doum"],
+  "photo_url": "/uploads/drinks/slow-doum-brew.jpg",
+  "temperature_options": ["hot"],
+  "milk_options": ["none"],
+  "estimated_time_minutes": 7
+}
+```
+
+Response matches the admin drink shape. `photo_url`, `name`, `category_id`, and `description` are required. Category and default bean IDs must already exist. Duplicate IDs return `409`.
+
+### Archive drink
+
+```http
+DELETE /api/admin/drinks/{drink_id}
+```
+
+Archives by marking the drink unavailable; it does not hard-delete records or old order snapshots.
+
 ### Edit drink details
 
 ```http
@@ -161,6 +195,35 @@ Response:
 
 Fields are partial at the API layer, but the admin menu form submits all editable catalog/copy/options together. Estimated time must be between 1 and 30 minutes. Category and default bean IDs must already exist.
 
+### Create category
+
+```http
+POST /api/admin/categories
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "id": "slow-bar",
+  "label": "Slow Bar",
+  "description": "Manual brews and quiet cups.",
+  "accent_color": "#8B5E34",
+  "display_order": 9
+}
+```
+
+Response matches the admin category shape. Duplicate IDs return `409`.
+
+### Archive category
+
+```http
+DELETE /api/admin/categories/{category_id}
+```
+
+Archives by marking the category unavailable; it does not hard-delete the category or its drinks.
+
 ### Edit category details
 
 ```http
@@ -193,6 +256,35 @@ Response:
 ```
 
 Category availability can also be toggled from the admin menu with `PATCH /api/admin/menu/categories/{category_id}` and `{ "is_available": false }`.
+
+### Create bean
+
+```http
+POST /api/admin/beans
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "id": "ethiopia-guji",
+  "name": "Ethiopia Guji",
+  "origin": "Ethiopia",
+  "process": "Natural",
+  "tasting_notes": ["berry", "jasmine"]
+}
+```
+
+Response matches the admin bean shape. Duplicate IDs return `409`.
+
+### Archive bean
+
+```http
+DELETE /api/admin/beans/{bean_id}
+```
+
+Archives by marking the bean unavailable; it does not hard-delete beans that existing drinks or order snapshots may reference.
 
 ### Edit bean details
 

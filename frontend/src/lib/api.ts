@@ -227,6 +227,24 @@ export function updateAdminCategoryAvailability(token: string, categoryId: strin
   });
 }
 
+export function createAdminCategory(
+  token: string,
+  payload: { id: string; label: string; description: string; accent_color: string; display_order: number },
+) {
+  return request<AdminMenuManagement['categories'][number]>('/api/admin/categories', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function archiveAdminCategory(token: string, categoryId: string) {
+  return request<AdminMenuManagement['categories'][number]>(`/api/admin/categories/${categoryId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function updateAdminOrdersOpen(token: string, ordersOpen: boolean) {
   return request<{ orders_open: boolean }>('/api/admin/menu/settings/orders-open', {
     method: 'PATCH',
@@ -267,6 +285,35 @@ export function updateAdminDrinkDetails(
   });
 }
 
+export function createAdminDrink(
+  token: string,
+  payload: {
+    id: string;
+    name: string;
+    category_id: string;
+    default_bean_id: string;
+    description: string;
+    ingredients: string[];
+    photo_url: string;
+    temperature_options: string[];
+    milk_options: string[];
+    estimated_time_minutes: number;
+  },
+) {
+  return request<AdminMenuManagement['drinks'][number]>('/api/admin/drinks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function archiveAdminDrink(token: string, drinkId: string) {
+  return request<AdminMenuManagement['drinks'][number]>(`/api/admin/drinks/${drinkId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function updateAdminBeanDetails(
   token: string,
   beanId: string,
@@ -281,6 +328,24 @@ export function updateAdminBeanDetails(
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
+  });
+}
+
+export function createAdminBean(
+  token: string,
+  payload: { id: string; name: string; origin: string; process: string; tasting_notes: string[] },
+) {
+  return request<AdminMenuManagement['beans'][number]>('/api/admin/beans', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function archiveAdminBean(token: string, beanId: string) {
+  return request<AdminMenuManagement['beans'][number]>(`/api/admin/beans/${beanId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 

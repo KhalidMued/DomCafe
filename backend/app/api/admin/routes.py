@@ -6,9 +6,12 @@ from app.db.session import get_session
 from app.schemas.admin import (
     AdminAvailabilityResponse,
     AdminAvailabilityUpdate,
+    AdminBeanCreate,
     AdminBeanUpdate,
+    AdminCategoryCreate,
     AdminCategoryUpdate,
     AdminDashboardResponse,
+    AdminDrinkCreate,
     AdminDrinkPhotoResponse,
     AdminDrinkUpdate,
     AdminLoginRequest,
@@ -28,6 +31,12 @@ from app.schemas.admin import (
 from app.services.admin_auth import authenticate_admin, get_active_admin_id
 from app.services.admin_dashboard import get_dashboard_summary
 from app.services.admin_menu import (
+    archive_bean,
+    archive_category,
+    archive_drink,
+    create_bean,
+    create_category,
+    create_drink,
     get_admin_settings,
     get_menu_management_summary,
     set_bean_availability,
@@ -170,6 +179,60 @@ async def upload_admin_drink_photo(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, str]:
     return await upload_drink_photo(session, drink_id, photo)
+
+
+@router.post("/admin/categories", response_model=AdminMenuCategory, status_code=status.HTTP_201_CREATED)
+async def create_admin_category(
+    payload: AdminCategoryCreate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await create_category(session, payload)
+
+
+@router.post("/admin/beans", response_model=AdminMenuBean, status_code=status.HTTP_201_CREATED)
+async def create_admin_bean(
+    payload: AdminBeanCreate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await create_bean(session, payload)
+
+
+@router.post("/admin/drinks", response_model=AdminMenuDrink, status_code=status.HTTP_201_CREATED)
+async def create_admin_drink(
+    payload: AdminDrinkCreate,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await create_drink(session, payload)
+
+
+@router.delete("/admin/drinks/{drink_id}", response_model=AdminMenuDrink)
+async def archive_admin_drink(
+    drink_id: str,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await archive_drink(session, drink_id)
+
+
+@router.delete("/admin/beans/{bean_id}", response_model=AdminMenuBean)
+async def archive_admin_bean(
+    bean_id: str,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await archive_bean(session, bean_id)
+
+
+@router.delete("/admin/categories/{category_id}", response_model=AdminMenuCategory)
+async def archive_admin_category(
+    category_id: str,
+    _admin_id: str = Depends(_current_admin_dependency),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    return await archive_category(session, category_id)
 
 
 @router.patch("/admin/drinks/{drink_id}", response_model=AdminMenuDrink)
