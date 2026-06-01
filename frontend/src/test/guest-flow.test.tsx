@@ -121,10 +121,27 @@ describe('Phase 3 guest frontend', () => {
 
     const cart = await screen.findByTestId('cart-page');
     expect(within(cart).getByText('Spanish Latte')).toBeInTheDocument();
+    expect(within(cart).getByText('One quiet check before your order reaches the bar.')).toBeInTheDocument();
+    expect(within(cart).getByText('Guest')).toBeInTheDocument();
+    expect(within(cart).getByText('Drinks')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /submit order/i }));
 
     await waitFor(() => expect(screen.getByText(/order #41/i)).toBeInTheDocument());
+    expect(screen.getByText('We’ll keep this page updated while your drink moves through the bar.')).toBeInTheDocument();
+    expect(screen.getByText('For')).toBeInTheDocument();
+    expect(screen.getByText('1 drink')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith('/api/orders', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('shows a polished empty cart state', async () => {
+    mockFetch();
+    window.localStorage.setItem('dom_guest_name', 'Ahmed');
+    window.history.pushState({}, '', '/cart');
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /your order is quiet for now/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /browse menu/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /submit order/i })).not.toBeInTheDocument();
   });
 
   it('shows a polished empty state when no drinks are available', async () => {
