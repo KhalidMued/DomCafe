@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 7 — UI Polish in progress
+Phase 7 — UI Polish in progress; production environment verification completed
 
 ## Current branch
-ui/menu-card-polish
+docs/production-env-verification
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -37,20 +37,33 @@ ui/menu-card-polish
 - Phase 6 PR #32 completed final Phase 6 readiness checks and was merged into `main`.
 - Phase 7 PR #33 added the initial welcome hero polish and was merged into `main`.
 - Phase 7 PR #34 fixed the welcome-page overlap from the screenshot and was merged into `main`.
-- Current branch improves menu/card polish with a menu intro, sticky category pill panel, drink/section counts, estimated-time badges, clearer card spacing/hover states, accessible detail-image buttons, mobile card stacking, and a proper empty-menu state.
+- Phase 7 PR #35 polished menu cards and the empty-menu state and was merged into `main`.
+- The runtime `.env` exists locally, is not committed, and now has file permissions `600`.
+- Runtime environment verification confirmed `APP_ENV=production`, `APP_BASE_URL=https://dom.khalidmued.com`, `FRONTEND_ORIGIN=https://dom.khalidmued.com`, Discord notifications enabled, and required secret keys present without printing secret values.
+- Docker Compose config validates with Nginx as the only host-published service at `0.0.0.0:11080->80`; backend, frontend, PostgreSQL, PgBouncer, and Redis have no published host ports.
+- After secret rotation, the existing PostgreSQL role password was aligned to the new `.env` secret without printing it, and PgBouncer/backend were restarted.
+- Local, Tailscale, and Cloudflare health checks all return `{"status":"ok","database":"ok","redis":"ok"}`.
+- Local, Tailscale, and Cloudflare home routes all return HTTP 200.
+- PgBouncer health check passes through `./scripts/check-pgbouncer.sh`.
+- A safe Discord webhook test message was sent successfully with HTTP 204 and no webhook URL or secret value printed.
 
 ## Verification
-- Frontend tests: `24 passed`.
-- Frontend production build: passed.
-- Docker Compose rebuild/restart for frontend/Nginx path: passed.
-- Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `/menu` route through Nginx: HTTP 200.
-- Browser smoke check for `/menu`: menu header, category pills, drink cards, time badges, option chips, and add buttons render with readable spacing and no obvious desktop layout defects.
+- `git status --short --branch`: clean before this docs-only update; PR #35 verified merged.
+- `gh pr status`: no open PRs before this docs-only update.
+- `.env` existence check: present; contents not printed.
+- `.env` permissions: `600`.
+- `docker compose config --format json`: valid; parsed without printing config or secrets.
+- Runtime published port check: only `nginx` publishes a host port, `0.0.0.0:11080->80`.
+- `docker compose up -d`: stack restarted after the `.env` update.
+- `curl http://127.0.0.1:11080/api/health`: OK.
+- `curl http://100.105.229.98:11080/api/health`: OK.
+- `curl https://dom.khalidmued.com/api/health`: OK.
+- Local, Tailscale, and domain `/` routes: HTTP 200.
+- Safe Discord webhook test: HTTP 204.
 
 ## What is pending
-- PR #35 (`ui/menu-card-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/35
-- Remaining Phase 7 work after this branch: cart/status visual polish, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
+- Open a docs-only PR for `docs/production-env-verification` into `main` and merge after review.
+- Remaining Phase 7 work after this docs-only branch: cart/status visual polish, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
