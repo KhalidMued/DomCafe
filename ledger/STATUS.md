@@ -79,7 +79,7 @@ docs/phase-7-completion-status
 - documentation
 
 ## What is pending
-- Open a docs/status PR for `docs/phase-7-completion-status` into `main`.
+- PR #49 (`docs/phase-7-completion-status`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/49
 - After this docs/status PR is merged, run a final MVP acceptance pass against the success criteria in `AGENT.md` section 34.
 
 ## Notes
