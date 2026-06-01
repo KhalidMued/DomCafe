@@ -315,14 +315,14 @@ export function AdminMenuPage() {
             {newDrinkDraft ? (
               <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewDrink(); }}>
                 <label>New drink id<input value={newDrinkDraft.id} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, id: event.currentTarget.value })} /></label>
-                <label>New drink name<input value={newDrinkDraft.name} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, name: event.currentTarget.value })} /></label>
+                <label>New drink name<input value={newDrinkDraft.name} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, name: event.currentTarget.value })} dir="auto" /></label>
                 <label>New drink category<select value={newDrinkDraft.categoryId} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, categoryId: event.currentTarget.value })}>{menu.categories.map((category) => <option key={category.id} value={category.id}>{category.label}</option>)}</select></label>
                 <label>New drink default bean<select value={newDrinkDraft.beanId} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, beanId: event.currentTarget.value })}>{menu.beans.map((bean) => <option key={bean.id} value={bean.id}>{bean.name}</option>)}</select></label>
-                <label>New drink description<textarea value={newDrinkDraft.description} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, description: event.currentTarget.value })} /></label>
-                <label>New drink ingredients<input value={newDrinkDraft.ingredients} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, ingredients: event.currentTarget.value })} /></label>
+                <label>New drink description<textarea value={newDrinkDraft.description} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, description: event.currentTarget.value })} dir="auto" /></label>
+                <label>New drink ingredients<input value={newDrinkDraft.ingredients} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, ingredients: event.currentTarget.value })} dir="auto" /></label>
                 <label>New drink photo URL<input value={newDrinkDraft.photoUrl} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, photoUrl: event.currentTarget.value })} /></label>
-                <label>New drink temperature options<input value={newDrinkDraft.temperatureOptions} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, temperatureOptions: event.currentTarget.value })} /></label>
-                <label>New drink milk options<input value={newDrinkDraft.milkOptions} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, milkOptions: event.currentTarget.value })} /></label>
+                <label>New drink temperature options<input value={newDrinkDraft.temperatureOptions} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, temperatureOptions: event.currentTarget.value })} dir="auto" /></label>
+                <label>New drink milk options<input value={newDrinkDraft.milkOptions} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, milkOptions: event.currentTarget.value })} dir="auto" /></label>
                 <label>New drink estimated minutes<input min="1" max="30" type="number" value={newDrinkDraft.estimatedMinutes} onChange={(event) => setNewDrinkDraft({ ...newDrinkDraft, estimatedMinutes: event.currentTarget.value })} /></label>
                 <button type="submit">Create drink</button>
               </form>
@@ -333,19 +333,19 @@ export function AdminMenuPage() {
               <article className="status-card admin-menu-card" key={drink.id} aria-label={`${drink.name} controls`}>
                 <img src={drink.photo_url} alt={`${drink.name} photo`} />
                 <div>
-                  <h3>{drink.name}</h3>
-                  <p className="detail-copy">{drink.category_name}</p>
-                  {drink.bean_name ? <p className="detail-copy">{drink.bean_name}</p> : null}
-                  {drink.description ? <p>{drink.description}</p> : null}
-                  {drink.ingredients.length ? <p className="detail-copy">{listText(drink.ingredients)}</p> : null}
-                  <p className="detail-copy">{drinkMeta}</p>
+                  <h3 dir="auto">{drink.name}</h3>
+                  <p className="detail-copy" dir="auto">{drink.category_name}</p>
+                  {drink.bean_name ? <p className="detail-copy" dir="auto">{drink.bean_name}</p> : null}
+                  {drink.description ? <p dir="auto">{drink.description}</p> : null}
+                  {drink.ingredients.length ? <p className="detail-copy" dir="auto">{listText(drink.ingredients)}</p> : null}
+                  <p className="detail-copy" dir="auto">{drinkMeta}</p>
                   <p>{drink.is_available ? 'Available' : 'Unavailable'}</p>
                 </div>
                 {editingDrinkId === drink.id && drinkDraft ? (
                   <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveDrinkEdit(drink.id); }}>
                     <label>
                       Drink name
-                      <input value={drinkDraft.name} onChange={(event) => updateDrinkDraft('name', event.currentTarget.value)} />
+                      <input value={drinkDraft.name} onChange={(event) => updateDrinkDraft('name', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Category
@@ -361,19 +361,19 @@ export function AdminMenuPage() {
                     </label>
                     <label>
                       Description
-                      <textarea value={drinkDraft.description} onChange={(event) => updateDrinkDraft('description', event.currentTarget.value)} />
+                      <textarea value={drinkDraft.description} onChange={(event) => updateDrinkDraft('description', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Ingredients
-                      <input value={drinkDraft.ingredients} onChange={(event) => updateDrinkDraft('ingredients', event.currentTarget.value)} />
+                      <input value={drinkDraft.ingredients} onChange={(event) => updateDrinkDraft('ingredients', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Temperature options
-                      <input value={drinkDraft.temperatureOptions} onChange={(event) => updateDrinkDraft('temperatureOptions', event.currentTarget.value)} />
+                      <input value={drinkDraft.temperatureOptions} onChange={(event) => updateDrinkDraft('temperatureOptions', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Milk options
-                      <input value={drinkDraft.milkOptions} onChange={(event) => updateDrinkDraft('milkOptions', event.currentTarget.value)} />
+                      <input value={drinkDraft.milkOptions} onChange={(event) => updateDrinkDraft('milkOptions', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Estimated minutes
@@ -408,8 +408,8 @@ export function AdminMenuPage() {
             {newCategoryDraft ? (
               <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewCategory(); }}>
                 <label>New category id<input value={newCategoryDraft.id} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, id: event.currentTarget.value })} /></label>
-                <label>New category name<input value={newCategoryDraft.label} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, label: event.currentTarget.value })} /></label>
-                <label>New category description<textarea value={newCategoryDraft.description} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, description: event.currentTarget.value })} /></label>
+                <label>New category name<input value={newCategoryDraft.label} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, label: event.currentTarget.value })} dir="auto" /></label>
+                <label>New category description<textarea value={newCategoryDraft.description} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, description: event.currentTarget.value })} dir="auto" /></label>
                 <label>New category accent color<input value={newCategoryDraft.accentColor} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, accentColor: event.currentTarget.value })} /></label>
                 <label>New category display order<input min="0" max="1000" type="number" value={newCategoryDraft.displayOrder} onChange={(event) => setNewCategoryDraft({ ...newCategoryDraft, displayOrder: event.currentTarget.value })} /></label>
                 <button type="submit">Create category</button>
@@ -418,8 +418,8 @@ export function AdminMenuPage() {
             {menu.categories.map((category) => (
               <article className="status-card admin-menu-card" key={category.id} aria-label={`${category.label} controls`}>
                 <div>
-                  <h3>{category.label}</h3>
-                  {category.description ? <p>{category.description}</p> : null}
+                  <h3 dir="auto">{category.label}</h3>
+                  {category.description ? <p dir="auto">{category.description}</p> : null}
                   {category.accent_color ? <p className="detail-copy">{category.accent_color}</p> : null}
                   <p className="detail-copy">Order {category.display_order}</p>
                   <p>{category.is_available ? 'Available' : 'Unavailable'}</p>
@@ -428,11 +428,11 @@ export function AdminMenuPage() {
                   <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveCategoryEdit(category.id); }}>
                     <label>
                       Category name
-                      <input value={categoryDraft.label} onChange={(event) => updateCategoryDraft('label', event.currentTarget.value)} />
+                      <input value={categoryDraft.label} onChange={(event) => updateCategoryDraft('label', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Category description
-                      <textarea value={categoryDraft.description} onChange={(event) => updateCategoryDraft('description', event.currentTarget.value)} />
+                      <textarea value={categoryDraft.description} onChange={(event) => updateCategoryDraft('description', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Accent color
@@ -461,39 +461,39 @@ export function AdminMenuPage() {
             {newBeanDraft ? (
               <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewBean(); }}>
                 <label>New bean id<input value={newBeanDraft.id} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, id: event.currentTarget.value })} /></label>
-                <label>New bean name<input value={newBeanDraft.name} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, name: event.currentTarget.value })} /></label>
-                <label>New bean origin<input value={newBeanDraft.origin} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, origin: event.currentTarget.value })} /></label>
-                <label>New bean process<input value={newBeanDraft.process} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, process: event.currentTarget.value })} /></label>
-                <label>New bean tasting notes<input value={newBeanDraft.tastingNotes} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, tastingNotes: event.currentTarget.value })} /></label>
+                <label>New bean name<input value={newBeanDraft.name} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, name: event.currentTarget.value })} dir="auto" /></label>
+                <label>New bean origin<input value={newBeanDraft.origin} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, origin: event.currentTarget.value })} dir="auto" /></label>
+                <label>New bean process<input value={newBeanDraft.process} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, process: event.currentTarget.value })} dir="auto" /></label>
+                <label>New bean tasting notes<input value={newBeanDraft.tastingNotes} onChange={(event) => setNewBeanDraft({ ...newBeanDraft, tastingNotes: event.currentTarget.value })} dir="auto" /></label>
                 <button type="submit">Create bean</button>
               </form>
             ) : null}
             {menu.beans.map((bean) => (
               <article className="status-card admin-menu-card" key={bean.id} aria-label={`${bean.name} controls`}>
                 <div>
-                  <h3>{bean.name}</h3>
-                  {bean.origin ? <p className="detail-copy">{bean.origin}</p> : null}
-                  {bean.process ? <p>{bean.process}</p> : null}
-                  {bean.tasting_notes.length ? <p className="detail-copy">{listText(bean.tasting_notes)}</p> : null}
+                  <h3 dir="auto">{bean.name}</h3>
+                  {bean.origin ? <p className="detail-copy" dir="auto">{bean.origin}</p> : null}
+                  {bean.process ? <p dir="auto">{bean.process}</p> : null}
+                  {bean.tasting_notes.length ? <p className="detail-copy" dir="auto">{listText(bean.tasting_notes)}</p> : null}
                   <p>{bean.is_available ? 'Available' : 'Unavailable'}</p>
                 </div>
                 {editingBeanId === bean.id && beanDraft ? (
                   <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveBeanEdit(bean.id); }}>
                     <label>
                       Bean name
-                      <input value={beanDraft.name} onChange={(event) => updateBeanDraft('name', event.currentTarget.value)} />
+                      <input value={beanDraft.name} onChange={(event) => updateBeanDraft('name', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Origin
-                      <input value={beanDraft.origin} onChange={(event) => updateBeanDraft('origin', event.currentTarget.value)} />
+                      <input value={beanDraft.origin} onChange={(event) => updateBeanDraft('origin', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Process
-                      <input value={beanDraft.process} onChange={(event) => updateBeanDraft('process', event.currentTarget.value)} />
+                      <input value={beanDraft.process} onChange={(event) => updateBeanDraft('process', event.currentTarget.value)} dir="auto" />
                     </label>
                     <label>
                       Tasting notes
-                      <input value={beanDraft.tastingNotes} onChange={(event) => updateBeanDraft('tastingNotes', event.currentTarget.value)} />
+                      <input value={beanDraft.tastingNotes} onChange={(event) => updateBeanDraft('tastingNotes', event.currentTarget.value)} dir="auto" />
                     </label>
                     <button disabled={updatingId === `${bean.id}-details`} type="submit">Save bean</button>
                   </form>
