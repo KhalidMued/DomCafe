@@ -43,7 +43,7 @@ config/cloudflare-domain-allowed-host
 - Cloudflare Tunnel `/api/health` check: `https://dom.khalidmued.com/api/health` returned HTTP 200 with database and Redis OK.
 
 ## What is pending
-- Open a PR for `config/cloudflare-domain-allowed-host` into `main` and merge after review.
+- PR #28 (`config/cloudflare-domain-allowed-host`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/28
 - Complete the guided Cloudflare Tunnel service installation step so the tunnel runs persistently after reboot.
 - Remaining Phase 6 work after this branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
