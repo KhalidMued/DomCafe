@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/cart-status-polish
+ui/restore-welcome-card
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -39,7 +39,8 @@ ui/cart-status-polish
 - Phase 7 PR #34 fixed the welcome-page overlap from the screenshot and was merged into `main`.
 - Phase 7 PR #35 polished menu cards and the empty-menu state and was merged into `main`.
 - PR #36 recorded production `.env` verification and was merged into `main`.
-- Current branch polishes the cart and order-status guest pages with clearer hero copy, a cart summary card, a proper empty-cart state/CTA, improved cart item controls, submitting state copy, order-status topline metadata, completed progress-step styling, and RTL-ready `dir="auto"` text fields.
+- Phase 7 PR #37 polished cart and order-status pages and was merged into `main`.
+- Current branch restores the main/welcome page closer to the user's attached old simple card: wide card, plain dark surface, no decorative blobs/orbits, larger DŌM mark moved lower in the card, and service notes kept as separated chips.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -48,13 +49,11 @@ ui/cart-status-polish
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `/cart` route through Nginx: HTTP 200.
-- `/order/41` SPA route through Nginx: HTTP 200.
-- Browser smoke check for `/cart`: empty-cart summary, empty state, and Browse menu CTA render with readable spacing and no dangling order-note/submit controls.
-- Browser smoke check for `/order/41`: status hero, friendly error, and loading card render with readable spacing and no obvious desktop layout defects.
+- `/` route through Nginx: HTTP 200.
+- Browser screenshot comparison for `/`: restored old wide/simple welcome card, decorative blobs removed, DŌM lowered compared with the previous broken version, chips spaced, and no obvious desktop layout defects.
 
 ## What is pending
-- PR #37 (`ui/cart-status-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/37
+- PR #38 (`ui/restore-welcome-card`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/38
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
