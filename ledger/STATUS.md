@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Final MVP acceptance pass complete
+Favicon pack PR ready
 
 ## Current branch
-docs/final-mvp-acceptance
+feat/dom-favicon-pack
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -52,58 +52,43 @@ docs/final-mvp-acceptance
 - Phase 7 PR #47 fixed the initial blank-screen/slow-transition path with a production frontend container, immediate DŌM loading shell, and route-level lazy loading, and was merged into `main`.
 - Phase 7 PR #48 added a focused admin navigation header with Dashboard, Orders, Menu, Beans, and Settings links; added a visible Logout button that clears the stored admin token and returns to `/admin/login`; and added a dedicated `/admin/beans` page backed by the existing admin menu/beans API. It was merged into `main`.
 - PR #49 recorded Phase 7 completion and the decision to defer optional Three.js. It was merged into `main`.
-- Current branch records the final MVP acceptance pass. Three.js remains intentionally deferred for later; the accepted MVP keeps the simple fast DŌM welcome screen and avoids non-essential first-screen weight.
+- PR #50 recorded the final MVP acceptance pass and was merged into `main`.
+- Current branch adds the provided DŌM favicon pack to `frontend/public/`, links browser favicon/touch/manifest metadata from `frontend/index.html`, and keeps favicon files out of the uploads/drink-photo pipeline.
 
 ## Verification
-- Previous PR merge verification: PR #49 is merged into `main`; local `main` was already up to date; there are no open PRs before this branch.
+- Previous PR merge verification: PR #50 is merged into `main`; local `main` is up to date; there were no open PRs before this branch.
+- Provided favicon files were copied from `dom_favicon_final.zip` without regenerating icons: `favicon.ico`, `favicon_32.png`, `favicon_180.png`, `favicon_192.png`, and `favicon_512.png` match the zip by SHA-256.
+- Alias files are byte-for-byte copies of the requested source PNGs: `apple-touch-icon.png` from `favicon_180.png`, `icon-192.png` from `favicon_192.png`, and `icon-512.png` from `favicon_512.png`.
+- `frontend/public/manifest.json` keeps `background_color` as `#2C2C2A` and `theme_color` as `#BA7517`.
+- `frontend/index.html` links `/favicon.ico`, `/favicon_32.png`, `/apple-touch-icon.png`, `/manifest.json`, and the requested `#2C2C2A` browser theme color.
+- Upload-directory check found no favicon, touch icon, PWA icon, or manifest files under `uploads/`; favicon assets remain static browser files under `frontend/public/` only.
 - Frontend tests: `28 passed`.
-- Frontend production build: passed.
-- Backend tests in the backend container with the test suite mounted and `PYTHONPATH=/app`: `67 passed, 1 warning`.
-- Docker Compose full rebuild/restart: passed.
-- Docker Compose services present: `postgres`, `pgbouncer`, `redis`, `backend`, `frontend`, `nginx`.
-- Local `/api/health` through Nginx: database and Redis OK.
-- Public Cloudflare `/api/health`: database and Redis OK.
-- Local guest `/` browser check: approved DŌM SVG welcome card is visible, no blank white screen observed, and chips/input/Start button are intact.
-- Local guest flow browser check: guest name can be set, menu loads with 22 drinks across 5 sections, adding a drink updates the cart, and the cart shows the selected drink and guest name.
-- Public Cloudflare `/` browser check: welcome page loads.
-- Public Cloudflare `/menu` browser check: menu loads with categories and drinks.
-- Local `/admin/login` browser check: approved DŌM SVG branding and username/password/login controls are visible.
-- Final success criteria coverage: Docker Compose runtime, guest menu/cart flow, admin surface, protected agent/Discord paths, Nginx routing, private backend/db/Redis exposure model, feature-branch/PR workflow, DŌM branding, and friendly loading/error states are covered by the automated test suite, runtime health checks, and browser smoke checks above.
-- Phase 7 optional Three.js decision: deferred for later; no Three.js bundle or decorative main-page treatment is needed for MVP acceptance.
+- Frontend production build: passed; build output includes all favicon/touch/manifest files and the expected head links.
 
 ## Hermes Tools Used
 - skill_view
 - terminal
-- process
 - read_file
 - search_files
+- write_file
 - patch
 - todo
-- browser tools
 
 ## Technologies / Services Touched
 - Git / GitHub CLI
-- Docker / Docker Compose
-- FastAPI
-- Nginx
 - React
 - Vite
-- PostgreSQL
-- PgBouncer
-- Redis
-- Cloudflare
 - documentation
 
 ## What is pending
-- PR #50 (`docs/final-mvp-acceptance`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/50
-- After this docs/status PR is merged, delete the merged branch.
+- Open PR for `feat/dom-favicon-pack` into `main`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No MVP-blocking issues found in this acceptance pass.
+- No favicon-pack issues found. The provided `.ico` file is served only as a static browser favicon and was not sent through any image-processing or upload-validation path.
 
 ## Next recommended task
-- Merge the final MVP acceptance ledger PR, then keep Three.js as a later optional experiment only if it stays lightweight and does not slow the first screen.
+- Review and merge the favicon pack PR, then delete the merged branch.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
