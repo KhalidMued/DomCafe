@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 6 — Security and deployment hardening final readiness
+Phase 7 — UI Polish in progress
 
 ## Current branch
-ops/phase6-readiness
+ui/welcome-polish
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -34,27 +34,20 @@ ops/phase6-readiness
 - Phase 6 PR #29 documented the Cloudflare Tunnel service setup, verification commands, and network exposure model and was merged into `main`.
 - Phase 6 PR #30 resolved dependency audit findings and was merged into `main`.
 - Phase 6 PR #31 added the PgBouncer health check and was merged into `main`.
-- Current branch performs final Phase 6 deployment readiness verification, documents the readiness checklist, and makes backup output path configurable via `BACKUP_DIR` for non-root smoke tests.
+- Phase 6 PR #32 completed final Phase 6 readiness checks and was merged into `main`.
+- Current branch starts Phase 7 with a focused welcome-screen visual polish slice: atmospheric DŌM hero styling, service-note chips, reduced-motion safeguards, and RTL-friendly `dir="auto"` copy/name handling.
 
 ## Verification
-- `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
-- Backend, PostgreSQL, PgBouncer, and Redis have no host port bindings.
-- `uvx pip-audit -r backend/requirements.txt`: no known vulnerabilities found.
-- `npm audit --audit-level=high`: found 0 vulnerabilities.
-- Backend tests: `67 passed`.
-- Frontend tests: `22 passed`.
+- Frontend tests: `23 passed`.
 - Frontend production build: passed.
-- `docker compose up -d --build`: passed.
-- `./scripts/check-pgbouncer.sh`: passed; verified application query through PgBouncer and pool visibility via `SHOW POOLS`.
-- Backup creation with `BACKUP_DIR=/tmp/domcafe-backups ./scripts/backup-db.sh`: passed.
-- Restore smoke test into temporary database `dom_cafe_restore_check`: passed; temporary database was dropped after validation.
+- Docker Compose rebuild/restart for frontend/Nginx path: passed.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `cloudflared` service: active and enabled.
+- Browser smoke check for `/`: welcome page renders the polished hero, service chips, name input, and start button without obvious layout issues on the desktop viewport.
 
 ## What is pending
-- PR #32 (`ops/phase6-readiness`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/32
-- After this branch merges, Phase 6 can be considered complete and the next planned phase is Phase 7 — UI Polish.
+- Open a PR for `ui/welcome-polish` into `main` and merge after review.
+- Remaining Phase 7 work after this branch: menu/card visual polish, empty states, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

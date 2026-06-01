@@ -34,11 +34,11 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
   });
 }
 
-function mockFetch() {
+function mockFetch(settings = { cafe_name: 'DŌM', welcome_message: 'Welcome to DŌM. Take your time.', orders_open: true }) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     if (url === '/api/settings/public') {
-      return jsonResponse({ cafe_name: 'DŌM', welcome_message: 'Welcome to DŌM. Take your time.', orders_open: true });
+      return jsonResponse(settings);
     }
     if (url === '/api/menu') {
       return jsonResponse(menuPayload);
@@ -82,11 +82,24 @@ describe('Phase 3 guest frontend', () => {
     render(<App />);
 
     expect(screen.getByRole('heading', { name: 'DŌM' })).toBeInTheDocument();
+    expect(await screen.findByText('Open today')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText(/your name/i), 'Ahmed');
     await userEvent.click(screen.getByRole('button', { name: /start/i }));
 
     await waitFor(() => expect(screen.getByRole('heading', { name: /menu/i })).toBeInTheDocument());
     expect(window.localStorage.getItem('dom_guest_name')).toBe('Ahmed');
+  });
+
+  it('keeps the polished welcome start action disabled while orders are paused', async () => {
+    mockFetch({ cafe_name: 'DŌM', welcome_message: 'الطلبات متوقفة مؤقتاً.', orders_open: false });
+    render(<App />);
+
+    expect(await screen.findAllByText('Orders paused')).toHaveLength(2);
+    expect(screen.getByText('الطلبات متوقفة مؤقتاً.')).toHaveAttribute('dir', 'auto');
+    await userEvent.type(screen.getByLabelText(/your name/i), 'Ahmed');
+
+    expect(screen.getByRole('button', { name: /orders paused/i })).toBeDisabled();
+    expect(window.localStorage.getItem('dom_guest_name')).toBeNull();
   });
 
   it('shows the menu, adds a drink, and submits the cart', async () => {
