@@ -88,7 +88,7 @@ fix/admin-guest-typography-nav
 - documentation
 
 ## What is pending
-- Open PR for `fix/admin-guest-typography-nav` into `main`.
+- PR #53 (`fix/admin-guest-typography-nav`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/53
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
