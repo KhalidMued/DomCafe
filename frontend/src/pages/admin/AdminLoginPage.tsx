@@ -25,10 +25,40 @@ export function AdminLoginPage({ navigate }: { navigate: (path: string) => void 
 
   return (
     <main className="welcome-page page-shell">
-      <section className="hero-card admin-card">
-        <p className="eyebrow">Admin</p>
-        <h1>DŌM</h1>
-        <p className="tagline">Control room</p>
+      <section className="hero-card admin-card" aria-label="DŌM Admin Login">
+        <div style={{ textAlign: 'center' }}>
+          <svg width="100%" viewBox="0 0 680 220" role="img" xmlns="http://www.w3.org/2000/svg">
+            <style>{`
+    .hc-label {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 6px;
+      fill: #BA7517;
+    }
+    .wordmark-letter {
+      font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+      font-size: 108px;
+      font-weight: 300;
+      fill: #F1EFE8;
+    }
+    .tagline {
+      font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 2.5px;
+      fill: #F1EFE8;
+    }
+  `}</style>
+            <text x="340" y="14" textAnchor="middle" className="hc-label">HOME CAFÉ</text>
+            <rect x="316" y="24" width="48" height="1.5" fill="#BA7517" />
+            <text x="148" y="148" textAnchor="middle" className="wordmark-letter">D</text>
+            <text x="340" y="148" textAnchor="middle" className="wordmark-letter">O</text>
+            <rect x="307" y="28" width="66" height="2.5" fill="#F1EFE8" rx="1" />
+            <text x="532" y="148" textAnchor="middle" className="wordmark-letter">M</text>
+            <text x="340" y="190" textAnchor="middle" className="tagline">Slow coffee.  Deep roots.</text>
+          </svg>
+        </div>
         <p className="hero-copy">Sign in to manage orders with the same calm pace as the café.</p>
         <form className="name-form" onSubmit={submit}>
           <label htmlFor="admin-username">Username</label>
