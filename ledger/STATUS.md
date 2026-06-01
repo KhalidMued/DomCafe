@@ -81,7 +81,8 @@ feat/dom-favicon-pack
 - documentation
 
 ## What is pending
-- Open PR for `feat/dom-favicon-pack` into `main`.
+- PR #51 (`feat/dom-favicon-pack`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/51
+- After this favicon PR is merged, delete the merged branch.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
