@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 7 — UI Polish complete; MVP acceptance review ready
+Final MVP acceptance pass complete
 
 ## Current branch
-docs/phase-7-completion-status
+docs/final-mvp-acceptance
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -51,36 +51,59 @@ docs/phase-7-completion-status
 - Phase 7 PR #46 replaced the `/admin/login` splash header with the approved inline SVG lockup and was merged into `main`.
 - Phase 7 PR #47 fixed the initial blank-screen/slow-transition path with a production frontend container, immediate DŌM loading shell, and route-level lazy loading, and was merged into `main`.
 - Phase 7 PR #48 added a focused admin navigation header with Dashboard, Orders, Menu, Beans, and Settings links; added a visible Logout button that clears the stored admin token and returns to `/admin/login`; and added a dedicated `/admin/beans` page backed by the existing admin menu/beans API. It was merged into `main`.
-- Current branch records Phase 7 as complete and documents that the optional Three.js welcome component is intentionally deferred because the approved simple welcome UI is already in place and recent performance work made avoiding non-essential first-screen weight the safer MVP choice.
+- PR #49 recorded Phase 7 completion and the decision to defer optional Three.js. It was merged into `main`.
+- Current branch records the final MVP acceptance pass. Three.js remains intentionally deferred for later; the accepted MVP keeps the simple fast DŌM welcome screen and avoids non-essential first-screen weight.
 
 ## Verification
-- Previous PR merge verification: PR #48 is merged into `main`; local `main` was fast-forwarded; local and remote `fix/admin-navigation-usability` branches were deleted.
-- Frontend tests after merging PR #48: `28 passed`.
-- Frontend production build after merging PR #48: passed.
-- Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Local guest `/` route through Nginx: HTTP 200.
-- Local `/admin/beans` route through Nginx: HTTP 200.
-- Phase 7 optional Three.js decision: deferred for MVP; no Three.js bundle or decorative main-page treatment is needed to meet the current UI polish and performance goals.
+- Previous PR merge verification: PR #49 is merged into `main`; local `main` was already up to date; there are no open PRs before this branch.
+- Frontend tests: `28 passed`.
+- Frontend production build: passed.
+- Backend tests in the backend container with the test suite mounted and `PYTHONPATH=/app`: `67 passed, 1 warning`.
+- Docker Compose full rebuild/restart: passed.
+- Docker Compose services present: `postgres`, `pgbouncer`, `redis`, `backend`, `frontend`, `nginx`.
+- Local `/api/health` through Nginx: database and Redis OK.
+- Public Cloudflare `/api/health`: database and Redis OK.
+- Local guest `/` browser check: approved DŌM SVG welcome card is visible, no blank white screen observed, and chips/input/Start button are intact.
+- Local guest flow browser check: guest name can be set, menu loads with 22 drinks across 5 sections, adding a drink updates the cart, and the cart shows the selected drink and guest name.
+- Public Cloudflare `/` browser check: welcome page loads.
+- Public Cloudflare `/menu` browser check: menu loads with categories and drinks.
+- Local `/admin/login` browser check: approved DŌM SVG branding and username/password/login controls are visible.
+- Final success criteria coverage: Docker Compose runtime, guest menu/cart flow, admin surface, protected agent/Discord paths, Nginx routing, private backend/db/Redis exposure model, feature-branch/PR workflow, DŌM branding, and friendly loading/error states are covered by the automated test suite, runtime health checks, and browser smoke checks above.
+- Phase 7 optional Three.js decision: deferred for later; no Three.js bundle or decorative main-page treatment is needed for MVP acceptance.
 
 ## Hermes Tools Used
 - skill_view
 - terminal
+- process
 - read_file
 - search_files
 - patch
+- todo
+- browser tools
 
 ## Technologies / Services Touched
 - Git / GitHub CLI
+- Docker / Docker Compose
+- FastAPI
 - Nginx
 - React
 - Vite
 - PostgreSQL
+- PgBouncer
 - Redis
+- Cloudflare
 - documentation
 
 ## What is pending
-- PR #49 (`docs/phase-7-completion-status`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/49
-- After this docs/status PR is merged, run a final MVP acceptance pass against the success criteria in `AGENT.md` section 34.
+- PR #50 (`docs/final-mvp-acceptance`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/50
+- After this docs/status PR is merged, delete the merged branch.
+- Three.js is intentionally deferred for a later optional enhancement.
+
+## Known issues
+- No MVP-blocking issues found in this acceptance pass.
+
+## Next recommended task
+- Merge the final MVP acceptance ledger PR, then keep Three.js as a later optional experiment only if it stays lightweight and does not slow the first screen.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
