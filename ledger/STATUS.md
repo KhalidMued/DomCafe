@@ -56,7 +56,7 @@ ui/tune-welcome-wordmark-lockup
 - Browser screenshot comparison for `/`: macron is visibly restored over the normal O using a positioned element, D-O and O-M spacing are visually balanced without global letter-spacing, the tagline sits closer to the wordmark like a logo lockup, and background/label/chips/input/button remain unchanged.
 
 ## What is pending
-- Open a PR for `ui/tune-welcome-wordmark-lockup` into `main` and merge after review.
+- PR #41 (`ui/tune-welcome-wordmark-lockup`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/41
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
