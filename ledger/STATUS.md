@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 7 — UI Polish in progress; production environment verification completed
+Phase 7 — UI Polish in progress
 
 ## Current branch
-docs/production-env-verification
+ui/cart-status-polish
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -38,32 +38,24 @@ docs/production-env-verification
 - Phase 7 PR #33 added the initial welcome hero polish and was merged into `main`.
 - Phase 7 PR #34 fixed the welcome-page overlap from the screenshot and was merged into `main`.
 - Phase 7 PR #35 polished menu cards and the empty-menu state and was merged into `main`.
-- The runtime `.env` exists locally, is not committed, and now has file permissions `600`.
-- Runtime environment verification confirmed `APP_ENV=production`, `APP_BASE_URL=https://dom.khalidmued.com`, `FRONTEND_ORIGIN=https://dom.khalidmued.com`, Discord notifications enabled, and required secret keys present without printing secret values.
-- Docker Compose config validates with Nginx as the only host-published service at `0.0.0.0:11080->80`; backend, frontend, PostgreSQL, PgBouncer, and Redis have no published host ports.
-- After secret rotation, the existing PostgreSQL role password was aligned to the new `.env` secret without printing it, and PgBouncer/backend were restarted.
-- Local, Tailscale, and Cloudflare health checks all return `{"status":"ok","database":"ok","redis":"ok"}`.
-- Local, Tailscale, and Cloudflare home routes all return HTTP 200.
-- PgBouncer health check passes through `./scripts/check-pgbouncer.sh`.
-- A safe Discord webhook test message was sent successfully with HTTP 204 and no webhook URL or secret value printed.
+- PR #36 recorded production `.env` verification and was merged into `main`.
+- Current branch polishes the cart and order-status guest pages with clearer hero copy, a cart summary card, a proper empty-cart state/CTA, improved cart item controls, submitting state copy, order-status topline metadata, completed progress-step styling, and RTL-ready `dir="auto"` text fields.
 
 ## Verification
-- `git status --short --branch`: clean before this docs-only update; PR #35 verified merged.
-- `gh pr status`: no open PRs before this docs-only update.
-- `.env` existence check: present; contents not printed.
-- `.env` permissions: `600`.
-- `docker compose config --format json`: valid; parsed without printing config or secrets.
-- Runtime published port check: only `nginx` publishes a host port, `0.0.0.0:11080->80`.
-- `docker compose up -d`: stack restarted after the `.env` update.
-- `curl http://127.0.0.1:11080/api/health`: OK.
-- `curl http://100.105.229.98:11080/api/health`: OK.
-- `curl https://dom.khalidmued.com/api/health`: OK.
-- Local, Tailscale, and domain `/` routes: HTTP 200.
-- Safe Discord webhook test: HTTP 204.
+- Frontend tests: `25 passed`.
+- Frontend production build: passed.
+- Docker Compose rebuild/restart for frontend/Nginx path: passed.
+- Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
+- Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
+- Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
+- `/cart` route through Nginx: HTTP 200.
+- `/order/41` SPA route through Nginx: HTTP 200.
+- Browser smoke check for `/cart`: empty-cart summary, empty state, and Browse menu CTA render with readable spacing and no dangling order-note/submit controls.
+- Browser smoke check for `/order/41`: status hero, friendly error, and loading card render with readable spacing and no obvious desktop layout defects.
 
 ## What is pending
-- PR #36 (`docs/production-env-verification`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/36
-- Remaining Phase 7 work after this docs-only branch: cart/status visual polish, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
+- PR #37 (`ui/cart-status-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/37
+- Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

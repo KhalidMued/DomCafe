@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getOrderStatus, type OrderStatus } from '../../lib/api';
 
 const finalStatuses = new Set(['ready', 'cancelled']);
+const statusSteps = ['new', 'received', 'preparing', 'ready'];
 
 export function OrderStatusPage({ orderId, navigate }: { orderId: string; navigate: (path: string) => void }) {
   const [order, setOrder] = useState<OrderStatus | null>(null);
@@ -35,30 +36,38 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
     };
   }, [orderId]);
 
+  const activeIndex = order ? Math.max(statusSteps.indexOf(order.status), 0) : -1;
+
   return (
     <main className="page-shell status-page">
-      <header className="top-bar">
+      <header className="top-bar status-hero">
         <div>
           <p className="eyebrow">Order status</p>
           <h1>{order ? `Order #${order.order_number}` : 'Order'}</h1>
+          <p className="status-lede">We’ll keep this page updated while your drink moves through the bar.</p>
         </div>
         <a href="/menu" onClick={(event) => { event.preventDefault(); navigate('/menu'); }}>Menu</a>
       </header>
       {error ? <p className="error-text">{error}</p> : null}
-      {!order ? <div className="skeleton-card">Listening for your order…</div> : null}
+      {!order ? <div className="skeleton-card status-loading-card">Listening for your order…</div> : null}
       {order ? (
-        <section className="status-card">
-          <p className="status-label">{order.status_label}</p>
-          <div className="progress-track" aria-label={`Current status ${order.status}`}>
-            {['new', 'received', 'preparing', 'ready'].map((status) => <span className={status === order.status ? 'active' : ''} key={status}>{status}</span>)}
+        <section className="status-card status-detail-card">
+          <div className="status-card-topline">
+            <span>For <strong dir="auto">{order.guest_name}</strong></span>
+            <span>{order.items.length} {order.items.length === 1 ? 'drink' : 'drinks'}</span>
           </div>
-          <p>For {order.guest_name}</p>
-          {order.items.map((item) => (
-            <article className="status-item" key={`${item.drink_name}-${item.quantity}`}>
-              <strong>{item.quantity}× {item.drink_name}</strong>
-              <span>{[item.temperature, item.milk_option, item.bean_name].filter(Boolean).join(' · ')}</span>
-            </article>
-          ))}
+          <p className="status-label" dir="auto">{order.status_label}</p>
+          <div className="progress-track" aria-label={`Current status ${order.status}`}>
+            {statusSteps.map((status, index) => <span className={index <= activeIndex ? 'active' : ''} key={status}>{status}</span>)}
+          </div>
+          <div className="status-items-list">
+            {order.items.map((item) => (
+              <article className="status-item" key={`${item.drink_name}-${item.quantity}`}>
+                <strong dir="auto">{item.quantity}× {item.drink_name}</strong>
+                <span dir="auto">{[item.temperature, item.milk_option, item.bean_name].filter(Boolean).join(' · ')}</span>
+              </article>
+            ))}
+          </div>
         </section>
       ) : null}
     </main>
