@@ -47,7 +47,7 @@ ui/fix-welcome-overlap
 - Browser smoke check for `/`: `Home café` is no longer crossed by the steam decoration and service-note chips have visible spacing/borders.
 
 ## What is pending
-- Open a PR for `ui/fix-welcome-overlap` into `main` and merge after review.
+- PR #34 (`ui/fix-welcome-overlap`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/34
 - Remaining Phase 7 work after this branch: menu/card visual polish, empty states, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
