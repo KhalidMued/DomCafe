@@ -49,7 +49,7 @@ ui/menu-card-polish
 - Browser smoke check for `/menu`: menu header, category pills, drink cards, time badges, option chips, and add buttons render with readable spacing and no obvious desktop layout defects.
 
 ## What is pending
-- Open a PR for `ui/menu-card-polish` into `main` and merge after review.
+- PR #35 (`ui/menu-card-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/35
 - Remaining Phase 7 work after this branch: cart/status visual polish, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
