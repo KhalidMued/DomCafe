@@ -48,7 +48,7 @@ security/dependency-audits
 - `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
 
 ## What is pending
-- Open a PR for `security/dependency-audits` into `main` and merge after review.
+- PR #30 (`security/dependency-audits`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/30
 - Remaining Phase 6 work after this branch: PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
