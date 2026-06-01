@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/replace-welcome-wordmark-svg
+ui/move-home-cafe-label-up
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -44,7 +44,8 @@ ui/replace-welcome-wordmark-svg
 - Phase 7 PR #39 separated the large white DŌM mark from the small orange `Home café` label and was merged into `main`.
 - Phase 7 PR #40 fixed the first DŌM wordmark rhythm issue with equal-width spans and a CSS macron overlay and was merged into `main`.
 - Phase 7 PR #41 tuned the CSS wordmark lockup and was merged into `main`.
-- Current branch replaces the entire welcome wordmark/label/tagline block with the user-supplied inline SVG, wrapped only in a centered div, and leaves the rest of the welcome card unchanged.
+- Phase 7 PR #42 replaced the welcome wordmark/label/tagline block with the user-supplied inline SVG and was merged into `main`.
+- Current branch makes the requested small SVG-only touch: moves the orange `HOME CAFÉ` label and its orange underline upward within the inline SVG while leaving the D/O/M letters, white macron, tagline, welcome copy, chips, input, button, card, and background unchanged.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -54,10 +55,10 @@ ui/replace-welcome-wordmark-svg
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 - `/` route through Nginx: HTTP 200.
-- Browser screenshot comparison for `/`: supplied inline SVG renders the HOME CAFÉ label, D/O/M letters, macron rectangle, and tagline as one SVG lockup; no duplicate external label/tagline appears; background, service chips, input, and Start button remain unchanged.
+- Browser screenshot comparison for `/`: orange `HOME CAFÉ` label is moved up within the SVG and remains below the top orange inner border; D/O/M letters, white macron, tagline, welcome copy, chips, input, Start button, card, and background appear unchanged.
 
 ## What is pending
-- PR #42 (`ui/replace-welcome-wordmark-svg`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/42
+- PR #43 (`ui/move-home-cafe-label-up`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/43
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
