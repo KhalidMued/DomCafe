@@ -52,7 +52,7 @@ describe('Phase 4 admin settings page', () => {
     render(<App />);
 
     expect(await screen.findByText('Settings')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Cafe name'), { target: { value: 'DŌM Home Café' } });
+    fireEvent.change(await screen.findByLabelText('Cafe name'), { target: { value: 'DŌM Home Café' } });
     fireEvent.change(screen.getByLabelText('Welcome message'), { target: { value: 'Welcome in. Take your time.' } });
     fireEvent.click(screen.getByLabelText('Orders open'));
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));

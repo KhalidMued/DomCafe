@@ -83,7 +83,7 @@ describe('Phase 4 admin menu management page', () => {
     render(<App />);
 
     expect(await screen.findByText('Menu management')).toBeInTheDocument();
-    expect(screen.getByText('Orders are open')).toBeInTheDocument();
+    expect(await screen.findByText('Orders are open')).toBeInTheDocument();
     const drinks = screen.getByLabelText('Admin drinks management');
     expect(within(drinks).getByText('Iced Doum Latte')).toBeInTheDocument();
     expect(within(drinks).getByText('Signature')).toBeInTheDocument();

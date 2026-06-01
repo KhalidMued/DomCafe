@@ -18,6 +18,9 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; background: radial-gradient(circle at top, #3b332d 0, var(--color-nubian-night) 42rem); }
+.app-route-loading { align-items: center; background: var(--color-nubian-night); color: var(--color-palm-dust); display: grid; min-height: 100vh; place-items: center; text-align: center; }
+.app-route-loading strong { color: var(--color-palm-dust); display: block; font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif; font-size: clamp(3rem, 14vw, 6rem); font-weight: 300; letter-spacing: .18em; line-height: 1; margin-inline-start: .18em; }
+.app-route-loading span { color: var(--color-doum-gold); display: block; font-size: .75rem; letter-spacing: .28em; margin-top: 16px; text-transform: uppercase; }
 a { color: inherit; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }

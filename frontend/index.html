@@ -1,1 +1,48 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>DŌM Home Café</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DŌM Home Café</title>
+    <style>
+      :root { background: #2C2C2A; color: #F1EFE8; }
+      body { margin: 0; min-width: 320px; background: #2C2C2A; }
+      .app-loading-screen {
+        align-items: center;
+        background: #2C2C2A;
+        color: #F1EFE8;
+        display: grid;
+        font-family: Tajawal, Cairo, Almarai, system-ui, sans-serif;
+        min-height: 100vh;
+        place-items: center;
+        text-align: center;
+      }
+      .app-loading-screen strong {
+        color: #F1EFE8;
+        display: block;
+        font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+        font-size: clamp(3rem, 14vw, 6rem);
+        font-weight: 300;
+        letter-spacing: .18em;
+        line-height: 1;
+        margin-inline-start: .18em;
+      }
+      .app-loading-screen span {
+        color: #BA7517;
+        display: block;
+        font-size: .75rem;
+        letter-spacing: .28em;
+        margin-top: 16px;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="app-loading-screen" role="status" aria-live="polite">
+        <div><strong>DŌM</strong><span>Loading</span></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
