@@ -40,7 +40,7 @@ config/tailscale-nginx-bind
   - `http://100.105.229.98:11080/` returned HTTP 200.
 
 ## What is pending
-- Commit, push, and open a PR for this config-only branch.
+- PR #26 (`config/tailscale-nginx-bind`) is open for review and merge into `main`.
 - Remaining project work after this branch: Phase 6 hardening/final QA, dependency audits, rate-limit polish if not already sufficient, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
