@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Favicon pack PR ready
+Favicon pack merged and runtime verified
 
 ## Current branch
-feat/dom-favicon-pack
+docs/favicon-runtime-status
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -53,43 +53,44 @@ feat/dom-favicon-pack
 - Phase 7 PR #48 added a focused admin navigation header with Dashboard, Orders, Menu, Beans, and Settings links; added a visible Logout button that clears the stored admin token and returns to `/admin/login`; and added a dedicated `/admin/beans` page backed by the existing admin menu/beans API. It was merged into `main`.
 - PR #49 recorded Phase 7 completion and the decision to defer optional Three.js. It was merged into `main`.
 - PR #50 recorded the final MVP acceptance pass and was merged into `main`.
-- Current branch adds the provided DŌM favicon pack to `frontend/public/`, links browser favicon/touch/manifest metadata from `frontend/index.html`, and keeps favicon files out of the uploads/drink-photo pipeline.
+- PR #51 added the provided DŌM favicon pack to `frontend/public/`, linked browser favicon/touch/manifest metadata from `frontend/index.html`, kept favicon files out of the uploads/drink-photo pipeline, and was merged into `main`.
+- The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
 
 ## Verification
-- Previous PR merge verification: PR #50 is merged into `main`; local `main` is up to date; there were no open PRs before this branch.
-- Provided favicon files were copied from `dom_favicon_final.zip` without regenerating icons: `favicon.ico`, `favicon_32.png`, `favicon_180.png`, `favicon_192.png`, and `favicon_512.png` match the zip by SHA-256.
-- Alias files are byte-for-byte copies of the requested source PNGs: `apple-touch-icon.png` from `favicon_180.png`, `icon-192.png` from `favicon_192.png`, and `icon-512.png` from `favicon_512.png`.
-- `frontend/public/manifest.json` keeps `background_color` as `#2C2C2A` and `theme_color` as `#BA7517`.
-- `frontend/index.html` links `/favicon.ico`, `/favicon_32.png`, `/apple-touch-icon.png`, `/manifest.json`, and the requested `#2C2C2A` browser theme color.
-- Upload-directory check found no favicon, touch icon, PWA icon, or manifest files under `uploads/`; favicon assets remain static browser files under `frontend/public/` only.
-- Frontend tests: `28 passed`.
-- Frontend production build: passed; build output includes all favicon/touch/manifest files and the expected head links.
+- PR #51 is merged into `main`; local `main` was fast-forwarded and the merged `feat/dom-favicon-pack` branch was removed locally/remotely.
+- Root cause of the missing browser-tab favicon: the running production frontend container was still serving the pre-PR #51 build, so `/favicon.ico`, `/favicon_32.png`, `/apple-touch-icon.png`, `/manifest.json`, and `/icon-192.png` returned the old `index.html` SPA fallback as `text/html`.
+- Runtime fix: rebuilt/recreated the frontend service with the merged PR #51 assets.
+- Local Nginx verification after rebuild: `/` contains the favicon/touch/manifest/theme-color head links; `/favicon.ico` returns `200 image/x-icon` with 279 bytes; `/favicon_32.png` returns `200 image/png` with 499 bytes; `/apple-touch-icon.png` returns `200 image/png` with 2916 bytes; `/manifest.json` returns `200 application/json` with 327 bytes.
+- Public Cloudflare verification after rebuild: `/` contains the favicon/touch/manifest/theme-color head links; `/favicon.ico` returns `200 image/x-icon` with 279 bytes; `/favicon_32.png` returns `200 image/png` with 499 bytes; `/apple-touch-icon.png` returns `200 image/png` with 2916 bytes; `/manifest.json` returns `200 application/json` with 327 bytes.
+- Browser verification against `https://dom.khalidmued.com/`: document head exposes the icon, PNG icon, Apple touch icon, and manifest links; browser fetches for `/favicon.ico`, `/favicon_32.png`, `/apple-touch-icon.png`, and `/manifest.json` all return `200` with the expected content types and sizes.
 
 ## Hermes Tools Used
 - skill_view
 - terminal
+- process
 - read_file
-- search_files
-- write_file
 - patch
 - todo
+- browser tools
 
 ## Technologies / Services Touched
 - Git / GitHub CLI
+- Docker / Docker Compose
+- Nginx
 - React
 - Vite
+- Cloudflare
 - documentation
 
 ## What is pending
-- PR #51 (`feat/dom-favicon-pack`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/51
-- After this favicon PR is merged, delete the merged branch.
+- PR #52 (`docs/favicon-runtime-status`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/52
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No favicon-pack issues found. The provided `.ico` file is served only as a static browser favicon and was not sent through any image-processing or upload-validation path.
+- No active favicon-serving issue found after the frontend rebuild. If a previously opened browser tab still shows the old blank favicon, it is expected browser favicon cache; force-refresh the page or close/reopen the tab.
 
 ## Next recommended task
-- Review and merge the favicon pack PR, then delete the merged branch.
+- Merge the docs-only runtime-status PR, then delete the merged branch.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
