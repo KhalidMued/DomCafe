@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/welcome-polish
+ui/fix-welcome-overlap
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -35,7 +35,8 @@ ui/welcome-polish
 - Phase 6 PR #30 resolved dependency audit findings and was merged into `main`.
 - Phase 6 PR #31 added the PgBouncer health check and was merged into `main`.
 - Phase 6 PR #32 completed final Phase 6 readiness checks and was merged into `main`.
-- Current branch starts Phase 7 with a focused welcome-screen visual polish slice: atmospheric DŌM hero styling, service-note chips, reduced-motion safeguards, and RTL-friendly `dir="auto"` copy/name handling.
+- Phase 7 PR #33 added the initial welcome hero polish and was merged into `main`.
+- Current branch fixes the welcome-page overlap reported from the screenshot by removing the steam marks that crossed the `Home café` eyebrow and making service-note chips a properly spaced semantic list.
 
 ## Verification
 - Frontend tests: `23 passed`.
@@ -43,10 +44,10 @@ ui/welcome-polish
 - Docker Compose rebuild/restart for frontend/Nginx path: passed.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- Browser smoke check for `/`: welcome page renders the polished hero, service chips, name input, and start button without obvious layout issues on the desktop viewport.
+- Browser smoke check for `/`: `Home café` is no longer crossed by the steam decoration and service-note chips have visible spacing/borders.
 
 ## What is pending
-- PR #33 (`ui/welcome-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/33
+- PR #34 (`ui/fix-welcome-overlap`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/34
 - Remaining Phase 7 work after this branch: menu/card visual polish, empty states, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
