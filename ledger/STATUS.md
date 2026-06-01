@@ -49,7 +49,7 @@ security/rate-limit-critical-actions
   - `/api/health` returned HTTP 200 with database and Redis OK.
 
 ## What is pending
-- Commit, push, and open a PR for this rate-limit hardening branch.
+- PR #27 (`security/rate-limit-critical-actions`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/27
 - Remaining Phase 6 work after this branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
