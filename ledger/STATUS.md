@@ -55,7 +55,7 @@ ui/fix-welcome-wordmark
 - Browser screenshot comparison for `/`: D, O-with-CSS-macron, and M are evenly spaced as a unified wordmark; `Home café` and the tagline are centered relative to the wordmark container; no overlap or obvious desktop layout defects were found.
 
 ## What is pending
-- Open a PR for `ui/fix-welcome-wordmark` into `main` and merge after review.
+- PR #40 (`ui/fix-welcome-wordmark`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/40
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
