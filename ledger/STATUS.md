@@ -53,7 +53,7 @@ ui/restore-welcome-card
 - Browser screenshot comparison for `/`: restored old wide/simple welcome card, decorative blobs removed, DŌM lowered compared with the previous broken version, chips spaced, and no obvious desktop layout defects.
 
 ## What is pending
-- Open a PR for `ui/restore-welcome-card` into `main` and merge after review.
+- PR #38 (`ui/restore-welcome-card`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/38
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
