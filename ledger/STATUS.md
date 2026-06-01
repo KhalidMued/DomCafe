@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 5 — Agent API and Discord notification in progress
+Phase 5 — Agent API and Discord notification complete; Tailscale development access config in progress
 
 ## Current branch
-feature/discord-order-notifications
+config/tailscale-nginx-bind
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -27,29 +27,20 @@ feature/discord-order-notifications
 - Phase 4 PR #22 added protected create/archive endpoints and `/admin/menu` UI controls for categories, beans, and drinks.
 - Phase 5 PR #23 added the dedicated Herms/agent order-control API surface.
 - Phase 5 PR #24 added the dedicated Herms/agent menu/bean lookup and availability-control API surface.
-- Current branch adds Discord order notifications:
-  - `DISCORD_WEBHOOK_URL` configures the target webhook;
-  - `DISCORD_NOTIFICATIONS_ENABLED` controls default enablement;
-  - `discord_notifications_enabled` setting row can enable/disable notifications at runtime;
-  - new public orders send a clean Discord message after commit when configured/enabled;
-  - webhook failures are logged and do not fail guest order creation.
+- Phase 5 PR #25 added Discord order notifications and was merged into `main`.
+- Current branch makes the Docker Compose Nginx entrypoint reachable over the private Tailscale network by binding only Nginx to `0.0.0.0:11080:80`; backend, PostgreSQL, PgBouncer, and Redis remain internal-only with no host port bindings.
 
 ## Verification
-- Focused Discord notification tests: `5 passed`.
-- Full backend tests: `64 passed`.
-- Frontend tests: `22 passed`.
-- Frontend production build: passed.
-- Docker Compose rebuild for backend/frontend/nginx: passed.
+- Docker Compose config validation passed for both base and production override compose files.
+- Resolved compose config shows only Nginx has a published host port: `0.0.0.0:11080->80/tcp`.
+- Resolved compose config shows backend, frontend, PostgreSQL, PgBouncer, and Redis have no published host ports.
+- Restarted the stack with `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`; only the Nginx container was recreated.
 - Runtime verification through Nginx passed:
-  - temporarily pointed `DISCORD_WEBHOOK_URL` at an isolated local capture container without printing the URL;
-  - enabled notifications through local runtime env only;
-  - created a temporary public order;
-  - verified the capture container received the Discord message;
-  - verified the guest note was not included in the notification;
-  - deleted the temporary order/order items, restored `.env`, recreated the backend, and removed the capture container.
+  - `http://localhost:11080/` returned HTTP 200;
+  - `http://100.105.229.98:11080/` returned HTTP 200.
 
 ## What is pending
-- Commit, push, and open a PR for this branch.
+- Commit, push, and open a PR for this config-only branch.
 - Remaining project work after this branch: Phase 6 hardening/final QA, dependency audits, rate-limit polish if not already sufficient, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
