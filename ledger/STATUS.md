@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Favicon pack merged and runtime verified
+Admin/guest typography and admin nav fixes ready
 
 ## Current branch
-docs/favicon-runtime-status
+fix/admin-guest-typography-nav
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -55,21 +55,25 @@ docs/favicon-runtime-status
 - PR #50 recorded the final MVP acceptance pass and was merged into `main`.
 - PR #51 added the provided DŌM favicon pack to `frontend/public/`, linked browser favicon/touch/manifest metadata from `frontend/index.html`, kept favicon files out of the uploads/drink-photo pipeline, and was merged into `main`.
 - The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
+- Current branch fixes the guest menu metadata color, applies the enforced brand-serif heading class across admin and guest display headings, replaces the large admin header box with a slim dark top nav, and uses a CSS macron DŌM wordmark in the admin nav.
 
 ## Verification
-- PR #51 is merged into `main`; local `main` was fast-forwarded and the merged `feat/dom-favicon-pack` branch was removed locally/remotely.
-- Root cause of the missing browser-tab favicon: the running production frontend container was still serving the pre-PR #51 build, so `/favicon.ico`, `/favicon_32.png`, `/apple-touch-icon.png`, `/manifest.json`, and `/icon-192.png` returned the old `index.html` SPA fallback as `text/html`.
-- Runtime fix: rebuilt/recreated the frontend service with the merged PR #51 assets.
-- Local Nginx verification after rebuild: `/` contains the favicon/touch/manifest/theme-color head links; `/favicon.ico` returns `200 image/x-icon` with 279 bytes; `/favicon_32.png` returns `200 image/png` with 499 bytes; `/apple-touch-icon.png` returns `200 image/png` with 2916 bytes; `/manifest.json` returns `200 application/json` with 327 bytes.
-- Public Cloudflare verification after rebuild: `/` contains the favicon/touch/manifest/theme-color head links; `/favicon.ico` returns `200 image/x-icon` with 279 bytes; `/favicon_32.png` returns `200 image/png` with 499 bytes; `/apple-touch-icon.png` returns `200 image/png` with 2916 bytes; `/manifest.json` returns `200 application/json` with 327 bytes.
-- Browser verification against `https://dom.khalidmued.com/`: document head exposes the icon, PNG icon, Apple touch icon, and manifest links; browser fetches for `/favicon.ico`, `/favicon_32.png`, `/apple-touch-icon.png`, and `/manifest.json` all return `200` with the expected content types and sizes.
+- Frontend tests: `28 passed`.
+- Frontend production build: passed; Vite emitted route/admin chunks successfully.
+- Docker Compose frontend service was rebuilt/recreated locally for browser verification; stack services are running behind Nginx on `0.0.0.0:11080`.
+- Guest menu browser verification at local `/menu`: `22 drinks across 5 sections` renders as `rgb(136, 135, 128)` (`#888780`), category and drink headings report the brand serif font, and visible menu layout remains intact.
+- Admin dashboard browser verification at local `/admin/dashboard`: old boxed `.admin-shell-header` and gold `.admin-logout-button` styles are absent; slim top nav renders at 56px with `#2C2C2A` background and `#3a3835` bottom border; active Dashboard tab is gold-filled; Logout is a plain transparent gray text button; admin title uses the brand serif.
+- Static grep verification: no old `.admin-shell-header` / `.admin-logout-button` selectors remain, and menu/time/cart metadata selectors no longer use `var(--color-nile-mist)` teal.
 
 ## Hermes Tools Used
 - skill_view
 - terminal
 - process
 - read_file
+- search_files
+- write_file
 - patch
+- execute_code
 - todo
 - browser tools
 
@@ -78,19 +82,20 @@ docs/favicon-runtime-status
 - Docker / Docker Compose
 - Nginx
 - React
+- TypeScript
 - Vite
-- Cloudflare
+- CSS
 - documentation
 
 ## What is pending
-- PR #52 (`docs/favicon-runtime-status`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/52
+- Open PR for `fix/admin-guest-typography-nav` into `main`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No active favicon-serving issue found after the frontend rebuild. If a previously opened browser tab still shows the old blank favicon, it is expected browser favicon cache; force-refresh the page or close/reopen the tab.
+- No active admin/guest typography or nav issues found after local test/build/browser verification.
 
 ## Next recommended task
-- Merge the docs-only runtime-status PR, then delete the merged branch.
+- Review and merge the admin/guest typography and nav fixes PR, then delete the merged branch.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

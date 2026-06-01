@@ -43,7 +43,7 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
       <header className="top-bar status-hero">
         <div>
           <p className="eyebrow">Order status</p>
-          <h1>{order ? `Order #${order.order_number}` : 'Order'}</h1>
+          <h1 className="brand-heading">{order ? `Order #${order.order_number}` : 'Order'}</h1>
           <p className="status-lede">We’ll keep this page updated while your drink moves through the bar.</p>
         </div>
         <a href="/menu" onClick={(event) => { event.preventDefault(); navigate('/menu'); }}>Menu</a>
@@ -56,7 +56,7 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
             <span>For <strong dir="auto">{order.guest_name}</strong></span>
             <span>{order.items.length} {order.items.length === 1 ? 'drink' : 'drinks'}</span>
           </div>
-          <p className="status-label" dir="auto">{order.status_label}</p>
+          <p className="status-label brand-heading" dir="auto">{order.status_label}</p>
           <div className="progress-track" aria-label={`Current status ${order.status}`}>
             {statusSteps.map((status, index) => <span className={index <= activeIndex ? 'active' : ''} key={status}>{status}</span>)}
           </div>

@@ -68,10 +68,10 @@ export function AdminOrdersPage() {
             <article className="status-card admin-order-card" key={order.id} aria-label={`Order #${order.order_number} controls`}>
               <div>
                 <p className="eyebrow">Order #{order.order_number}</p>
-                <h2 dir="auto">{order.guest_name}</h2>
+                <h2 className="brand-heading" dir="auto">{order.guest_name}</h2>
                 <p className="detail-copy">{order.items_count === 1 ? '1 item' : `${order.items_count} items`}</p>
               </div>
-              <p className="status-label">{statusLabels[order.status]}</p>
+              <p className="status-label brand-heading">{statusLabels[order.status]}</p>
               <label>
                 Update status
                 <select

@@ -59,7 +59,7 @@ export function AdminSettingsPage() {
             Orders open
           </label>
           <button disabled={saving} type="submit">Save settings</button>
-          {status ? <p className="status-label">{status}</p> : null}
+          {status ? <p className="status-label brand-heading">{status}</p> : null}
         </form>
       ) : null}
     </AdminLayout>

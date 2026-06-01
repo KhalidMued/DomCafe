@@ -49,7 +49,7 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
       <header className="top-bar cart-hero">
         <div>
           <p className="eyebrow">Review</p>
-          <h1>Cart</h1>
+          <h1 className="brand-heading">Cart</h1>
           <p className="cart-lede">One quiet check before your order reaches the bar.</p>
         </div>
         <a href="/menu" onClick={(event) => { event.preventDefault(); navigate('/menu'); }}>Back to menu</a>
@@ -69,7 +69,7 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
       {items.length === 0 ? (
         <section className="skeleton-card cart-empty-card" aria-live="polite">
           <p className="eyebrow">No drinks yet</p>
-          <h2>Your order is quiet for now.</h2>
+          <h2 className="brand-heading">Your order is quiet for now.</h2>
           <p>Return to the menu and choose a drink when you are ready.</p>
           <a href="/menu" onClick={(event) => { event.preventDefault(); navigate('/menu'); }}>Browse menu</a>
         </section>
@@ -81,7 +81,7 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
             <div className="cart-item-heading">
               <div>
                 <p className="eyebrow">Drink</p>
-                <h2 dir="auto">{item.drink.name}</h2>
+                <h2 className="brand-heading" dir="auto">{item.drink.name}</h2>
               </div>
               <span>{item.quantity}×</span>
             </div>
