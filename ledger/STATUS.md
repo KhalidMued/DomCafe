@@ -86,7 +86,7 @@ fix/admin-navigation-usability
 - documentation
 
 ## What is pending
-- Open a PR for `fix/admin-navigation-usability` into `main` and merge after review.
+- PR #48 (`fix/admin-navigation-usability`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/48
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
