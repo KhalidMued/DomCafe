@@ -34,14 +34,17 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
   });
 }
 
-function mockFetch(settings = { cafe_name: 'DŌM', welcome_message: 'Welcome to DŌM. Take your time.', orders_open: true }) {
+function mockFetch(
+  settings = { cafe_name: 'DŌM', welcome_message: 'Welcome to DŌM. Take your time.', orders_open: true },
+  menu = menuPayload,
+) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     if (url === '/api/settings/public') {
       return jsonResponse(settings);
     }
     if (url === '/api/menu') {
-      return jsonResponse(menuPayload);
+      return jsonResponse(menu);
     }
     if (url === '/api/orders' && init?.method === 'POST') {
       return jsonResponse({ order_id: '41', order_number: 41, status: 'new', message: 'Your order was sent to the bar.' }, { status: 201 });
@@ -109,6 +112,10 @@ describe('Phase 3 guest frontend', () => {
     render(<App />);
 
     await screen.findByText('Spanish Latte');
+    expect(screen.getByText('1 drink across 1 section')).toBeInTheDocument();
+    expect(screen.getByText('4 min')).toBeInTheDocument();
+    expect(screen.getByText('1 drink')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show spanish latte details/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /add spanish latte/i }));
     await userEvent.click(screen.getByRole('link', { name: /review order/i }));
 
@@ -118,6 +125,16 @@ describe('Phase 3 guest frontend', () => {
 
     await waitFor(() => expect(screen.getByText(/order #41/i)).toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledWith('/api/orders', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('shows a polished empty state when no drinks are available', async () => {
+    mockFetch(undefined, []);
+    window.localStorage.setItem('dom_guest_name', 'Ahmed');
+    window.history.pushState({}, '', '/menu');
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { name: /no drinks are available right now/i })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: /menu categories/i })).not.toBeInTheDocument();
   });
 
   it('polls the order status every 15 seconds and stops after unmount', async () => {
