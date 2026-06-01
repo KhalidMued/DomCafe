@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/restore-welcome-card
+ui/fix-welcome-dom-spacing
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -40,7 +40,8 @@ ui/restore-welcome-card
 - Phase 7 PR #35 polished menu cards and the empty-menu state and was merged into `main`.
 - PR #36 recorded production `.env` verification and was merged into `main`.
 - Phase 7 PR #37 polished cart and order-status pages and was merged into `main`.
-- Current branch restores the main/welcome page closer to the user's attached old simple card: wide card, plain dark surface, no decorative blobs/orbits, larger DŌM mark moved lower in the card, and service notes kept as separated chips.
+- Phase 7 PR #38 restored the main/welcome page closer to the user's attached old simple card and was merged into `main`.
+- Current branch fixes the remaining welcome-card issue: the large white DŌM mark no longer covers the small orange `Home café` label, the DŌM mark is lowered with a visible gap, and the card is slightly smaller.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -50,10 +51,10 @@ ui/restore-welcome-card
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 - `/` route through Nginx: HTTP 200.
-- Browser screenshot comparison for `/`: restored old wide/simple welcome card, decorative blobs removed, DŌM lowered compared with the previous broken version, chips spaced, and no obvious desktop layout defects.
+- Browser screenshot comparison for `/`: `Home café` is visibly separated above the large white DŌM mark, DŌM is lower in the card without overlap, the card is slightly smaller, chips remain spaced, and no obvious desktop layout defects were found.
 
 ## What is pending
-- PR #38 (`ui/restore-welcome-card`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/38
+- Open a PR for `ui/fix-welcome-dom-spacing` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
