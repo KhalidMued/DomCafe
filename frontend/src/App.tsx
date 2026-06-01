@@ -4,6 +4,7 @@ import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import { WelcomePage } from './pages/public/WelcomePage';
 
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })));
+const AdminBeansPage = lazy(() => import('./pages/admin/AdminBeansPage').then((module) => ({ default: module.AdminBeansPage })));
 const AdminMenuPage = lazy(() => import('./pages/admin/AdminMenuPage').then((module) => ({ default: module.AdminMenuPage })));
 const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage').then((module) => ({ default: module.AdminOrdersPage })));
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage').then((module) => ({ default: module.AdminSettingsPage })));
@@ -29,6 +30,7 @@ function RouteLoading() {
 function CurrentRoute({ path, navigate }: { path: string; navigate: (nextPath: string) => void }) {
   if (path === '/admin/login') return <AdminLoginPage navigate={navigate} />;
   if (path === '/admin/dashboard') return <AdminDashboardPage />;
+  if (path === '/admin/beans') return <AdminBeansPage />;
   if (path === '/admin/menu') return <AdminMenuPage />;
   if (path === '/admin/orders') return <AdminOrdersPage />;
   if (path === '/admin/settings') return <AdminSettingsPage />;
