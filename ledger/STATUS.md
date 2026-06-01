@@ -89,7 +89,7 @@ fix/initial-load-performance
 - documentation
 
 ## What is pending
-- Open a PR for `fix/initial-load-performance` into `main` and merge after review.
+- PR #47 (`fix/initial-load-performance`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/47
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
