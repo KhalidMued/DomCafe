@@ -52,8 +52,8 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
       fill: #F1EFE8;
     }
   `}</style>
-            <text x="340" y="28" textAnchor="middle" className="hc-label">HOME CAFÉ</text>
-            <rect x="316" y="36" width="48" height="1.5" fill="#BA7517" />
+            <text x="340" y="14" textAnchor="middle" className="hc-label">HOME CAFÉ</text>
+            <rect x="316" y="24" width="48" height="1.5" fill="#BA7517" />
             <text x="148" y="148" textAnchor="middle" className="wordmark-letter">D</text>
             <text x="340" y="148" textAnchor="middle" className="wordmark-letter">O</text>
             <rect x="307" y="28" width="66" height="2.5" fill="#F1EFE8" rx="1" />
