@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/fix-welcome-overlap
+ui/menu-card-polish
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -36,19 +36,21 @@ ui/fix-welcome-overlap
 - Phase 6 PR #31 added the PgBouncer health check and was merged into `main`.
 - Phase 6 PR #32 completed final Phase 6 readiness checks and was merged into `main`.
 - Phase 7 PR #33 added the initial welcome hero polish and was merged into `main`.
-- Current branch fixes the welcome-page overlap reported from the screenshot by removing the steam marks that crossed the `Home café` eyebrow and making service-note chips a properly spaced semantic list.
+- Phase 7 PR #34 fixed the welcome-page overlap from the screenshot and was merged into `main`.
+- Current branch improves menu/card polish with a menu intro, sticky category pill panel, drink/section counts, estimated-time badges, clearer card spacing/hover states, accessible detail-image buttons, mobile card stacking, and a proper empty-menu state.
 
 ## Verification
-- Frontend tests: `23 passed`.
+- Frontend tests: `24 passed`.
 - Frontend production build: passed.
 - Docker Compose rebuild/restart for frontend/Nginx path: passed.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- Browser smoke check for `/`: `Home café` is no longer crossed by the steam decoration and service-note chips have visible spacing/borders.
+- `/menu` route through Nginx: HTTP 200.
+- Browser smoke check for `/menu`: menu header, category pills, drink cards, time badges, option chips, and add buttons render with readable spacing and no obvious desktop layout defects.
 
 ## What is pending
-- PR #34 (`ui/fix-welcome-overlap`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/34
-- Remaining Phase 7 work after this branch: menu/card visual polish, empty states, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
+- PR #35 (`ui/menu-card-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/35
+- Remaining Phase 7 work after this branch: cart/status visual polish, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
