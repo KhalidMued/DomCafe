@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/fix-welcome-wordmark
+ui/tune-welcome-wordmark-lockup
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -42,7 +42,8 @@ ui/fix-welcome-wordmark
 - Phase 7 PR #37 polished cart and order-status pages and was merged into `main`.
 - Phase 7 PR #38 restored the main/welcome page closer to the user's attached old simple card and was merged into `main`.
 - Phase 7 PR #39 separated the large white DŌM mark from the small orange `Home café` label and was merged into `main`.
-- Current branch fixes the remaining DŌM wordmark rhythm issue by rendering the brand mark as equal-width letter spans and drawing the macron with CSS over a normal `O`, avoiding fallback glyph width differences from the `Ō` character.
+- Phase 7 PR #40 fixed the first DŌM wordmark rhythm issue with equal-width spans and a CSS macron overlay and was merged into `main`.
+- Current branch makes the requested focused wordmark tuning only: explicit `o-wrap`/`macron` markup, D-only negative kerning adjustment, and a tighter wordmark-to-tagline lockup gap.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -52,10 +53,10 @@ ui/fix-welcome-wordmark
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 - `/` route through Nginx: HTTP 200.
-- Browser screenshot comparison for `/`: D, O-with-CSS-macron, and M are evenly spaced as a unified wordmark; `Home café` and the tagline are centered relative to the wordmark container; no overlap or obvious desktop layout defects were found.
+- Browser screenshot comparison for `/`: macron is visibly restored over the normal O using a positioned element, D-O and O-M spacing are visually balanced without global letter-spacing, the tagline sits closer to the wordmark like a logo lockup, and background/label/chips/input/button remain unchanged.
 
 ## What is pending
-- PR #40 (`ui/fix-welcome-wordmark`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/40
+- Open a PR for `ui/tune-welcome-wordmark-lockup` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes

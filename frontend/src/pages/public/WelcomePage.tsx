@@ -36,8 +36,11 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
           <h1 id="welcome-title" aria-label={cafeName}>
             {useDomWordmark ? (
               <span className="dom-wordmark" aria-hidden="true">
-                <span>D</span>
-                <span className="o-macron">O</span>
+                <span className="d-letter">D</span>
+                <span className="o-wrap">
+                  O
+                  <span className="macron" />
+                </span>
                 <span>M</span>
               </span>
             ) : cafeName}
