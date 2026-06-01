@@ -6,7 +6,7 @@ import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 function SummaryCard({ label, value }: { label: string; value: string | number }) {
   return (
     <article className="status-card admin-summary-card">
-      <strong>{value}</strong>
+      <strong className="brand-heading">{value}</strong>
       <span>{label}</span>
     </article>
   );

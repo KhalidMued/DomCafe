@@ -8,11 +8,24 @@ const adminLinks = [
   { href: '/admin/settings', label: 'Settings' },
 ];
 
+function AdminWordmark() {
+  return (
+    <span className="admin-wordmark" aria-label="DŌM">
+      D
+      <span className="admin-wordmark-o" aria-hidden="true">
+        O
+        <span className="admin-wordmark-macron" />
+      </span>
+      M
+    </span>
+  );
+}
+
 export function AdminLoginRequired() {
   return (
     <main className="page-shell admin-page">
       <section className="status-card">
-        <p className="status-label">Admin login required.</p>
+        <p className="status-label brand-heading">Admin login required.</p>
         <a className="cart-link" href="/admin/login">Go to login</a>
       </section>
     </main>
@@ -30,10 +43,10 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
 
   return (
     <main className="page-shell admin-page">
-      <section className="admin-shell-header" aria-label="Admin controls navigation">
-        <div>
-          <p className="eyebrow">Admin</p>
-          <h1>{title}</h1>
+      <header className="admin-top-nav" aria-label="Admin controls navigation">
+        <div className="admin-top-brand">
+          <span className="admin-top-label">Admin</span>
+          <AdminWordmark />
         </div>
         <nav className="admin-nav" aria-label="Admin sections">
           {adminLinks.map((link) => (
@@ -46,8 +59,9 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
             </a>
           ))}
         </nav>
-        <button className="admin-logout-button" onClick={logout} type="button">Logout</button>
-      </section>
+        <button className="admin-logout-link" onClick={logout} type="button">Logout</button>
+      </header>
+      <h1 className="admin-page-title brand-heading">{title}</h1>
       {children}
     </main>
   );

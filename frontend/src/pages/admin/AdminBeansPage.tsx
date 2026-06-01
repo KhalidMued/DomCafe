@@ -135,7 +135,7 @@ export function AdminBeansPage() {
     <AdminLayout title="Beans">
       <section className="status-card admin-menu-toolbar">
         <div>
-          <p className="status-label">Bean management</p>
+          <p className="status-label brand-heading">Bean management</p>
           <p className="detail-copy">Add and manage beans used by menu drinks.</p>
         </div>
         <button onClick={() => setNewBeanDraft(emptyDraft)} type="button">Add bean</button>
@@ -158,7 +158,7 @@ export function AdminBeansPage() {
           {beans.map((bean) => (
             <article className="status-card admin-menu-card" key={bean.id} aria-label={`${bean.name} controls`}>
               <div>
-                <h2 dir="auto">{bean.name}</h2>
+                <h2 className="brand-heading" dir="auto">{bean.name}</h2>
                 {bean.origin ? <p className="detail-copy" dir="auto">{bean.origin}</p> : null}
                 {bean.process ? <p dir="auto">{bean.process}</p> : null}
                 {bean.tasting_notes.length ? <p className="detail-copy" dir="auto">{listText(bean.tasting_notes)}</p> : null}

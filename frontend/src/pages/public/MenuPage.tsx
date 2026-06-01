@@ -31,7 +31,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
       <header className="top-bar menu-hero">
         <div>
           <p className="eyebrow">DŌM menu</p>
-          <h1>Menu</h1>
+          <h1 className="brand-heading">Menu</h1>
           <p className="menu-lede">Choose your coffee, then review everything before it reaches the bar.</p>
         </div>
         <a className="cart-link cart-link-strong" href="/cart" onClick={(event) => { event.preventDefault(); navigate('/cart'); }}>Review order ({cartCount})</a>
@@ -48,7 +48,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
       {!isLoading && !error && categories.length === 0 ? (
         <section className="skeleton-card menu-empty-card" aria-live="polite">
           <p className="eyebrow">Menu pause</p>
-          <h2>No drinks are available right now.</h2>
+          <h2 className="brand-heading">No drinks are available right now.</h2>
           <p>The bar may be updating today’s menu. Please check again soon or ask the coffee bar.</p>
         </section>
       ) : null}
@@ -59,7 +59,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
         <section className="menu-section" id={category.id} key={category.id}>
           <div className="section-heading-row">
             <div>
-              <h2 dir="auto">{category.name}</h2>
+              <h2 className="brand-heading" dir="auto">{category.name}</h2>
               {category.description ? <p dir="auto">{category.description}</p> : null}
             </div>
             <span>{category.drinks.length} {category.drinks.length === 1 ? 'drink' : 'drinks'}</span>
@@ -72,7 +72,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
                 </button>
                 <div className="drink-content">
                   <div className="drink-title-row">
-                    <h3 dir="auto">{drink.name}</h3>
+                    <h3 className="brand-heading" dir="auto">{drink.name}</h3>
                     {drink.estimated_time_minutes ? <span>{drink.estimated_time_minutes} min</span> : null}
                   </div>
                   <p dir="auto">{drink.description}</p>

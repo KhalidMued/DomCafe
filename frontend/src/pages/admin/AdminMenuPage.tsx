@@ -287,13 +287,13 @@ export function AdminMenuPage() {
       {menu ? (
         <>
           <section className="status-card admin-menu-toolbar">
-            <p className="status-label">{menu.orders_open ? 'Orders are open' : 'Orders are closed'}</p>
+            <p className="status-label brand-heading">{menu.orders_open ? 'Orders are open' : 'Orders are closed'}</p>
             <button disabled={updatingId === 'orders-open'} onClick={toggleOrdersOpen} type="button">
               {menu.orders_open ? 'Close orders' : 'Open orders'}
             </button>
           </section>
           <section className="admin-management-grid" aria-label="Admin drinks management">
-            <h2>Drinks</h2>
+            <h2 className="brand-heading">Drinks</h2>
             <button onClick={() => setNewDrinkDraft({ id: '', name: '', categoryId: menu.categories[0]?.id ?? '', beanId: menu.beans[0]?.id ?? '', description: '', ingredients: '', photoUrl: '', temperatureOptions: '', milkOptions: '', estimatedMinutes: '5' })} type="button">Add drink</button>
             {newDrinkDraft ? (
               <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewDrink(); }}>
@@ -316,7 +316,7 @@ export function AdminMenuPage() {
               <article className="status-card admin-menu-card" key={drink.id} aria-label={`${drink.name} controls`}>
                 <img src={drink.photo_url} alt={`${drink.name} photo`} />
                 <div>
-                  <h3 dir="auto">{drink.name}</h3>
+                  <h3 className="brand-heading" dir="auto">{drink.name}</h3>
                   <p className="detail-copy" dir="auto">{drink.category_name}</p>
                   {drink.bean_name ? <p className="detail-copy" dir="auto">{drink.bean_name}</p> : null}
                   {drink.description ? <p dir="auto">{drink.description}</p> : null}
@@ -386,7 +386,7 @@ export function AdminMenuPage() {
             })}
           </section>
           <section className="admin-management-grid" aria-label="Admin categories management">
-            <h2>Categories</h2>
+            <h2 className="brand-heading">Categories</h2>
             <button onClick={() => setNewCategoryDraft({ id: '', label: '', description: '', accentColor: '', displayOrder: '0' })} type="button">Add category</button>
             {newCategoryDraft ? (
               <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewCategory(); }}>
@@ -401,7 +401,7 @@ export function AdminMenuPage() {
             {menu.categories.map((category) => (
               <article className="status-card admin-menu-card" key={category.id} aria-label={`${category.label} controls`}>
                 <div>
-                  <h3 dir="auto">{category.label}</h3>
+                  <h3 className="brand-heading" dir="auto">{category.label}</h3>
                   {category.description ? <p dir="auto">{category.description}</p> : null}
                   {category.accent_color ? <p className="detail-copy">{category.accent_color}</p> : null}
                   <p className="detail-copy">Order {category.display_order}</p>
@@ -439,7 +439,7 @@ export function AdminMenuPage() {
             ))}
           </section>
           <section className="admin-management-grid" aria-label="Admin beans management">
-            <h2>Beans</h2>
+            <h2 className="brand-heading">Beans</h2>
             <button onClick={() => setNewBeanDraft({ id: '', name: '', origin: '', process: '', tastingNotes: '' })} type="button">Add bean</button>
             {newBeanDraft ? (
               <form className="admin-edit-form" onSubmit={(event) => { event.preventDefault(); saveNewBean(); }}>
@@ -454,7 +454,7 @@ export function AdminMenuPage() {
             {menu.beans.map((bean) => (
               <article className="status-card admin-menu-card" key={bean.id} aria-label={`${bean.name} controls`}>
                 <div>
-                  <h3 dir="auto">{bean.name}</h3>
+                  <h3 className="brand-heading" dir="auto">{bean.name}</h3>
                   {bean.origin ? <p className="detail-copy" dir="auto">{bean.origin}</p> : null}
                   {bean.process ? <p dir="auto">{bean.process}</p> : null}
                   {bean.tasting_notes.length ? <p className="detail-copy" dir="auto">{listText(bean.tasting_notes)}</p> : null}
