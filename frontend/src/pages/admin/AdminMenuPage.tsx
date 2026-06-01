@@ -18,17 +18,7 @@ import {
   uploadAdminDrinkPhoto,
   type AdminMenuManagement,
 } from '../../lib/api';
-
-function AdminLoginRequired() {
-  return (
-    <main className="page-shell admin-page">
-      <section className="status-card">
-        <p className="status-label">Admin login required.</p>
-        <a className="cart-link" href="/admin/login">Go to login</a>
-      </section>
-    </main>
-  );
-}
+import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 type DrinkDraft = {
   name: string;
@@ -291,14 +281,7 @@ export function AdminMenuPage() {
   }
 
   return (
-    <main className="page-shell admin-page">
-      <section className="top-bar">
-        <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Menu management</h1>
-        </div>
-        <a href="/admin/dashboard">Dashboard</a>
-      </section>
+    <AdminLayout title="Menu management">
       {error ? <p className="error-text">{error}</p> : null}
       {!menu && !error ? <section className="skeleton-card">Loading menu management…</section> : null}
       {menu ? (
@@ -510,6 +493,6 @@ export function AdminMenuPage() {
           </section>
         </>
       ) : null}
-    </main>
+    </AdminLayout>
   );
 }

@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { getAdminSettings, updateAdminSettings, type AdminSettings } from '../../lib/api';
-
-function AdminLoginRequired() {
-  return (
-    <main className="page-shell admin-page">
-      <section className="status-card">
-        <p className="status-label">Admin login required.</p>
-        <a className="cart-link" href="/admin/login">Go to login</a>
-      </section>
-    </main>
-  );
-}
+import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 export function AdminSettingsPage() {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
@@ -41,14 +31,7 @@ export function AdminSettingsPage() {
   }
 
   return (
-    <main className="page-shell admin-page">
-      <section className="top-bar">
-        <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Settings</h1>
-        </div>
-        <a href="/admin/dashboard">Dashboard</a>
-      </section>
+    <AdminLayout title="Settings">
       {error ? <p className="error-text">{error}</p> : null}
       {!settings && !error ? <section className="skeleton-card">Loading settings…</section> : null}
       {settings ? (
@@ -79,6 +62,6 @@ export function AdminSettingsPage() {
           {status ? <p className="status-label">{status}</p> : null}
         </form>
       ) : null}
-    </main>
+    </AdminLayout>
   );
 }

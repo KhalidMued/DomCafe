@@ -127,6 +127,12 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .status-item span { color: var(--color-hint); }
 .status-loading-card { text-align: center; }
 .admin-summary-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.admin-shell-header { align-items: start; border: 1px solid color-mix(in srgb, var(--color-light-rule) 18%, transparent); border-radius: 24px; display: grid; gap: 16px; margin-block: 8px 26px; padding: 18px; }
+.admin-shell-header h1 { font-size: clamp(2rem, 10vw, 4rem); }
+.admin-nav { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-nav a { border: 1px solid color-mix(in srgb, var(--color-doum-gold) 48%, transparent); border-radius: 999px; color: var(--color-doum-gold); padding: 10px 14px; text-decoration: none; }
+.admin-nav a[aria-current="page"] { background: var(--color-doum-gold); color: var(--color-nubian-night); font-weight: 700; }
+.admin-logout-button { justify-self: start; }
 .admin-summary-card { padding: 18px; display: grid; gap: 8px; }
 .admin-summary-card strong { color: var(--color-doum-gold); font-size: 2rem; font-weight: 400; }
 .admin-summary-card span { color: var(--color-hint); }

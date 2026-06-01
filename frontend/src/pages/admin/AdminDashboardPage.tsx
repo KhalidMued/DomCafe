@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { getAdminDashboard, type AdminDashboardSummary } from '../../lib/api';
+import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 function SummaryCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -23,28 +24,10 @@ export function AdminDashboardPage() {
     });
   }, [token]);
 
-  if (!token) {
-    return (
-      <main className="page-shell admin-page">
-        <section className="status-card">
-          <p className="status-label">Admin login required.</p>
-          <a className="cart-link" href="/admin/login">Go to login</a>
-        </section>
-      </main>
-    );
-  }
+  if (!token) return <AdminLoginRequired />;
 
   return (
-    <main className="page-shell admin-page">
-      <section className="top-bar">
-        <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Admin dashboard</h1>
-        </div>
-        <a href="/admin/orders">Orders</a>
-        <a href="/admin/menu">Menu</a>
-        <a href="/admin/settings">Settings</a>
-      </section>
+    <AdminLayout title="Admin dashboard">
       {error ? <p className="error-text">{error}</p> : null}
       {!summary && !error ? <section className="skeleton-card">Loading dashboard…</section> : null}
       {summary ? (
@@ -57,6 +40,6 @@ export function AdminDashboardPage() {
           <SummaryCard label="Available beans" value={summary.available_beans_count} />
         </section>
       ) : null}
-    </main>
+    </AdminLayout>
   );
 }

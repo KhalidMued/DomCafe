@@ -6,6 +6,7 @@ import {
   type AdminOrderListItem,
   type AdminOrderStatus,
 } from '../../lib/api';
+import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 const statusLabels: Record<AdminOrderStatus, string> = {
   new: 'New',
@@ -16,17 +17,6 @@ const statusLabels: Record<AdminOrderStatus, string> = {
 };
 
 const statuses: AdminOrderStatus[] = ['new', 'received', 'preparing', 'ready', 'cancelled'];
-
-function AdminLoginRequired() {
-  return (
-    <main className="page-shell admin-page">
-      <section className="status-card">
-        <p className="status-label">Admin login required.</p>
-        <a className="cart-link" href="/admin/login">Go to login</a>
-      </section>
-    </main>
-  );
-}
 
 export function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrderListItem[]>([]);
@@ -68,14 +58,7 @@ export function AdminOrdersPage() {
   }
 
   return (
-    <main className="page-shell admin-page">
-      <section className="top-bar">
-        <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Orders</h1>
-        </div>
-        <a href="/admin/dashboard">Dashboard</a>
-      </section>
+    <AdminLayout title="Orders">
       {error ? <p className="error-text">{error}</p> : null}
       {loading ? <section className="skeleton-card">Loading recent orders…</section> : null}
       {!loading && orders.length === 0 ? <section className="skeleton-card">No orders yet.</section> : null}
@@ -105,6 +88,6 @@ export function AdminOrdersPage() {
           ))}
         </section>
       ) : null}
-    </main>
+    </AdminLayout>
   );
 }

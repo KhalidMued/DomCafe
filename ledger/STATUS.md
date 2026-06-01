@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-fix/initial-load-performance
+fix/admin-navigation-usability
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -49,22 +49,21 @@ fix/initial-load-performance
 - Phase 7 PR #44 improved RTL/content-direction resilience and was merged into `main`.
 - Phase 7 PR #45 improved small interaction feedback and was merged into `main`.
 - Phase 7 PR #46 replaced the `/admin/login` splash header with the approved inline SVG lockup and was merged into `main`.
-- Current branch fixes the initial blank-screen/slow-transition path by serving the frontend as a production static build from the frontend container, adding an immediate lightweight DŌM loading shell in `index.html`, and lazy-loading non-critical route pages while keeping the approved welcome UI and DOM branding intact.
+- Phase 7 PR #47 fixed the initial blank-screen/slow-transition path with a production frontend container, immediate DŌM loading shell, and route-level lazy loading, and was merged into `main`.
+- Current branch adds a focused admin navigation header with Dashboard, Orders, Menu, Beans, and Settings links; adds a visible Logout button that clears the stored admin token and returns to `/admin/login`; and adds a dedicated `/admin/beans` page backed by the existing admin menu/beans API.
 
 ## Verification
-- Frontend tests: `25 passed`.
+- Admin route inspection: `/admin/dashboard`, `/admin/orders`, `/admin/menu`, and `/admin/settings` already existed; `/admin/beans` had only an unused placeholder file and no active route before this branch.
+- Frontend tests: `28 passed`.
 - Frontend production build: passed.
-- Docker Compose config validation: passed.
 - Docker Compose rebuild/restart for frontend/Nginx path: passed.
-- Frontend container runtime: Nginx serving the Vite production build on port 5173; Vite dev server no longer runs in the container.
-- Initial HTML check: DŌM branded loading shell is present; `/@vite/client` is absent; production `/assets/...` script is served.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Local `/` route through Nginx: HTTP 200.
-- Local `/menu` route through Nginx: HTTP 200.
-- Tailscale `/` route through Nginx: HTTP 200 and includes the loading shell.
-- Browser visual smoke check for `/`: no blank white screen observed; approved SVG welcome card and existing chips/input/Start button remain unchanged.
-- Browser route-transition smoke check: `/menu` and `/cart` routes load through the split production bundle without obvious delay or broken layout.
+- Local `/admin/dashboard` route through Nginx: HTTP 200.
+- Local `/admin/beans` route through Nginx: HTTP 200.
+- Local guest `/` route through Nginx: HTTP 200.
+- Browser admin smoke check: protected admin pages show Dashboard, Orders, Menu, Beans, Settings, and Logout controls.
+- Browser Beans smoke check: Beans navigation opens `/admin/beans`, shows the Beans heading, Add bean action, and existing bean management API results when authorized.
+- Browser logout smoke check: Logout clears `dom_admin_token`, redirects to `/admin/login`, and leaves the admin login form visible.
 
 ## Hermes Tools Used
 - skill_view
@@ -72,8 +71,8 @@ fix/initial-load-performance
 - process
 - read_file
 - write_file
-- search_files
 - patch
+- search_files
 - browser tools
 
 ## Technologies / Services Touched
@@ -83,13 +82,11 @@ fix/initial-load-performance
 - React
 - Vite
 - PostgreSQL
-- PgBouncer
 - Redis
-- Cloudflare
 - documentation
 
 ## What is pending
-- PR #47 (`fix/initial-load-performance`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/47
+- Open a PR for `fix/admin-navigation-usability` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
