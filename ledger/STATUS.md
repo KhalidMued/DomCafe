@@ -69,7 +69,7 @@ ui/rtl-content-direction-polish
 - Documentation (`AGENT.md`, `ledger/STATUS.md`)
 
 ## What is pending
-- Open a PR for `ui/rtl-content-direction-polish` into `main` and merge after review.
+- PR #44 (`ui/rtl-content-direction-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/44
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
