@@ -2,7 +2,8 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 
 import bcrypt
-from jose import JWTError, jwt
+import jwt
+from jwt import PyJWTError
 
 from app.core.config import get_settings
 
@@ -29,7 +30,7 @@ def create_access_token(subject: str) -> str:
 def decode_admin_subject(token: str) -> str | None:
     try:
         payload = jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
-    except JWTError:
+    except PyJWTError:
         return None
     if payload.get("scope") != "admin":
         return None
