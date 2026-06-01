@@ -8,6 +8,8 @@ See `AGENT.md` for project rules and source requirements.
 - Backend, PostgreSQL, PgBouncer, and Redis stay on Docker-internal networks only.
 - If another reverse proxy/CDN/load balancer is placed in front of Nginx, configure Nginx `real_ip` with explicit trusted upstreams before relying on per-client edge rate limits.
 - For private Tailscale development access, Nginx is bound to `0.0.0.0:11080:80`.
+- Cloudflare Tunnel routes `dom.khalidmued.com` to `http://127.0.0.1:11080`, so the public domain still reaches only the Nginx entrypoint.
+- The `cloudflared` system service uses HTTP/2 because QUIC was unstable on this server/network during setup.
 
 ## Authentication
 

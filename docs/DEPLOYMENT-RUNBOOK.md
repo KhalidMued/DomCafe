@@ -1,5 +1,106 @@
 # Deployment Runbook
 
-Phase 0 skeleton. Keep this document concise and update it as each phase lands.
-
 See `AGENT.md` for project rules and source requirements.
+
+## Docker Compose entrypoint
+
+DomCafe is served through the Compose `nginx` service on host port `11080`.
+
+Only Nginx publishes a host port:
+
+```text
+0.0.0.0:11080:80
+```
+
+Backend, PostgreSQL, PgBouncer, and Redis must stay Docker-internal and must not publish host ports.
+
+Verify the effective Compose config before deployment changes:
+
+```bash
+docker compose config
+```
+
+## Cloudflare Tunnel
+
+The production/dev public hostname is:
+
+```text
+https://dom.khalidmued.com
+```
+
+Traffic path:
+
+```text
+Cloudflare Tunnel -> http://127.0.0.1:11080 -> DomCafe Nginx -> frontend/backend
+```
+
+The `domcafe` tunnel ID is:
+
+```text
+d79a9dd8-ff7b-48e1-82a8-f290d6b50f76
+```
+
+System service config lives at:
+
+```text
+/etc/cloudflared/config.yml
+```
+
+Expected config shape:
+
+```yaml
+tunnel: d79a9dd8-ff7b-48e1-82a8-f290d6b50f76
+credentials-file: /etc/cloudflared/d79a9dd8-ff7b-48e1-82a8-f290d6b50f76.json
+protocol: http2
+
+ingress:
+  - hostname: dom.khalidmued.com
+    service: http://127.0.0.1:11080
+  - service: http_status:404
+```
+
+`protocol: http2` is intentional. QUIC connections were unstable on this server/network during setup, while HTTP/2 registered stable Cloudflare edge connections.
+
+Do not commit or print the tunnel credentials JSON file.
+
+Validate ingress rules:
+
+```bash
+sudo cloudflared --config /etc/cloudflared/config.yml tunnel ingress validate
+```
+
+Check service state:
+
+```bash
+sudo systemctl status cloudflared --no-pager
+sudo journalctl -u cloudflared -n 80 --no-pager -l
+```
+
+Expected service state:
+
+```text
+Active: active (running)
+protocol=http2
+```
+
+Restart after config changes:
+
+```bash
+sudo systemctl restart cloudflared
+```
+
+## Smoke checks
+
+After restarting the stack or tunnel, verify:
+
+```bash
+curl -I https://dom.khalidmued.com
+curl https://dom.khalidmued.com/api/health
+```
+
+Expected results:
+
+```text
+HTTP/2 200
+{"status":"ok","database":"ok","redis":"ok"}
+```

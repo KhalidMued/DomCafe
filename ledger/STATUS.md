@@ -4,7 +4,7 @@
 Phase 6 — Security and deployment hardening in progress
 
 ## Current branch
-config/cloudflare-domain-allowed-host
+docs/cloudflare-tunnel-service
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -30,26 +30,24 @@ config/cloudflare-domain-allowed-host
 - Phase 5 PR #25 added Discord order notifications and was merged into `main`.
 - Phase 6 PR #26 made the Docker Compose Nginx entrypoint reachable over the private Tailscale network by binding only Nginx to `0.0.0.0:11080:80`; backend, PostgreSQL, PgBouncer, and Redis remain internal-only with no host port bindings.
 - Phase 6 PR #27 added Nginx edge limits plus Redis-backed backend fallback fixed-window limits for high-risk write endpoints and was merged into `main`.
-- Current branch allows the Cloudflare Tunnel hostname `dom.khalidmued.com` through the Vite dev server host allowlist so the tunnel can reach the existing Nginx-only entrypoint.
+- Phase 6 PR #28 allowed the Cloudflare Tunnel hostname `dom.khalidmued.com` through the Vite dev server host allowlist and was merged into `main`.
+- Cloudflare Tunnel service is installed and enabled for the `domcafe` tunnel, routing `dom.khalidmued.com` to `http://127.0.0.1:11080` with `protocol: http2`.
+- Current branch documents the Cloudflare Tunnel service setup, verification commands, and network exposure model.
 
 ## Verification
-- Frontend tests: `22 passed`.
-- Frontend production build: passed.
+- `cloudflared` system service: active and enabled.
+- Cloudflare Tunnel registered four HTTP/2 edge connections after service restart.
+- `https://dom.khalidmued.com`: HTTP 200.
+- `https://dom.khalidmued.com/api/health`: HTTP 200 with database and Redis OK.
 - `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
-- Docker Compose rebuild/restart for the frontend/Nginx path: passed.
-- Local Nginx request with `Host: dom.khalidmued.com`: HTTP 200.
-- Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Cloudflare Tunnel foreground check using `--protocol http2`: active connector registered and `https://dom.khalidmued.com` returned HTTP 200.
-- Cloudflare Tunnel `/api/health` check: `https://dom.khalidmued.com/api/health` returned HTTP 200 with database and Redis OK.
 
 ## What is pending
-- PR #28 (`config/cloudflare-domain-allowed-host`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/28
-- Complete the guided Cloudflare Tunnel service installation step so the tunnel runs persistently after reboot.
-- Remaining Phase 6 work after this branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
+- Open a PR for `docs/cloudflare-tunnel-service` into `main` and merge after review.
+- Remaining Phase 6 work after this docs branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
-- Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, or connection strings.
+- Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, tunnel credential JSON files, or connection strings.
 - Runtime verification scripts should construct secrets in memory without printing them.
 - Keep local dev data clean: restore any runtime verification edits immediately after assertions.
-- The Cloudflare Tunnel needed `--protocol http2` during verification because QUIC connections were unstable on this network.
+- The Cloudflare Tunnel uses `protocol: http2` because QUIC connections were unstable on this server/network during setup.
