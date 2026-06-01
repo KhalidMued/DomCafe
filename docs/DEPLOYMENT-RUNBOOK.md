@@ -113,6 +113,60 @@ The script verifies both:
 - application queries can pass through PgBouncer to PostgreSQL; and
 - `SHOW POOLS` exposes the expected application database pool.
 
+## Backups and restore smoke tests
+
+Create a database backup:
+
+```bash
+./scripts/backup-db.sh
+```
+
+By default, backups are written under:
+
+```text
+/backups/dom-cafe
+```
+
+For local or non-root verification, override the destination:
+
+```bash
+BACKUP_DIR=/tmp/domcafe-backups ./scripts/backup-db.sh
+```
+
+Restore into the configured application database only when intentionally rolling back or recovering data:
+
+```bash
+./scripts/restore-db.sh /path/to/backup.sql
+```
+
+For readiness checks, test restore into a temporary database instead of overwriting the application database, then drop the temporary database after validation.
+
+## Phase 6 readiness checklist
+
+Before declaring the deployment ready, verify:
+
+```bash
+docker compose config
+uvx pip-audit -r backend/requirements.txt
+cd frontend && npm audit --audit-level=high && cd ..
+PYTHONPATH=backend pytest backend/tests
+cd frontend && npm test && npm run build && cd ..
+docker compose up -d --build
+./scripts/check-pgbouncer.sh
+curl -I https://dom.khalidmued.com
+curl https://dom.khalidmued.com/api/health
+```
+
+Expected readiness state:
+
+- only Nginx publishes `0.0.0.0:11080->80/tcp`;
+- backend, PostgreSQL, PgBouncer, and Redis have no host port bindings;
+- login and order creation rate-limit tests pass;
+- dependency audits report no known Python vulnerabilities and zero high/critical frontend vulnerabilities;
+- backup creation succeeds and restore has been tested against a temporary database;
+- PgBouncer accepts application traffic and exposes pool visibility through `SHOW POOLS`;
+- Cloudflare Tunnel is `active`, `enabled`, and serves `https://dom.khalidmued.com`.
+
 ## Smoke checks
 
 After restarting the stack or tunnel, verify:
