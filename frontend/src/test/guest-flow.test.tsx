@@ -84,7 +84,7 @@ describe('Phase 3 guest frontend', () => {
     mockFetch();
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: 'DŌM' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'DŌM Home Café' })).toBeInTheDocument();
     expect(await screen.findByText('Open today')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText(/your name/i), 'Ahmed');
     await userEvent.click(screen.getByRole('button', { name: /start/i }));
