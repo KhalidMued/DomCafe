@@ -29,13 +29,10 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
   return (
     <main className="welcome-page page-shell">
       <section className="hero-card welcome-hero-card" aria-labelledby="welcome-title">
-        <div className="hero-orbit" aria-hidden="true">
-          <span />
-          <span />
-          <span />
+        <div className="welcome-title-stack">
+          <p className="eyebrow">Home café</p>
+          <h1 id="welcome-title">{activeSettings.cafe_name || 'DŌM'}</h1>
         </div>
-        <p className="eyebrow">Home café</p>
-        <h1 id="welcome-title">{activeSettings.cafe_name || 'DŌM'}</h1>
         <p className="tagline">Slow coffee. Deep roots.</p>
         <p className="hero-copy" dir="auto">{activeSettings.welcome_message}</p>
         <ul className="welcome-status-row" aria-label="Café service notes">
