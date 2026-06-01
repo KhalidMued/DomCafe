@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/rtl-content-direction-polish
+ui/reduced-motion-feedback-polish
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -46,7 +46,8 @@ ui/rtl-content-direction-polish
 - Phase 7 PR #41 tuned the CSS wordmark lockup and was merged into `main`.
 - Phase 7 PR #42 replaced the welcome wordmark/label/tagline block with the user-supplied inline SVG and was merged into `main`.
 - Phase 7 PR #43 moved the orange `HOME CAFÉ` label and its orange underline upward within the inline SVG and was merged into `main`.
-- Current branch improves RTL/content-direction resilience without changing the visual design: public menu user-provided names/descriptions/options now use `dir="auto"`; admin menu/order user-provided fields and previews use `dir="auto"`; common count/time/bean labels are isolated so English labels keep natural order when the document is rendered RTL.
+- Phase 7 PR #44 improved RTL/content-direction resilience and was merged into `main`.
+- Current branch improves small interaction feedback without changing the approved welcome design: common buttons/links now have consistent transition/focus/pressed states, inputs/selects/textareas have a clearer keyboard focus ring, and loading skeleton cards have a subtle low-cost shimmer that is disabled by the existing reduced-motion media query.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -55,21 +56,34 @@ ui/rtl-content-direction-polish
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `/menu` route through Nginx: HTTP 200.
-- Browser RTL smoke check for `/menu` with `document.documentElement.dir = 'rtl'`: no obvious overflow/broken card layout; menu count, section count badges, time badges, and bean label punctuation render in natural English order while the page uses RTL direction.
+- `/` route through Nginx: HTTP 200.
+- Browser visual smoke check for `/`: approved SVG welcome card, `HOME CAFÉ` position, chips, input, and Start button remain visually unchanged apart from the intended focus/press affordance.
+- Keyboard smoke check: first Tab lands on the name input with a clear visible focus ring.
 
-## Tools / Skills Used
-- Git
-- GitHub CLI
-- GitHub PR workflow skill
-- Docker Compose
+## Hermes Tools Used
+- memory
+- skill_view
+- skill_manage
+- terminal
+- process
+- read_file
+- search_files
+- patch
+- browser tools
+
+## Technologies / Services Touched
+- Git / GitHub CLI
+- Docker / Docker Compose
 - Nginx
 - React
-- Browser screenshot verification
-- Documentation (`AGENT.md`, `ledger/STATUS.md`)
+- PostgreSQL
+- PgBouncer
+- Redis
+- Cloudflare
+- documentation
 
 ## What is pending
-- PR #44 (`ui/rtl-content-direction-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/44
+- Open a PR for `ui/reduced-motion-feedback-polish` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes

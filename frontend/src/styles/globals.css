@@ -22,6 +22,9 @@ a { color: inherit; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.5; }
+button, .cart-link, .top-bar a { transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease, transform .16s ease; }
+button:not(:disabled):active, .cart-link:active, .top-bar a:active { transform: translateY(1px); }
+button:focus-visible, .cart-link:focus-visible, .top-bar a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-nile-mist) 82%, white); outline-offset: 3px; }
 [dir="auto"] { unicode-bidi: plaintext; }
 input[dir="auto"], textarea[dir="auto"] { text-align: start; }
 
@@ -85,6 +88,7 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .option-row span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 28%, transparent); color: var(--color-palm-dust); border-radius: 999px; padding: 4px 9px; font-size: .8rem; }
 .error-text { color: var(--color-fired-clay); background: color-mix(in srgb, var(--color-fired-clay) 16%, transparent); border: 1px solid color-mix(in srgb, var(--color-fired-clay) 42%, transparent); padding: 12px 14px; border-radius: 16px; }
 .skeleton-card { padding: 28px; color: var(--color-hint); }
+.skeleton-card { background-image: linear-gradient(110deg, color-mix(in srgb, var(--color-nubian-night) 88%, black) 0%, color-mix(in srgb, var(--color-palm-dust) 8%, transparent) 42%, color-mix(in srgb, var(--color-nubian-night) 88%, black) 78%); background-size: 220% 100%; animation: skeleton-breathe 2.8s ease-in-out infinite; }
 .menu-empty-card { display: grid; gap: 10px; margin-block: 24px; text-align: center; }
 .menu-empty-card h2 { color: var(--color-palm-dust); margin: 0; }
 .menu-empty-card p { line-height: 1.7; margin: 0; }
@@ -153,6 +157,11 @@ html[dir="rtl"] .status-card-topline,
 html[dir="rtl"] .section-heading-row,
 html[dir="rtl"] .admin-menu-toolbar {
   direction: rtl;
+}
+
+@keyframes skeleton-breathe {
+  0%, 100% { background-position: 120% 0; }
+  50% { background-position: 0 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
