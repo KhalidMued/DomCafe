@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/move-home-cafe-label-up
+ui/rtl-content-direction-polish
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -45,7 +45,8 @@ ui/move-home-cafe-label-up
 - Phase 7 PR #40 fixed the first DŌM wordmark rhythm issue with equal-width spans and a CSS macron overlay and was merged into `main`.
 - Phase 7 PR #41 tuned the CSS wordmark lockup and was merged into `main`.
 - Phase 7 PR #42 replaced the welcome wordmark/label/tagline block with the user-supplied inline SVG and was merged into `main`.
-- Current branch makes the requested small SVG-only touch: moves the orange `HOME CAFÉ` label and its orange underline upward within the inline SVG while leaving the D/O/M letters, white macron, tagline, welcome copy, chips, input, button, card, and background unchanged.
+- Phase 7 PR #43 moved the orange `HOME CAFÉ` label and its orange underline upward within the inline SVG and was merged into `main`.
+- Current branch improves RTL/content-direction resilience without changing the visual design: public menu user-provided names/descriptions/options now use `dir="auto"`; admin menu/order user-provided fields and previews use `dir="auto"`; common count/time/bean labels are isolated so English labels keep natural order when the document is rendered RTL.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -54,12 +55,22 @@ ui/move-home-cafe-label-up
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `/` route through Nginx: HTTP 200.
-- Browser screenshot comparison for `/`: orange `HOME CAFÉ` label is moved up within the SVG and remains below the top orange inner border; D/O/M letters, white macron, tagline, welcome copy, chips, input, Start button, card, and background appear unchanged.
+- `/menu` route through Nginx: HTTP 200.
+- Browser RTL smoke check for `/menu` with `document.documentElement.dir = 'rtl'`: no obvious overflow/broken card layout; menu count, section count badges, time badges, and bean label punctuation render in natural English order while the page uses RTL direction.
+
+## Tools / Skills Used
+- Git
+- GitHub CLI
+- GitHub PR workflow skill
+- Docker Compose
+- Nginx
+- React
+- Browser screenshot verification
+- Documentation (`AGENT.md`, `ledger/STATUS.md`)
 
 ## What is pending
-- PR #43 (`ui/move-home-cafe-label-up`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/43
-- Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
+- Open a PR for `ui/rtl-content-direction-polish` into `main` and merge after review.
+- Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

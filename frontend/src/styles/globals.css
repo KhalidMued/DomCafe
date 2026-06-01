@@ -22,6 +22,8 @@ a { color: inherit; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.5; }
+[dir="auto"] { unicode-bidi: plaintext; }
+input[dir="auto"], textarea[dir="auto"] { text-align: start; }
 
 .page-shell { min-height: 100vh; width: min(100%, 980px); margin-inline: auto; padding: 24px 18px 64px; }
 .welcome-page { display: grid; place-items: center; width: min(100%, 1120px); }
@@ -60,12 +62,12 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .category-tabs { position: sticky; top: 0; z-index: 4; display: flex; gap: 10px; overflow-x: auto; padding: 12px; margin-block-end: 14px; border: 1px solid color-mix(in srgb, var(--color-light-rule) 16%, transparent); border-radius: 22px; background: color-mix(in srgb, var(--color-nubian-night) 90%, black); backdrop-filter: blur(16px); }
 .category-tabs a { flex: 0 0 auto; padding: 10px 14px; text-decoration: none; color: var(--color-hint); border: 1px solid transparent; border-radius: 999px; }
 .category-tabs a:focus, .category-tabs a:hover { color: var(--color-palm-dust); border-color: color-mix(in srgb, var(--color-doum-gold) 46%, transparent); background: color-mix(in srgb, var(--color-doum-gold) 10%, transparent); }
-.menu-count { color: var(--color-nile-mist); margin-block: 22px; }
+.menu-count { color: var(--color-nile-mist); direction: ltr; margin-block: 22px; unicode-bidi: isolate; }
 .menu-section { padding-block: 28px; scroll-margin-top: 68px; }
 .section-heading-row { align-items: end; display: flex; gap: 18px; justify-content: space-between; margin-block-end: 20px; }
 .section-heading-row h2 { margin-bottom: 10px; }
 .section-heading-row p { color: var(--color-hint); line-height: 1.7; margin: 0; }
-.section-heading-row > span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 22%, transparent); border-radius: 999px; color: var(--color-hint); flex: 0 0 auto; font-size: .8rem; padding: 7px 12px; }
+.section-heading-row > span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 22%, transparent); border-radius: 999px; color: var(--color-hint); direction: ltr; flex: 0 0 auto; font-size: .8rem; padding: 7px 12px; unicode-bidi: isolate; }
 .drink-grid { display: grid; gap: 18px; }
 .drink-card { overflow: hidden; display: grid; grid-template-columns: 104px 1fr; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .drink-card:focus-within, .drink-card:hover { border-color: color-mix(in srgb, var(--color-doum-gold) 46%, transparent); box-shadow: 0 30px 90px rgba(0,0,0,.28); transform: translateY(-2px); }
@@ -75,8 +77,9 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .drink-content { display: grid; gap: 10px; padding: 18px; }
 .drink-title-row { align-items: start; display: flex; gap: 12px; justify-content: space-between; }
 .drink-title-row h3 { margin: 0; }
-.drink-title-row span { border: 1px solid color-mix(in srgb, var(--color-nile-mist) 34%, transparent); border-radius: 999px; color: var(--color-nile-mist); flex: 0 0 auto; font-size: .72rem; padding: 4px 8px; }
+.drink-title-row span { border: 1px solid color-mix(in srgb, var(--color-nile-mist) 34%, transparent); border-radius: 999px; color: var(--color-nile-mist); direction: ltr; flex: 0 0 auto; font-size: .72rem; padding: 4px 8px; unicode-bidi: isolate; }
 .drink-content p, .bean-line, .detail-copy { color: var(--color-hint); line-height: 1.65; }
+.bean-line { direction: ltr; unicode-bidi: isolate; }
 .drink-content p { margin: 0; }
 .option-row { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 2px 4px; }
 .option-row span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 28%, transparent); color: var(--color-palm-dust); border-radius: 999px; padding: 4px 9px; font-size: .8rem; }
@@ -138,6 +141,19 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .admin-settings-form label { color: var(--color-palm-dust); display: grid; font-size: .88rem; gap: 8px; letter-spacing: .04em; }
 .admin-checkbox-label { align-items: center; display: flex !important; gap: 10px !important; }
 .admin-checkbox-label input { width: auto; }
+
+html[dir="rtl"] .top-bar,
+html[dir="rtl"] .menu-hero,
+html[dir="rtl"] .cart-hero,
+html[dir="rtl"] .status-hero,
+html[dir="rtl"] .category-tabs,
+html[dir="rtl"] .drink-title-row,
+html[dir="rtl"] .cart-item-heading,
+html[dir="rtl"] .status-card-topline,
+html[dir="rtl"] .section-heading-row,
+html[dir="rtl"] .admin-menu-toolbar {
+  direction: rtl;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

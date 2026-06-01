@@ -39,7 +39,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
 
       {categories.length > 0 ? (
         <nav className="category-tabs" aria-label="Menu categories">
-          {categories.map((category) => <a key={category.id} href={`#${category.id}`}>{category.name}</a>)}
+          {categories.map((category) => <a key={category.id} href={`#${category.id}`} dir="auto">{category.name}</a>)}
         </nav>
       ) : null}
 
@@ -59,7 +59,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
         <section className="menu-section" id={category.id} key={category.id}>
           <div className="section-heading-row">
             <div>
-              <h2>{category.name}</h2>
+              <h2 dir="auto">{category.name}</h2>
               {category.description ? <p dir="auto">{category.description}</p> : null}
             </div>
             <span>{category.drinks.length} {category.drinks.length === 1 ? 'drink' : 'drinks'}</span>
@@ -76,10 +76,10 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
                     {drink.estimated_time_minutes ? <span>{drink.estimated_time_minutes} min</span> : null}
                   </div>
                   <p dir="auto">{drink.description}</p>
-                  <p className="bean-line">Bean: {drink.bean?.name ?? 'House selection'}</p>
+                  <p className="bean-line">Bean: <span dir="auto">{drink.bean?.name ?? 'House selection'}</span></p>
                   <div className="option-row" aria-label={`${drink.name} options`}>
-                    {drink.temperature_options.map((option) => <span key={option}>{option}</span>)}
-                    {drink.milk_options.map((option) => <span key={option}>{option}</span>)}
+                    {drink.temperature_options.map((option) => <span key={option} dir="auto">{option}</span>)}
+                    {drink.milk_options.map((option) => <span key={option} dir="auto">{option}</span>)}
                   </div>
                   {expanded === drink.id ? <p className="detail-copy" dir="auto">{drink.ingredients.join(', ') || 'Simple and quiet.'}</p> : null}
                   <button type="button" onClick={() => addCartItem(drink)} aria-label={`Add ${drink.name}`}>Add to order</button>
