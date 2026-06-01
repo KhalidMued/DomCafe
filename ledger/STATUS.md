@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/reduced-motion-feedback-polish
+ui/admin-login-svg-lockup
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -47,7 +47,8 @@ ui/reduced-motion-feedback-polish
 - Phase 7 PR #42 replaced the welcome wordmark/label/tagline block with the user-supplied inline SVG and was merged into `main`.
 - Phase 7 PR #43 moved the orange `HOME CAFÉ` label and its orange underline upward within the inline SVG and was merged into `main`.
 - Phase 7 PR #44 improved RTL/content-direction resilience and was merged into `main`.
-- Current branch improves small interaction feedback without changing the approved welcome design: common buttons/links now have consistent transition/focus/pressed states, inputs/selects/textareas have a clearer keyboard focus ring, and loading skeleton cards have a subtle low-cost shimmer that is disabled by the existing reduced-motion media query.
+- Phase 7 PR #45 improved small interaction feedback and was merged into `main`.
+- Current branch replaces the `/admin/login` splash header with the same inline SVG lockup used by the approved welcome screen, removing the old separate `Admin`, `DŌM`, and `Control room` header text while leaving the login form copy and controls unchanged.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -56,14 +57,12 @@ ui/reduced-motion-feedback-polish
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `/` route through Nginx: HTTP 200.
-- Browser visual smoke check for `/`: approved SVG welcome card, `HOME CAFÉ` position, chips, input, and Start button remain visually unchanged apart from the intended focus/press affordance.
-- Keyboard smoke check: first Tab lands on the name input with a clear visible focus ring.
+- Local `/admin/login` route through Nginx: HTTP 200.
+- Public `/admin/login` route through Cloudflare Tunnel: HTTP 200.
+- Browser visual smoke check for `/admin/login`: approved SVG lockup appears at the top of the admin login card; no duplicate old `Admin`, `DŌM`, or `Control room` header text appears; username/password/login controls remain usable.
 
 ## Hermes Tools Used
-- memory
 - skill_view
-- skill_manage
 - terminal
 - process
 - read_file
@@ -83,7 +82,7 @@ ui/reduced-motion-feedback-polish
 - documentation
 
 ## What is pending
-- PR #45 (`ui/reduced-motion-feedback-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/45
+- Open a PR for `ui/admin-login-svg-lockup` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
