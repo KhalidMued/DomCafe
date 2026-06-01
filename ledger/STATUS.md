@@ -95,7 +95,7 @@ docs/final-mvp-acceptance
 - documentation
 
 ## What is pending
-- Open a docs-only PR for `docs/final-mvp-acceptance` into `main`.
+- PR #50 (`docs/final-mvp-acceptance`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/50
 - After this docs/status PR is merged, delete the merged branch.
 - Three.js is intentionally deferred for a later optional enhancement.
 
