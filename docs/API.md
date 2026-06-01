@@ -496,6 +496,31 @@ Response:
 }
 ```
 
+## Discord order notifications
+
+When `DISCORD_WEBHOOK_URL` is configured and notifications are enabled, creating a new public order sends a Discord webhook message after the order is committed.
+
+Notifications can be enabled either by environment (`DISCORD_NOTIFICATIONS_ENABLED=true`) or by the `discord_notifications_enabled` setting row. The database setting allows runtime control without redeploying.
+
+Message shape:
+
+```text
+☕ New DŌM order
+
+Order #12
+Guest: Ahmed
+
+Items:
+- 2x Iced Spanish Latte
+  Temperature: iced
+  Milk: whole milk
+  Note: Less sweet
+
+Status: New
+```
+
+Webhook failures are logged and do not fail public order creation. Secrets and webhook URLs must not be printed in logs or responses.
+
 ## Friendly error shape
 
 Public guest errors use this shape:
