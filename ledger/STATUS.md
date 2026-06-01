@@ -62,7 +62,7 @@ docs/production-env-verification
 - Safe Discord webhook test: HTTP 204.
 
 ## What is pending
-- Open a docs-only PR for `docs/production-env-verification` into `main` and merge after review.
+- PR #36 (`docs/production-env-verification`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/36
 - Remaining Phase 7 work after this docs-only branch: cart/status visual polish, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
