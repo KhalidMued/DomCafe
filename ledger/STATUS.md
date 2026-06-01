@@ -53,7 +53,7 @@ ops/phase6-readiness
 - `cloudflared` service: active and enabled.
 
 ## What is pending
-- Open a PR for `ops/phase6-readiness` into `main` and merge after review.
+- PR #32 (`ops/phase6-readiness`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/32
 - After this branch merges, Phase 6 can be considered complete and the next planned phase is Phase 7 — UI Polish.
 
 ## Notes
