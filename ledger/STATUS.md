@@ -58,7 +58,7 @@ ui/move-home-cafe-label-up
 - Browser screenshot comparison for `/`: orange `HOME CAFÉ` label is moved up within the SVG and remains below the top orange inner border; D/O/M letters, white macron, tagline, welcome copy, chips, input, Start button, card, and background appear unchanged.
 
 ## What is pending
-- Open a PR for `ui/move-home-cafe-label-up` into `main` and merge after review.
+- PR #43 (`ui/move-home-cafe-label-up`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/43
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
