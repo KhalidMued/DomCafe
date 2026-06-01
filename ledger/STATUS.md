@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 7 — UI Polish in progress
+Phase 7 — UI Polish complete; MVP acceptance review ready
 
 ## Current branch
-fix/admin-navigation-usability
+docs/phase-7-completion-status
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -50,34 +50,27 @@ fix/admin-navigation-usability
 - Phase 7 PR #45 improved small interaction feedback and was merged into `main`.
 - Phase 7 PR #46 replaced the `/admin/login` splash header with the approved inline SVG lockup and was merged into `main`.
 - Phase 7 PR #47 fixed the initial blank-screen/slow-transition path with a production frontend container, immediate DŌM loading shell, and route-level lazy loading, and was merged into `main`.
-- Current branch adds a focused admin navigation header with Dashboard, Orders, Menu, Beans, and Settings links; adds a visible Logout button that clears the stored admin token and returns to `/admin/login`; and adds a dedicated `/admin/beans` page backed by the existing admin menu/beans API.
+- Phase 7 PR #48 added a focused admin navigation header with Dashboard, Orders, Menu, Beans, and Settings links; added a visible Logout button that clears the stored admin token and returns to `/admin/login`; and added a dedicated `/admin/beans` page backed by the existing admin menu/beans API. It was merged into `main`.
+- Current branch records Phase 7 as complete and documents that the optional Three.js welcome component is intentionally deferred because the approved simple welcome UI is already in place and recent performance work made avoiding non-essential first-screen weight the safer MVP choice.
 
 ## Verification
-- Admin route inspection: `/admin/dashboard`, `/admin/orders`, `/admin/menu`, and `/admin/settings` already existed; `/admin/beans` had only an unused placeholder file and no active route before this branch.
-- Frontend tests: `28 passed`.
-- Frontend production build: passed.
-- Docker Compose rebuild/restart for frontend/Nginx path: passed.
+- Previous PR merge verification: PR #48 is merged into `main`; local `main` was fast-forwarded; local and remote `fix/admin-navigation-usability` branches were deleted.
+- Frontend tests after merging PR #48: `28 passed`.
+- Frontend production build after merging PR #48: passed.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Local `/admin/dashboard` route through Nginx: HTTP 200.
-- Local `/admin/beans` route through Nginx: HTTP 200.
 - Local guest `/` route through Nginx: HTTP 200.
-- Browser admin smoke check: protected admin pages show Dashboard, Orders, Menu, Beans, Settings, and Logout controls.
-- Browser Beans smoke check: Beans navigation opens `/admin/beans`, shows the Beans heading, Add bean action, and existing bean management API results when authorized.
-- Browser logout smoke check: Logout clears `dom_admin_token`, redirects to `/admin/login`, and leaves the admin login form visible.
+- Local `/admin/beans` route through Nginx: HTTP 200.
+- Phase 7 optional Three.js decision: deferred for MVP; no Three.js bundle or decorative main-page treatment is needed to meet the current UI polish and performance goals.
 
 ## Hermes Tools Used
 - skill_view
 - terminal
-- process
 - read_file
-- write_file
-- patch
 - search_files
-- browser tools
+- patch
 
 ## Technologies / Services Touched
 - Git / GitHub CLI
-- Docker / Docker Compose
 - Nginx
 - React
 - Vite
@@ -86,8 +79,8 @@ fix/admin-navigation-usability
 - documentation
 
 ## What is pending
-- PR #48 (`fix/admin-navigation-usability`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/48
-- Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
+- PR #49 (`docs/phase-7-completion-status`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/49
+- After this docs/status PR is merged, run a final MVP acceptance pass against the success criteria in `AGENT.md` section 34.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
