@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 6 — Security and deployment hardening in progress
+Phase 6 — Security and deployment hardening final readiness
 
 ## Current branch
-ops/pgbouncer-health-check
+ops/phase6-readiness
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -33,23 +33,32 @@ ops/pgbouncer-health-check
 - Phase 6 PR #28 allowed the Cloudflare Tunnel hostname `dom.khalidmued.com` through the Vite dev server host allowlist and was merged into `main`.
 - Phase 6 PR #29 documented the Cloudflare Tunnel service setup, verification commands, and network exposure model and was merged into `main`.
 - Phase 6 PR #30 resolved dependency audit findings and was merged into `main`.
-- Current branch adds an explicit PgBouncer health check script and configures the app database user as a PgBouncer stats user for read-only pool visibility.
+- Phase 6 PR #31 added the PgBouncer health check and was merged into `main`.
+- Current branch performs final Phase 6 deployment readiness verification, documents the readiness checklist, and makes backup output path configurable via `BACKUP_DIR` for non-root smoke tests.
 
 ## Verification
 - `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
-- Rendered PgBouncer config includes `stats_users = dom_cafe_user`.
+- Backend, PostgreSQL, PgBouncer, and Redis have no host port bindings.
+- `uvx pip-audit -r backend/requirements.txt`: no known vulnerabilities found.
+- `npm audit --audit-level=high`: found 0 vulnerabilities.
+- Backend tests: `67 passed`.
+- Frontend tests: `22 passed`.
+- Frontend production build: passed.
+- `docker compose up -d --build`: passed.
 - `./scripts/check-pgbouncer.sh`: passed; verified application query through PgBouncer and pool visibility via `SHOW POOLS`.
-- Docker Compose rebuild/restart for PgBouncer, backend, and Nginx path: passed.
+- Backup creation with `BACKUP_DIR=/tmp/domcafe-backups ./scripts/backup-db.sh`: passed.
+- Restore smoke test into temporary database `dom_cafe_restore_check`: passed; temporary database was dropped after validation.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
+- `cloudflared` service: active and enabled.
 
 ## What is pending
-- PR #31 (`ops/pgbouncer-health-check`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/31
-- Remaining Phase 6 work after this branch: final deployment readiness checks and final docs/runbook cleanup.
+- Open a PR for `ops/phase6-readiness` into `main` and merge after review.
+- After this branch merges, Phase 6 can be considered complete and the next planned phase is Phase 7 — UI Polish.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
 - Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, tunnel credential JSON files, or connection strings.
 - Runtime verification scripts should construct secrets in memory without printing them.
-- Keep local dev data clean: restore any runtime verification edits immediately after assertions.
+- Keep local dev data clean: restore smoke tests should use a temporary database and drop it after validation.
 - The Cloudflare Tunnel uses `protocol: http2` because QUIC connections were unstable on this server/network during setup.
