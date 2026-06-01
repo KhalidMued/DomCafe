@@ -57,7 +57,7 @@ ui/replace-welcome-wordmark-svg
 - Browser screenshot comparison for `/`: supplied inline SVG renders the HOME CAFÉ label, D/O/M letters, macron rectangle, and tagline as one SVG lockup; no duplicate external label/tagline appears; background, service chips, input, and Start button remain unchanged.
 
 ## What is pending
-- Open a PR for `ui/replace-welcome-wordmark-svg` into `main` and merge after review.
+- PR #42 (`ui/replace-welcome-wordmark-svg`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/42
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
