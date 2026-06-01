@@ -46,7 +46,7 @@ ui/welcome-polish
 - Browser smoke check for `/`: welcome page renders the polished hero, service chips, name input, and start button without obvious layout issues on the desktop viewport.
 
 ## What is pending
-- Open a PR for `ui/welcome-polish` into `main` and merge after review.
+- PR #33 (`ui/welcome-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/33
 - Remaining Phase 7 work after this branch: menu/card visual polish, empty states, broader RTL review, and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
