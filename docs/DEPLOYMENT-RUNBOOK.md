@@ -89,6 +89,30 @@ Restart after config changes:
 sudo systemctl restart cloudflared
 ```
 
+## PgBouncer pool health
+
+PgBouncer runs as an internal-only Compose service on port `6432`; it must not publish a host port.
+
+The app database user is configured as a PgBouncer `stats_users` entry so operators can run read-only pool visibility checks without granting admin-console privileges.
+
+Run the PgBouncer health check after database, pooler, or backend deployment changes:
+
+```bash
+./scripts/check-pgbouncer.sh
+```
+
+Expected result:
+
+```text
+PgBouncer health OK
+Verified application query through PgBouncer and pool visibility via SHOW POOLS.
+```
+
+The script verifies both:
+
+- application queries can pass through PgBouncer to PostgreSQL; and
+- `SHOW POOLS` exposes the expected application database pool.
+
 ## Smoke checks
 
 After restarting the stack or tunnel, verify:

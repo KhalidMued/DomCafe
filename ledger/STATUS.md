@@ -4,7 +4,7 @@
 Phase 6 — Security and deployment hardening in progress
 
 ## Current branch
-security/dependency-audits
+ops/pgbouncer-health-check
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -32,24 +32,20 @@ security/dependency-audits
 - Phase 6 PR #27 added Nginx edge limits plus Redis-backed backend fallback fixed-window limits for high-risk write endpoints and was merged into `main`.
 - Phase 6 PR #28 allowed the Cloudflare Tunnel hostname `dom.khalidmued.com` through the Vite dev server host allowlist and was merged into `main`.
 - Phase 6 PR #29 documented the Cloudflare Tunnel service setup, verification commands, and network exposure model and was merged into `main`.
-- Current branch resolves dependency audit findings by updating vulnerable Python dependency pins and replacing `python-jose` with `PyJWT` for admin JWT handling.
+- Phase 6 PR #30 resolved dependency audit findings and was merged into `main`.
+- Current branch adds an explicit PgBouncer health check script and configures the app database user as a PgBouncer stats user for read-only pool visibility.
 
 ## Verification
-- Initial `pip-audit -r backend/requirements.txt`: found 17 known vulnerabilities across `python-jose`, `python-multipart`, Pillow, pytest, and Starlette.
-- Updated Python dependency pins and JWT library migration completed.
-- Final `pip-audit -r backend/requirements.txt`: no known vulnerabilities found.
-- `npm audit --audit-level=high`: 0 high/critical vulnerabilities.
-- Backend tests: `67 passed`.
-- Frontend tests: `22 passed`.
-- Frontend production build: passed.
-- Docker Compose rebuild/restart for backend/Nginx path: passed.
+- `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
+- Rendered PgBouncer config includes `stats_users = dom_cafe_user`.
+- `./scripts/check-pgbouncer.sh`: passed; verified application query through PgBouncer and pool visibility via `SHOW POOLS`.
+- Docker Compose rebuild/restart for PgBouncer, backend, and Nginx path: passed.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
 
 ## What is pending
-- PR #30 (`security/dependency-audits`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/30
-- Remaining Phase 6 work after this branch: PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
+- PR #31 (`ops/pgbouncer-health-check`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/31
+- Remaining Phase 6 work after this branch: final deployment readiness checks and final docs/runbook cleanup.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

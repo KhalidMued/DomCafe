@@ -46,6 +46,7 @@ services:
       PGBOUNCER_POOL_MODE: transaction
       PGBOUNCER_LISTEN_PORT: 6432
       PGBOUNCER_AUTH_TYPE: plain
+      PGBOUNCER_STATS_USERS: ${POSTGRES_USER:-dom_cafe_user}
     expose:
       - "6432"
     depends_on:
