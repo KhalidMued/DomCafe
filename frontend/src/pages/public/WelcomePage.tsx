@@ -18,6 +18,8 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
   }, []);
 
   const activeSettings = settings ?? fallbackSettings;
+  const cafeName = activeSettings.cafe_name || 'DŌM';
+  const useDomWordmark = cafeName.trim().toLocaleUpperCase() === 'DŌM' || cafeName.trim().toLocaleUpperCase() === 'DOM';
 
   function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,7 +33,15 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
       <section className="hero-card welcome-hero-card" aria-labelledby="welcome-title">
         <div className="welcome-title-stack">
           <p className="eyebrow">Home café</p>
-          <h1 id="welcome-title">{activeSettings.cafe_name || 'DŌM'}</h1>
+          <h1 id="welcome-title" aria-label={cafeName}>
+            {useDomWordmark ? (
+              <span className="dom-wordmark" aria-hidden="true">
+                <span>D</span>
+                <span className="o-macron">O</span>
+                <span>M</span>
+              </span>
+            ) : cafeName}
+          </h1>
         </div>
         <p className="tagline">Slow coffee. Deep roots.</p>
         <p className="hero-copy" dir="auto">{activeSettings.welcome_message}</p>

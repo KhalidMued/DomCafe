@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/fix-welcome-dom-spacing
+ui/fix-welcome-wordmark
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -41,7 +41,8 @@ ui/fix-welcome-dom-spacing
 - PR #36 recorded production `.env` verification and was merged into `main`.
 - Phase 7 PR #37 polished cart and order-status pages and was merged into `main`.
 - Phase 7 PR #38 restored the main/welcome page closer to the user's attached old simple card and was merged into `main`.
-- Current branch fixes the remaining welcome-card issue: the large white DŌM mark no longer covers the small orange `Home café` label, the DŌM mark is lowered with a visible gap, and the card is slightly smaller.
+- Phase 7 PR #39 separated the large white DŌM mark from the small orange `Home café` label and was merged into `main`.
+- Current branch fixes the remaining DŌM wordmark rhythm issue by rendering the brand mark as equal-width letter spans and drawing the macron with CSS over a normal `O`, avoiding fallback glyph width differences from the `Ō` character.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -51,10 +52,10 @@ ui/fix-welcome-dom-spacing
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 - `/` route through Nginx: HTTP 200.
-- Browser screenshot comparison for `/`: `Home café` is visibly separated above the large white DŌM mark, DŌM is lower in the card without overlap, the card is slightly smaller, chips remain spaced, and no obvious desktop layout defects were found.
+- Browser screenshot comparison for `/`: D, O-with-CSS-macron, and M are evenly spaced as a unified wordmark; `Home café` and the tagline are centered relative to the wordmark container; no overlap or obvious desktop layout defects were found.
 
 ## What is pending
-- PR #39 (`ui/fix-welcome-dom-spacing`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/39
+- Open a PR for `ui/fix-welcome-wordmark` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
