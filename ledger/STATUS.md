@@ -54,7 +54,7 @@ ui/cart-status-polish
 - Browser smoke check for `/order/41`: status hero, friendly error, and loading card render with readable spacing and no obvious desktop layout defects.
 
 ## What is pending
-- Open a PR for `ui/cart-status-polish` into `main` and merge after review.
+- PR #37 (`ui/cart-status-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/37
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
