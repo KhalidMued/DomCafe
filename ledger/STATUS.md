@@ -44,7 +44,7 @@ ops/pgbouncer-health-check
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 
 ## What is pending
-- Open a PR for `ops/pgbouncer-health-check` into `main` and merge after review.
+- PR #31 (`ops/pgbouncer-health-check`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/31
 - Remaining Phase 6 work after this branch: final deployment readiness checks and final docs/runbook cleanup.
 
 ## Notes
