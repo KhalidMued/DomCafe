@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/admin-login-svg-lockup
+fix/initial-load-performance
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -48,24 +48,30 @@ ui/admin-login-svg-lockup
 - Phase 7 PR #43 moved the orange `HOME CAFÉ` label and its orange underline upward within the inline SVG and was merged into `main`.
 - Phase 7 PR #44 improved RTL/content-direction resilience and was merged into `main`.
 - Phase 7 PR #45 improved small interaction feedback and was merged into `main`.
-- Current branch replaces the `/admin/login` splash header with the same inline SVG lockup used by the approved welcome screen, removing the old separate `Admin`, `DŌM`, and `Control room` header text while leaving the login form copy and controls unchanged.
+- Phase 7 PR #46 replaced the `/admin/login` splash header with the approved inline SVG lockup and was merged into `main`.
+- Current branch fixes the initial blank-screen/slow-transition path by serving the frontend as a production static build from the frontend container, adding an immediate lightweight DŌM loading shell in `index.html`, and lazy-loading non-critical route pages while keeping the approved welcome UI and DOM branding intact.
 
 ## Verification
 - Frontend tests: `25 passed`.
 - Frontend production build: passed.
+- Docker Compose config validation: passed.
 - Docker Compose rebuild/restart for frontend/Nginx path: passed.
+- Frontend container runtime: Nginx serving the Vite production build on port 5173; Vite dev server no longer runs in the container.
+- Initial HTML check: DŌM branded loading shell is present; `/@vite/client` is absent; production `/assets/...` script is served.
 - Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
-- Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
-- Local `/admin/login` route through Nginx: HTTP 200.
-- Public `/admin/login` route through Cloudflare Tunnel: HTTP 200.
-- Browser visual smoke check for `/admin/login`: approved SVG lockup appears at the top of the admin login card; no duplicate old `Admin`, `DŌM`, or `Control room` header text appears; username/password/login controls remain usable.
+- Local `/` route through Nginx: HTTP 200.
+- Local `/menu` route through Nginx: HTTP 200.
+- Tailscale `/` route through Nginx: HTTP 200 and includes the loading shell.
+- Browser visual smoke check for `/`: no blank white screen observed; approved SVG welcome card and existing chips/input/Start button remain unchanged.
+- Browser route-transition smoke check: `/menu` and `/cart` routes load through the split production bundle without obvious delay or broken layout.
 
 ## Hermes Tools Used
 - skill_view
 - terminal
 - process
 - read_file
+- write_file
 - search_files
 - patch
 - browser tools
@@ -75,6 +81,7 @@ ui/admin-login-svg-lockup
 - Docker / Docker Compose
 - Nginx
 - React
+- Vite
 - PostgreSQL
 - PgBouncer
 - Redis
@@ -82,7 +89,7 @@ ui/admin-login-svg-lockup
 - documentation
 
 ## What is pending
-- PR #46 (`ui/admin-login-svg-lockup`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/46
+- Open a PR for `fix/initial-load-performance` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
