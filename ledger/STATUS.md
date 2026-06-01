@@ -4,7 +4,7 @@
 Phase 6 — Security and deployment hardening in progress
 
 ## Current branch
-security/rate-limit-critical-actions
+config/cloudflare-domain-allowed-host
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -29,27 +29,22 @@ security/rate-limit-critical-actions
 - Phase 5 PR #24 added the dedicated Herms/agent menu/bean lookup and availability-control API surface.
 - Phase 5 PR #25 added Discord order notifications and was merged into `main`.
 - Phase 6 PR #26 made the Docker Compose Nginx entrypoint reachable over the private Tailscale network by binding only Nginx to `0.0.0.0:11080:80`; backend, PostgreSQL, PgBouncer, and Redis remain internal-only with no host port bindings.
-- Current branch adds Nginx edge limits plus Redis-backed backend fallback fixed-window limits for high-risk write endpoints:
-  - `/api/admin/login` allows 5 attempts per client IP/source address per minute;
-  - `/api/orders` allows 10 attempts per client IP/source address per minute;
-  - over-limit requests return HTTP 429;
-  - backend fallback rate limiting ignores spoofable forwarded headers and fails open if Redis is unavailable, while the Nginx edge limits remain active.
+- Phase 6 PR #27 added Nginx edge limits plus Redis-backed backend fallback fixed-window limits for high-risk write endpoints and was merged into `main`.
+- Current branch allows the Cloudflare Tunnel hostname `dom.khalidmued.com` through the Vite dev server host allowlist so the tunnel can reach the existing Nginx-only entrypoint.
 
 ## Verification
-- Focused backend rate-limit tests: `3 passed`.
-- Full backend tests: `67 passed`.
 - Frontend tests: `22 passed`.
 - Frontend production build: passed.
-- Docker Compose rebuild for backend/frontend/nginx: passed.
-- Nginx config test (`nginx -t`) passed.
-- Runtime verification through Nginx passed:
-  - `/api/admin/login` returned five HTTP 401 responses, then HTTP 429 on the sixth attempt from the same source address;
-  - `/api/orders` returned ten HTTP 400 validation/service responses for a missing drink, then HTTP 429 on the eleventh attempt from the same source address;
-  - temporary Redis rate-limit keys were deleted after verification;
-  - `/api/health` returned HTTP 200 with database and Redis OK.
+- `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
+- Docker Compose rebuild/restart for the frontend/Nginx path: passed.
+- Local Nginx request with `Host: dom.khalidmued.com`: HTTP 200.
+- Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
+- Cloudflare Tunnel foreground check using `--protocol http2`: active connector registered and `https://dom.khalidmued.com` returned HTTP 200.
+- Cloudflare Tunnel `/api/health` check: `https://dom.khalidmued.com/api/health` returned HTTP 200 with database and Redis OK.
 
 ## What is pending
-- PR #27 (`security/rate-limit-critical-actions`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/27
+- PR #28 (`config/cloudflare-domain-allowed-host`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/28
+- Complete the guided Cloudflare Tunnel service installation step so the tunnel runs persistently after reboot.
 - Remaining Phase 6 work after this branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
@@ -57,3 +52,4 @@ security/rate-limit-critical-actions
 - Do not expose local admin credentials, database passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, or connection strings.
 - Runtime verification scripts should construct secrets in memory without printing them.
 - Keep local dev data clean: restore any runtime verification edits immediately after assertions.
+- The Cloudflare Tunnel needed `--protocol http2` during verification because QUIC connections were unstable on this network.
