@@ -83,7 +83,7 @@ ui/reduced-motion-feedback-polish
 - documentation
 
 ## What is pending
-- Open a PR for `ui/reduced-motion-feedback-polish` into `main` and merge after review.
+- PR #45 (`ui/reduced-motion-feedback-polish`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/45
 - Remaining Phase 7 work after this branch: optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
