@@ -47,6 +47,8 @@ POST /api/orders
 Content-Type: application/json
 ```
 
+Rate limit: 10 attempts per client IP/source address per minute. Extra attempts return `429`.
+
 Request:
 
 ```json
@@ -86,7 +88,16 @@ Returns guest-safe order details, item snapshots, and a friendly status label.
 
 ## Admin routes
 
-All admin routes require:
+### Admin login
+
+```http
+POST /api/admin/login
+Content-Type: application/json
+```
+
+Rate limit: 5 attempts per client IP/source address per minute. Extra attempts return `429`.
+
+All protected admin routes require:
 
 ```http
 Authorization: Bearer ADMIN_TOKEN

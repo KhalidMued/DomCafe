@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Phase 5 — Agent API and Discord notification complete; Tailscale development access config in progress
+Phase 6 — Security and deployment hardening in progress
 
 ## Current branch
-config/tailscale-nginx-bind
+security/rate-limit-critical-actions
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -28,20 +28,29 @@ config/tailscale-nginx-bind
 - Phase 5 PR #23 added the dedicated Herms/agent order-control API surface.
 - Phase 5 PR #24 added the dedicated Herms/agent menu/bean lookup and availability-control API surface.
 - Phase 5 PR #25 added Discord order notifications and was merged into `main`.
-- Current branch makes the Docker Compose Nginx entrypoint reachable over the private Tailscale network by binding only Nginx to `0.0.0.0:11080:80`; backend, PostgreSQL, PgBouncer, and Redis remain internal-only with no host port bindings.
+- Phase 6 PR #26 made the Docker Compose Nginx entrypoint reachable over the private Tailscale network by binding only Nginx to `0.0.0.0:11080:80`; backend, PostgreSQL, PgBouncer, and Redis remain internal-only with no host port bindings.
+- Current branch adds Nginx edge limits plus Redis-backed backend fallback fixed-window limits for high-risk write endpoints:
+  - `/api/admin/login` allows 5 attempts per client IP/source address per minute;
+  - `/api/orders` allows 10 attempts per client IP/source address per minute;
+  - over-limit requests return HTTP 429;
+  - backend fallback rate limiting ignores spoofable forwarded headers and fails open if Redis is unavailable, while the Nginx edge limits remain active.
 
 ## Verification
-- Docker Compose config validation passed for both base and production override compose files.
-- Resolved compose config shows only Nginx has a published host port: `0.0.0.0:11080->80/tcp`.
-- Resolved compose config shows backend, frontend, PostgreSQL, PgBouncer, and Redis have no published host ports.
-- Restarted the stack with `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`; only the Nginx container was recreated.
+- Focused backend rate-limit tests: `3 passed`.
+- Full backend tests: `67 passed`.
+- Frontend tests: `22 passed`.
+- Frontend production build: passed.
+- Docker Compose rebuild for backend/frontend/nginx: passed.
+- Nginx config test (`nginx -t`) passed.
 - Runtime verification through Nginx passed:
-  - `http://localhost:11080/` returned HTTP 200;
-  - `http://100.105.229.98:11080/` returned HTTP 200.
+  - `/api/admin/login` returned five HTTP 401 responses, then HTTP 429 on the sixth attempt from the same source address;
+  - `/api/orders` returned ten HTTP 400 validation/service responses for a missing drink, then HTTP 429 on the eleventh attempt from the same source address;
+  - temporary Redis rate-limit keys were deleted after verification;
+  - `/api/health` returned HTTP 200 with database and Redis OK.
 
 ## What is pending
-- PR #26 (`config/tailscale-nginx-bind`) is open for review and merge into `main`.
-- Remaining project work after this branch: Phase 6 hardening/final QA, dependency audits, rate-limit polish if not already sufficient, final deployment readiness checks, and final docs/runbook cleanup.
+- Commit, push, and open a PR for this rate-limit hardening branch.
+- Remaining Phase 6 work after this branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

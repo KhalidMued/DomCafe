@@ -9,6 +9,7 @@ from app.schemas.public import (
     PublicCategoryResponse,
     PublicSettingsResponse,
 )
+from app.security.rate_limit import enforce_order_create_rate_limit
 from app.services.public import (
     create_guest_order,
     get_guest_order_status,
@@ -34,7 +35,11 @@ async def public_menu(session: AsyncSession = Depends(get_session)):
     response_model=OrderCreateResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_order(payload: OrderCreate, session: AsyncSession = Depends(get_session)):
+async def create_order(
+    payload: OrderCreate,
+    _rate_limit: None = Depends(enforce_order_create_rate_limit),
+    session: AsyncSession = Depends(get_session),
+):
     return await create_guest_order(session, payload)
 
 

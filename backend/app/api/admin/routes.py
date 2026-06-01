@@ -48,6 +48,7 @@ from app.services.admin_menu import (
     update_category_details,
     update_drink_details,
 )
+from app.security.rate_limit import enforce_admin_login_rate_limit
 from app.services.admin_orders import list_recent_orders, update_order_status
 from app.services.admin_uploads import upload_drink_photo
 
@@ -58,6 +59,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 @router.post("/admin/login", response_model=AdminTokenResponse)
 async def login(
     payload: AdminLoginRequest,
+    _rate_limit: None = Depends(enforce_admin_login_rate_limit),
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, str]:
     token = await authenticate_admin(session, payload.username, payload.password)
