@@ -54,7 +54,7 @@ ui/fix-welcome-dom-spacing
 - Browser screenshot comparison for `/`: `Home café` is visibly separated above the large white DŌM mark, DŌM is lower in the card without overlap, the card is slightly smaller, chips remain spaced, and no obvious desktop layout defects were found.
 
 ## What is pending
-- Open a PR for `ui/fix-welcome-dom-spacing` into `main` and merge after review.
+- PR #39 (`ui/fix-welcome-dom-spacing`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/39
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
