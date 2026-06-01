@@ -4,7 +4,7 @@
 Phase 6 — Security and deployment hardening in progress
 
 ## Current branch
-docs/cloudflare-tunnel-service
+security/dependency-audits
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -31,19 +31,25 @@ docs/cloudflare-tunnel-service
 - Phase 6 PR #26 made the Docker Compose Nginx entrypoint reachable over the private Tailscale network by binding only Nginx to `0.0.0.0:11080:80`; backend, PostgreSQL, PgBouncer, and Redis remain internal-only with no host port bindings.
 - Phase 6 PR #27 added Nginx edge limits plus Redis-backed backend fallback fixed-window limits for high-risk write endpoints and was merged into `main`.
 - Phase 6 PR #28 allowed the Cloudflare Tunnel hostname `dom.khalidmued.com` through the Vite dev server host allowlist and was merged into `main`.
-- Cloudflare Tunnel service is installed and enabled for the `domcafe` tunnel, routing `dom.khalidmued.com` to `http://127.0.0.1:11080` with `protocol: http2`.
-- Current branch documents the Cloudflare Tunnel service setup, verification commands, and network exposure model.
+- Phase 6 PR #29 documented the Cloudflare Tunnel service setup, verification commands, and network exposure model and was merged into `main`.
+- Current branch resolves dependency audit findings by updating vulnerable Python dependency pins and replacing `python-jose` with `PyJWT` for admin JWT handling.
 
 ## Verification
-- `cloudflared` system service: active and enabled.
-- Cloudflare Tunnel registered four HTTP/2 edge connections after service restart.
-- `https://dom.khalidmued.com`: HTTP 200.
-- `https://dom.khalidmued.com/api/health`: HTTP 200 with database and Redis OK.
+- Initial `pip-audit -r backend/requirements.txt`: found 17 known vulnerabilities across `python-jose`, `python-multipart`, Pillow, pytest, and Starlette.
+- Updated Python dependency pins and JWT library migration completed.
+- Final `pip-audit -r backend/requirements.txt`: no known vulnerabilities found.
+- `npm audit --audit-level=high`: 0 high/critical vulnerabilities.
+- Backend tests: `67 passed`.
+- Frontend tests: `22 passed`.
+- Frontend production build: passed.
+- Docker Compose rebuild/restart for backend/Nginx path: passed.
+- Local `/api/health` through Nginx: HTTP 200 with database and Redis OK.
+- Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 - `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
 
 ## What is pending
-- PR #29 (`docs/cloudflare-tunnel-service`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/29
-- Remaining Phase 6 work after this docs branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
+- Open a PR for `security/dependency-audits` into `main` and merge after review.
+- Remaining Phase 6 work after this branch: PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

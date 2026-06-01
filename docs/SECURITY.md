@@ -32,4 +32,10 @@ Drink photo uploads are restricted to safe image types, size-limited, verified a
 
 ## Dependency security
 
-Phase 6 hardening should include `pip-audit` for Python dependencies and `npm audit` for frontend dependencies. High and critical findings must be resolved before deployment.
+Phase 6 dependency audits run `pip-audit` for Python dependencies and `npm audit --audit-level=high` for frontend dependencies. High and critical findings must be resolved before deployment.
+
+Current audit hardening:
+
+- Backend dependency pins were updated to remove known Python advisories in FastAPI/Starlette, `python-multipart`, Pillow, pytest, and `python-jose`.
+- Admin JWT handling uses `PyJWT` instead of `python-jose` because `python-jose` still had an advisory without a fixed release.
+- `pytest-asyncio` is pinned explicitly because the backend test suite contains async tests.
