@@ -4,7 +4,7 @@
 Phase 7 — UI Polish in progress
 
 ## Current branch
-ui/tune-welcome-wordmark-lockup
+ui/replace-welcome-wordmark-svg
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -43,7 +43,8 @@ ui/tune-welcome-wordmark-lockup
 - Phase 7 PR #38 restored the main/welcome page closer to the user's attached old simple card and was merged into `main`.
 - Phase 7 PR #39 separated the large white DŌM mark from the small orange `Home café` label and was merged into `main`.
 - Phase 7 PR #40 fixed the first DŌM wordmark rhythm issue with equal-width spans and a CSS macron overlay and was merged into `main`.
-- Current branch makes the requested focused wordmark tuning only: explicit `o-wrap`/`macron` markup, D-only negative kerning adjustment, and a tighter wordmark-to-tagline lockup gap.
+- Phase 7 PR #41 tuned the CSS wordmark lockup and was merged into `main`.
+- Current branch replaces the entire welcome wordmark/label/tagline block with the user-supplied inline SVG, wrapped only in a centered div, and leaves the rest of the welcome card unchanged.
 
 ## Verification
 - Frontend tests: `25 passed`.
@@ -53,10 +54,10 @@ ui/tune-welcome-wordmark-lockup
 - Tailscale `/api/health` through Nginx: HTTP 200 with database and Redis OK.
 - Public `/api/health` through Cloudflare Tunnel: HTTP 200 with database and Redis OK.
 - `/` route through Nginx: HTTP 200.
-- Browser screenshot comparison for `/`: macron is visibly restored over the normal O using a positioned element, D-O and O-M spacing are visually balanced without global letter-spacing, the tagline sits closer to the wordmark like a logo lockup, and background/label/chips/input/button remain unchanged.
+- Browser screenshot comparison for `/`: supplied inline SVG renders the HOME CAFÉ label, D/O/M letters, macron rectangle, and tagline as one SVG lockup; no duplicate external label/tagline appears; background, service chips, input, and Start button remain unchanged.
 
 ## What is pending
-- PR #41 (`ui/tune-welcome-wordmark-lockup`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/41
+- Open a PR for `ui/replace-welcome-wordmark-svg` into `main` and merge after review.
 - Remaining Phase 7 work after this branch: broader RTL review and optional lightweight Three.js welcome component only if it stays simple and performant.
 
 ## Notes
