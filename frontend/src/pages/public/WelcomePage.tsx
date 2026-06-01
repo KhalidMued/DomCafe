@@ -1,34 +1,57 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 import { getPublicSettings, type PublicSettings } from '../../lib/api';
 import { setGuestName } from '../../store/cartStore';
+
+const fallbackSettings: PublicSettings = {
+  cafe_name: 'DŌM',
+  welcome_message: 'Welcome to DŌM. Take your time.',
+  orders_open: true,
+};
 
 export function WelcomePage({ navigate }: { navigate: (path: string) => void }) {
   const [name, setName] = useState('');
   const [settings, setSettings] = useState<PublicSettings | null>(null);
 
   useEffect(() => {
-    getPublicSettings().then(setSettings).catch(() => setSettings({ cafe_name: 'DŌM', welcome_message: 'Welcome to DŌM. Take your time.', orders_open: true }));
+    getPublicSettings().then(setSettings).catch(() => setSettings(fallbackSettings));
   }, []);
 
-  function start(event: React.FormEvent<HTMLFormElement>) {
+  const activeSettings = settings ?? fallbackSettings;
+
+  function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !activeSettings.orders_open) return;
     setGuestName(name);
     navigate('/menu');
   }
 
   return (
     <main className="welcome-page page-shell">
-      <section className="hero-card">
+      <section className="hero-card welcome-hero-card" aria-labelledby="welcome-title">
+        <div className="hero-orbit" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="steam-mark" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
         <p className="eyebrow">Home café</p>
-        <h1>DŌM</h1>
+        <h1 id="welcome-title">{activeSettings.cafe_name || 'DŌM'}</h1>
         <p className="tagline">Slow coffee. Deep roots.</p>
-        <p className="hero-copy">{settings?.welcome_message ?? 'Welcome to DŌM. Take your time.'}</p>
+        <p className="hero-copy" dir="auto">{activeSettings.welcome_message}</p>
+        <div className="welcome-status-row" aria-label="Café service notes">
+          <span>{activeSettings.orders_open ? 'Open today' : 'Orders paused'}</span>
+          <span>Private roast bar</span>
+          <span>Made fresh</span>
+        </div>
         <form className="name-form" onSubmit={start}>
           <label htmlFor="guest-name">Your name</label>
-          <input id="guest-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={50} placeholder="Ahmed" />
-          <button type="submit">Start</button>
+          <input id="guest-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={50} placeholder="Ahmed" dir="auto" />
+          <button type="submit" disabled={!activeSettings.orders_open}>{activeSettings.orders_open ? 'Start' : 'Orders paused'}</button>
         </form>
       </section>
     </main>
