@@ -34,20 +34,15 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
           <span />
           <span />
         </div>
-        <div className="steam-mark" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
         <p className="eyebrow">Home café</p>
         <h1 id="welcome-title">{activeSettings.cafe_name || 'DŌM'}</h1>
         <p className="tagline">Slow coffee. Deep roots.</p>
         <p className="hero-copy" dir="auto">{activeSettings.welcome_message}</p>
-        <div className="welcome-status-row" aria-label="Café service notes">
-          <span>{activeSettings.orders_open ? 'Open today' : 'Orders paused'}</span>
-          <span>Private roast bar</span>
-          <span>Made fresh</span>
-        </div>
+        <ul className="welcome-status-row" aria-label="Café service notes">
+          <li>{activeSettings.orders_open ? 'Open today' : 'Orders paused'}</li>
+          <li>Private roast bar</li>
+          <li>Made fresh</li>
+        </ul>
         <form className="name-form" onSubmit={start}>
           <label htmlFor="guest-name">Your name</label>
           <input id="guest-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={50} placeholder="Ahmed" dir="auto" />
