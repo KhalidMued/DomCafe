@@ -42,7 +42,7 @@ docs/cloudflare-tunnel-service
 - `docker compose config`: passed; only Nginx has a host port binding (`0.0.0.0:11080->80/tcp`).
 
 ## What is pending
-- Open a PR for `docs/cloudflare-tunnel-service` into `main` and merge after review.
+- PR #29 (`docs/cloudflare-tunnel-service`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/29
 - Remaining Phase 6 work after this docs branch: dependency audits (`pip-audit` and `npm audit`), PgBouncer pool health check, final deployment readiness checks, and final docs/runbook cleanup.
 
 ## Notes
