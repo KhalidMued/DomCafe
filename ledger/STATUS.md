@@ -83,7 +83,7 @@ docs/favicon-runtime-status
 - documentation
 
 ## What is pending
-- Open docs-only PR for `docs/favicon-runtime-status` into `main`.
+- PR #52 (`docs/favicon-runtime-status`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/52
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
