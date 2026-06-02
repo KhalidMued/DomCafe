@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Cart / review page controls fixes ready
+Cart drink card stepper polish in progress
 
 ## Current branch
-fix/cart-review-controls
+fix/cart-quantity-stepper
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -55,13 +55,14 @@ fix/cart-review-controls
 - PR #50 recorded the final MVP acceptance pass and was merged into `main`.
 - PR #51 added the provided DŌM favicon pack to `frontend/public/`, linked browser favicon/touch/manifest metadata from `frontend/index.html`, kept favicon files out of the uploads/drink-photo pipeline, and was merged into `main`.
 - The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
-- Current branch adds a minimal Remove control to cart drink cards, removes the last drink with an empty-order menu notice, applies a custom centered SVG chevron to all selects, and disables textarea resizing globally.
+- PR #54 added the cart Remove control, centered select chevrons, and disabled textarea resizing; it was merged into `main` and the production frontend container was rebuilt afterward.
+- Current branch replaces the cart page native quantity number input with a custom minus/value/plus stepper, keeps the minimum quantity at 1, and aligns the cart quantity badge plus Remove control to the Doum gold/fired-clay color treatment.
 
 ## Verification
-- Frontend tests: `29 passed` (`npm test`).
-- Frontend production build: passed (`npm run build`); Vite emitted updated cart/menu route chunks successfully.
-- Browser verification on the local Vite dev server at `/cart`: Remove renders as a minimal gray text control beside the `1×` badge at the top-right of the drink card; Temperature and Milk select chevrons render centered on the right edge; no textarea resize handle is visible.
-- Browser behavior verification: clicking Remove on the only cart drink redirects to `/menu` and shows `Your order is empty. Add something to get started.` with the review-order count reset to 0.
+- Frontend tests: `29 passed` (`npm test -- --run`).
+- Frontend production build: passed (`npm run build`); Vite emitted updated cart route and CSS assets successfully.
+- Browser verification on the local Vite dev server at `/cart`: quantity renders as a custom `− / value / +` stepper with 36px controls; no native number input is present; minus is disabled at quantity `1`; plus increments to `2×`; minus returns to `1×` and disables again.
+- Browser visual/style verification: the cart quantity badge border/text and Remove link both render in Doum gold (`#BA7517`); Remove keeps transparent background; the badge remains a subtle dark/gold outline; stepper controls use border `#3a3835`, gold symbols, and palm-dust value text.
 - Static diff/security scan found no added secret, shell execution, eval/exec, unsafe deserialization, or SQL string-formatting patterns.
 - Independent pre-commit review passed with no security concerns or logic errors.
 
@@ -86,14 +87,14 @@ fix/cart-review-controls
 - documentation
 
 ## What is pending
-- PR #54 (`fix/cart-review-controls`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/54
+- Commit, push, and open a PR for `fix/cart-quantity-stepper`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No active cart/remove/select/textarea issues found after local test/build/browser verification.
+- No active cart quantity stepper, badge, or Remove color issues found after local test/build/browser verification.
 
 ## Next recommended task
-- Review and merge the cart/review controls PR, then delete the merged branch.
+- Review and merge the cart quantity stepper PR, then delete the merged branch.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

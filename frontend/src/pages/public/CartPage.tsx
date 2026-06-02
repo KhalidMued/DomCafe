@@ -100,7 +100,14 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
               </div>
             </div>
             <div className="cart-control-grid">
-              <label>Quantity<input type="number" min="1" max="10" value={item.quantity} onChange={(event) => update(item.drink.id, { quantity: Number(event.target.value) })} /></label>
+              <label>
+                Quantity
+                <div className="cart-quantity-stepper" aria-label={`${item.drink.name} quantity`}>
+                  <button type="button" disabled={item.quantity <= 1} onClick={() => update(item.drink.id, { quantity: item.quantity - 1 })} aria-label={`Decrease ${item.drink.name} quantity`}>−</button>
+                  <span aria-live="polite">{item.quantity}</span>
+                  <button type="button" onClick={() => update(item.drink.id, { quantity: item.quantity + 1 })} aria-label={`Increase ${item.drink.name} quantity`}>+</button>
+                </div>
+              </label>
               {item.drink.temperature_options.length > 0 ? <label>Temperature<select value={item.temperature} onChange={(event) => update(item.drink.id, { temperature: event.target.value })}>{item.drink.temperature_options.map((option) => <option key={option}>{option}</option>)}</select></label> : null}
               {item.drink.milk_options.length > 0 ? <label>Milk<select value={item.milk_option} onChange={(event) => update(item.drink.id, { milk_option: event.target.value })}>{item.drink.milk_options.map((option) => <option key={option}>{option}</option>)}</select></label> : null}
             </div>

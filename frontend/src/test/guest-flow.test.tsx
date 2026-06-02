@@ -124,6 +124,15 @@ describe('Phase 3 guest frontend', () => {
     expect(within(cart).getByText('One quiet check before your order reaches the bar.')).toBeInTheDocument();
     expect(within(cart).getByText('Guest')).toBeInTheDocument();
     expect(within(cart).getByText('Drinks')).toBeInTheDocument();
+    expect(within(cart).queryByRole('spinbutton')).not.toBeInTheDocument();
+    const decreaseButton = within(cart).getByRole('button', { name: /decrease spanish latte quantity/i });
+    expect(decreaseButton).toBeDisabled();
+    await userEvent.click(within(cart).getByRole('button', { name: /increase spanish latte quantity/i }));
+    expect(within(cart).getByText('2×')).toBeInTheDocument();
+    expect(decreaseButton).toBeEnabled();
+    await userEvent.click(decreaseButton);
+    expect(within(cart).getByText('1×')).toBeInTheDocument();
+    expect(decreaseButton).toBeDisabled();
     await userEvent.click(screen.getByRole('button', { name: /submit order/i }));
 
     await waitFor(() => expect(screen.getByText(/order #41/i)).toBeInTheDocument());
