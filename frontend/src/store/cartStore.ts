@@ -49,6 +49,11 @@ export function updateCartItem(drinkId: string, patch: Partial<CartItem>) {
   emit();
 }
 
+export function removeCartItem(drinkId: string) {
+  items = items.filter((item) => item.drink.id !== drinkId);
+  emit();
+}
+
 export function clearCart() {
   items = [];
   emit();

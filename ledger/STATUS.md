@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Admin/guest typography and admin nav fixes ready
+Cart / review page controls fixes ready
 
 ## Current branch
-fix/admin-guest-typography-nav
+fix/cart-review-controls
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -55,32 +55,29 @@ fix/admin-guest-typography-nav
 - PR #50 recorded the final MVP acceptance pass and was merged into `main`.
 - PR #51 added the provided DŌM favicon pack to `frontend/public/`, linked browser favicon/touch/manifest metadata from `frontend/index.html`, kept favicon files out of the uploads/drink-photo pipeline, and was merged into `main`.
 - The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
-- Current branch fixes the guest menu metadata color, applies the enforced brand-serif heading class across admin and guest display headings, replaces the large admin header box with a slim dark top nav, and uses a CSS macron DŌM wordmark in the admin nav.
+- Current branch adds a minimal Remove control to cart drink cards, removes the last drink with an empty-order menu notice, applies a custom centered SVG chevron to all selects, and disables textarea resizing globally.
 
 ## Verification
-- Frontend tests: `28 passed`.
-- Frontend production build: passed; Vite emitted route/admin chunks successfully.
-- Docker Compose frontend service was rebuilt/recreated locally for browser verification; stack services are running behind Nginx on `0.0.0.0:11080`.
-- Guest menu browser verification at local `/menu`: `22 drinks across 5 sections` renders as `rgb(136, 135, 128)` (`#888780`), category and drink headings report the brand serif font, and visible menu layout remains intact.
-- Admin dashboard browser verification at local `/admin/dashboard`: old boxed `.admin-shell-header` and gold `.admin-logout-button` styles are absent; slim top nav renders at 56px with `#2C2C2A` background and `#3a3835` bottom border; active Dashboard tab is gold-filled; Logout is a plain transparent gray text button; admin title uses the brand serif.
-- Static grep verification: no old `.admin-shell-header` / `.admin-logout-button` selectors remain, and menu/time/cart metadata selectors no longer use `var(--color-nile-mist)` teal.
+- Frontend tests: `29 passed` (`npm test`).
+- Frontend production build: passed (`npm run build`); Vite emitted updated cart/menu route chunks successfully.
+- Browser verification on the local Vite dev server at `/cart`: Remove renders as a minimal gray text control beside the `1×` badge at the top-right of the drink card; Temperature and Milk select chevrons render centered on the right edge; no textarea resize handle is visible.
+- Browser behavior verification: clicking Remove on the only cart drink redirects to `/menu` and shows `Your order is empty. Add something to get started.` with the review-order count reset to 0.
+- Static diff/security scan found no added secret, shell execution, eval/exec, unsafe deserialization, or SQL string-formatting patterns.
+- Independent pre-commit review passed with no security concerns or logic errors.
 
 ## Hermes Tools Used
 - skill_view
-- terminal
-- process
+- todo
 - read_file
 - search_files
-- write_file
+- terminal
+- process
 - patch
-- execute_code
-- todo
+- delegate_task
 - browser tools
 
 ## Technologies / Services Touched
 - Git / GitHub CLI
-- Docker / Docker Compose
-- Nginx
 - React
 - TypeScript
 - Vite
@@ -88,14 +85,14 @@ fix/admin-guest-typography-nav
 - documentation
 
 ## What is pending
-- PR #53 (`fix/admin-guest-typography-nav`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/53
+- Commit, push, and open PR for `fix/cart-review-controls`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No active admin/guest typography or nav issues found after local test/build/browser verification.
+- No active cart/remove/select/textarea issues found after local test/build/browser verification.
 
 ## Next recommended task
-- Review and merge the admin/guest typography and nav fixes PR, then delete the merged branch.
+- Review and merge the cart/review controls PR, then delete the merged branch.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

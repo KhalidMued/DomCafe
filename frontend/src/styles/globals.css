@@ -61,7 +61,8 @@ h3 { font-size: 1.2rem; margin-bottom: 8px; }
 .name-form { display: grid; gap: 12px; margin-top: 30px; text-align: start; }
 label { color: var(--color-hint); display: grid; gap: 8px; font-size: .95rem; }
 input, select, textarea { width: 100%; border: 1px solid color-mix(in srgb, var(--color-light-rule) 34%, transparent); border-radius: 16px; padding: 14px 16px; color: var(--color-palm-dust); background: color-mix(in srgb, var(--color-nubian-night) 72%, black); }
-textarea { min-height: 96px; resize: vertical; }
+select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888780' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-position: right 12px center; background-repeat: no-repeat; background-size: 16px; padding-right: 36px; }
+textarea { min-height: 96px; resize: none; }
 button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color: var(--color-nubian-night); background: var(--color-doum-gold); border-radius: 999px; padding: 12px 18px; text-decoration: none; font-weight: 700; }
 .top-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
 .top-bar h1 { font-size: clamp(2rem, 10vw, 4rem); }
@@ -94,6 +95,7 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .option-row { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 2px 4px; }
 .option-row span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 28%, transparent); color: var(--color-palm-dust); border-radius: 999px; padding: 4px 9px; font-size: .8rem; }
 .error-text { color: var(--color-fired-clay); background: color-mix(in srgb, var(--color-fired-clay) 16%, transparent); border: 1px solid color-mix(in srgb, var(--color-fired-clay) 42%, transparent); padding: 12px 14px; border-radius: 16px; }
+.menu-notice { color: var(--color-palm-dust); background: color-mix(in srgb, var(--color-nile-mist) 14%, transparent); border: 1px solid color-mix(in srgb, var(--color-nile-mist) 34%, transparent); padding: 12px 14px; border-radius: 16px; }
 .skeleton-card { padding: 28px; color: var(--color-hint); }
 .skeleton-card { background-image: linear-gradient(110deg, color-mix(in srgb, var(--color-nubian-night) 88%, black) 0%, color-mix(in srgb, var(--color-palm-dust) 8%, transparent) 42%, color-mix(in srgb, var(--color-nubian-night) 88%, black) 78%); background-size: 220% 100%; animation: skeleton-breathe 2.8s ease-in-out infinite; }
 .menu-empty-card { display: grid; gap: 10px; margin-block: 24px; text-align: center; }
@@ -114,7 +116,10 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .cart-item { padding: 18px; display: grid; gap: 14px; }
 .cart-item-heading { align-items: start; display: flex; gap: 16px; justify-content: space-between; }
 .cart-item-heading h2 { margin: 0; }
-.cart-item-heading > span { border: 1px solid color-mix(in srgb, var(--color-mid-tone) 34%, transparent); border-radius: 999px; color: var(--color-mid-tone); flex: 0 0 auto; padding: 6px 10px; }
+.cart-item-actions { align-items: center; display: flex; flex: 0 0 auto; gap: 10px; }
+.cart-item-actions > span { border: 1px solid color-mix(in srgb, var(--color-mid-tone) 34%, transparent); border-radius: 999px; color: var(--color-mid-tone); flex: 0 0 auto; padding: 6px 10px; }
+.cart-remove-button { background: transparent; border: 0; border-radius: 0; color: var(--color-mid-tone); font-size: .82rem; font-weight: 500; padding: 0; }
+.cart-remove-button:focus, .cart-remove-button:hover { color: var(--color-fired-clay); }
 .cart-control-grid { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .full-label { margin-block: 18px; }
 .submit-order-button { min-width: 160px; }
@@ -160,7 +165,7 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .admin-edit-form { border-top: 1px solid color-mix(in srgb, var(--color-light-rule) 20%, transparent); display: grid; gap: 10px; padding-top: 12px; }
 .admin-edit-form label { color: var(--color-palm-dust); display: grid; font-size: .82rem; gap: 7px; letter-spacing: .04em; }
 .admin-edit-form input, .admin-edit-form textarea, .admin-settings-form input, .admin-settings-form textarea { background: rgba(241,239,232,.06); border: 1px solid rgba(211,209,199,.22); border-radius: 12px; color: var(--color-palm-dust); padding: 10px; }
-.admin-edit-form textarea, .admin-settings-form textarea { min-height: 88px; resize: vertical; }
+.admin-edit-form textarea, .admin-settings-form textarea { min-height: 88px; }
 .admin-settings-form { display: grid; gap: 14px; max-width: 680px; }
 .admin-settings-form label { color: var(--color-palm-dust); display: grid; font-size: .88rem; gap: 8px; letter-spacing: .04em; }
 .admin-checkbox-label { align-items: center; display: flex !important; gap: 10px !important; }
