@@ -88,7 +88,7 @@ fix/menu-add-feedback
 - documentation
 
 ## What is pending
-- Commit, push, and open a PR for `fix/menu-add-feedback`.
+- PR #56 (`fix/menu-add-feedback`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/56
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
