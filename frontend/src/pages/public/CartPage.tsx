@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { createOrder } from '../../lib/api';
-import { clearCart, getCartItems, getGuestName, updateCartItem } from '../../store/cartStore';
+import { clearCart, getCartItems, getGuestName, removeCartItem, updateCartItem } from '../../store/cartStore';
 
 export function CartPage({ navigate }: { navigate: (path: string) => void }) {
   const [items, setItems] = useState(getCartItems());
@@ -44,6 +44,17 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
     setItems([...getCartItems()]);
   }
 
+  function remove(drinkId: string) {
+    removeCartItem(drinkId);
+    const nextItems = getCartItems();
+    if (nextItems.length === 0) {
+      window.sessionStorage.setItem('dom_menu_notice', 'Your order is empty. Add something to get started.');
+      navigate('/menu');
+      return;
+    }
+    setItems([...nextItems]);
+  }
+
   return (
     <main className="page-shell cart-page" data-testid="cart-page">
       <header className="top-bar cart-hero">
@@ -83,7 +94,10 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
                 <p className="eyebrow">Drink</p>
                 <h2 className="brand-heading" dir="auto">{item.drink.name}</h2>
               </div>
-              <span>{item.quantity}×</span>
+              <div className="cart-item-actions">
+                <button className="cart-remove-button" type="button" onClick={() => remove(item.drink.id)} aria-label={`Remove ${item.drink.name}`}>Remove</button>
+                <span>{item.quantity}×</span>
+              </div>
             </div>
             <div className="cart-control-grid">
               <label>Quantity<input type="number" min="1" max="10" value={item.quantity} onChange={(event) => update(item.drink.id, { quantity: Number(event.target.value) })} /></label>

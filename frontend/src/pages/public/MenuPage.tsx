@@ -6,11 +6,17 @@ import { addCartItem, getCartItems, subscribeCart } from '../../store/cartStore'
 export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   const [menu, setMenu] = useState<PublicMenuCategory[]>([]);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [cartCount, setCartCount] = useState(getCartItems().reduce((sum, item) => sum + item.quantity, 0));
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
+    const menuNotice = window.sessionStorage.getItem('dom_menu_notice');
+    if (menuNotice) {
+      setNotice(menuNotice);
+      window.sessionStorage.removeItem('dom_menu_notice');
+    }
     getMenu()
       .then(setMenu)
       .catch(() => setError('We couldn’t load the menu right now. Please refresh or check with the coffee bar.'))
@@ -44,6 +50,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
       ) : null}
 
       {error ? <p className="error-text">{error}</p> : null}
+      {notice ? <p className="menu-notice" aria-live="polite">{notice}</p> : null}
       {isLoading ? <div className="skeleton-card menu-empty-card">Preparing the menu…</div> : null}
       {!isLoading && !error && categories.length === 0 ? (
         <section className="skeleton-card menu-empty-card" aria-live="polite">

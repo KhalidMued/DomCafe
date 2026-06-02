@@ -133,6 +133,22 @@ describe('Phase 3 guest frontend', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/orders', expect.objectContaining({ method: 'POST' }));
   });
 
+  it('removes the last drink from the cart and returns to the menu with a notice', async () => {
+    mockFetch();
+    window.localStorage.setItem('dom_guest_name', 'Ahmed');
+    window.history.pushState({}, '', '/menu');
+    render(<App />);
+
+    await screen.findByText('Spanish Latte');
+    await userEvent.click(screen.getByRole('button', { name: /add spanish latte/i }));
+    await userEvent.click(screen.getByRole('link', { name: /review order/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /remove/i }));
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: /menu/i })).toBeInTheDocument());
+    expect(screen.getByText('Your order is empty. Add something to get started.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /review order \(0\)/i })).toBeInTheDocument();
+  });
+
   it('shows a polished empty cart state', async () => {
     mockFetch();
     window.localStorage.setItem('dom_guest_name', 'Ahmed');
