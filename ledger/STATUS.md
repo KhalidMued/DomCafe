@@ -1,7 +1,7 @@
 # Status
 
 ## Current phase
-Cart drink card stepper polish in progress
+Cart drink card stepper polish ready
 
 ## Current branch
 fix/cart-quantity-stepper
@@ -87,7 +87,7 @@ fix/cart-quantity-stepper
 - documentation
 
 ## What is pending
-- Commit, push, and open a PR for `fix/cart-quantity-stepper`.
+- PR #55 (`fix/cart-quantity-stepper`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/55
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
