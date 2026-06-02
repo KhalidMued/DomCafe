@@ -73,6 +73,7 @@ fix/cart-review-controls
 - terminal
 - process
 - patch
+- write_file
 - delegate_task
 - browser tools
 
@@ -85,7 +86,7 @@ fix/cart-review-controls
 - documentation
 
 ## What is pending
-- Commit, push, and open PR for `fix/cart-review-controls`.
+- PR #54 (`fix/cart-review-controls`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/54
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
