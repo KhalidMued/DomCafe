@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Cart drink card stepper polish ready
+Menu add-to-order feedback ready
 
 ## Current branch
-fix/cart-quantity-stepper
+fix/menu-add-feedback
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -56,21 +56,22 @@ fix/cart-quantity-stepper
 - PR #51 added the provided DŌM favicon pack to `frontend/public/`, linked browser favicon/touch/manifest metadata from `frontend/index.html`, kept favicon files out of the uploads/drink-photo pipeline, and was merged into `main`.
 - The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
 - PR #54 added the cart Remove control, centered select chevrons, and disabled textarea resizing; it was merged into `main` and the production frontend container was rebuilt afterward.
-- Current branch replaces the cart page native quantity number input with a custom minus/value/plus stepper, keeps the minimum quantity at 1, and aligns the cart quantity badge plus Remove control to the Doum gold/fired-clay color treatment.
+- PR #55 replaced the cart page native quantity number input with a custom minus/value/plus stepper, kept the minimum quantity at 1, and aligned the cart quantity badge plus Remove control to the Doum gold/fired-clay color treatment; it was merged into `main` and the production frontend container was rebuilt afterward.
+- Current branch adds menu-card feedback after clicking `Add to order`: the clicked button temporarily changes to `Order is Added` with a subtle confirmation pulse before returning to the normal label.
 
 ## Verification
 - Frontend tests: `29 passed` (`npm test -- --run`).
-- Frontend production build: passed (`npm run build`); Vite emitted updated cart route and CSS assets successfully.
-- Browser verification on the local Vite dev server at `/cart`: quantity renders as a custom `− / value / +` stepper with 36px controls; no native number input is present; minus is disabled at quantity `1`; plus increments to `2×`; minus returns to `1×` and disables again.
-- Browser visual/style verification: the cart quantity badge border/text and Remove link both render in Doum gold (`#BA7517`); Remove keeps transparent background; the badge remains a subtle dark/gold outline; stepper controls use border `#3a3835`, gold symbols, and palm-dust value text.
+- Frontend production build: passed (`npm run build`); Vite emitted updated menu route and CSS assets successfully.
+- Browser verification against a local production-build preview at `/menu`: clicking `Add to order` immediately changes the clicked drink button to `Order is Added`, applies the confirmation highlight class, increments the review-order count, then returns the label to `Add to order` after the timeout.
+- Browser screenshot verification: the highlighted `Order is Added` state renders inside the same menu-card button footprint with a mint/green confirmation treatment and no card layout shift.
 - Static diff/security scan found no added secret, shell execution, eval/exec, unsafe deserialization, or SQL string-formatting patterns.
 - Independent pre-commit review passed with no security concerns or logic errors.
 
 ## Hermes Tools Used
 - skill_view
+- vision_analyze
 - todo
 - read_file
-- search_files
 - terminal
 - process
 - patch
@@ -87,14 +88,14 @@ fix/cart-quantity-stepper
 - documentation
 
 ## What is pending
-- PR #55 (`fix/cart-quantity-stepper`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/55
+- Commit, push, and open a PR for `fix/menu-add-feedback`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No active cart quantity stepper, badge, or Remove color issues found after local test/build/browser verification.
+- No active menu add-to-order feedback issues found after local test/build/browser verification.
 
 ## Next recommended task
-- Review and merge the cart quantity stepper PR, then delete the merged branch.
+- Review and merge the menu add-to-order feedback PR, then delete the merged branch.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
