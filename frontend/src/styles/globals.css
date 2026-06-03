@@ -97,6 +97,8 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .drink-content p { margin: 0; }
 .option-row { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 2px 4px; }
 .option-row span { border: 1px solid color-mix(in srgb, var(--color-light-rule) 28%, transparent); color: var(--color-palm-dust); border-radius: 999px; padding: 4px 9px; font-size: .8rem; }
+.drink-add-button { overflow: hidden; position: relative; }
+.drink-add-button-added { background: color-mix(in srgb, var(--color-nile-mist) 72%, var(--color-doum-gold)); border-color: var(--color-nile-mist); box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-nile-mist) 24%, transparent), 0 12px 34px rgba(93,202,165,.18); color: var(--color-nubian-night); animation: order-added-pulse 2s ease; }
 .error-text { color: var(--color-fired-clay); background: color-mix(in srgb, var(--color-fired-clay) 16%, transparent); border: 1px solid color-mix(in srgb, var(--color-fired-clay) 42%, transparent); padding: 12px 14px; border-radius: 16px; }
 .menu-notice { color: var(--color-palm-dust); background: color-mix(in srgb, var(--color-nile-mist) 14%, transparent); border: 1px solid color-mix(in srgb, var(--color-nile-mist) 34%, transparent); padding: 12px 14px; border-radius: 16px; }
 .skeleton-card { padding: 28px; color: var(--color-hint); }
@@ -194,6 +196,13 @@ html[dir="rtl"] .admin-menu-toolbar {
 @keyframes skeleton-breathe {
   0%, 100% { background-position: 120% 0; }
   50% { background-position: 0 0; }
+}
+
+@keyframes order-added-pulse {
+  0% { transform: scale(1); }
+  18% { transform: scale(1.015); }
+  42% { transform: scale(1); }
+  100% { transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {

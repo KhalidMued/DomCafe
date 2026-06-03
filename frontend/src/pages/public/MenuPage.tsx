@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getMenu, type PublicMenuCategory } from '../../lib/api';
 import { addCartItem, getCartItems, subscribeCart } from '../../store/cartStore';
@@ -10,6 +10,8 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   const [isLoading, setIsLoading] = useState(true);
   const [cartCount, setCartCount] = useState(getCartItems().reduce((sum, item) => sum + item.quantity, 0));
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [addedDrinkId, setAddedDrinkId] = useState<string | null>(null);
+  const addedTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     const menuNotice = window.sessionStorage.getItem('dom_menu_notice');
@@ -24,8 +26,20 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
     const unsubscribe = subscribeCart(() => setCartCount(getCartItems().reduce((sum, item) => sum + item.quantity, 0)));
     return () => {
       unsubscribe();
+      if (addedTimeout.current) {
+        window.clearTimeout(addedTimeout.current);
+      }
     };
   }, []);
+
+  function addDrink(drink: PublicMenuCategory['drinks'][number]) {
+    addCartItem(drink);
+    setAddedDrinkId(drink.id);
+    if (addedTimeout.current) {
+      window.clearTimeout(addedTimeout.current);
+    }
+    addedTimeout.current = window.setTimeout(() => setAddedDrinkId(null), 2000);
+  }
 
   const categories = useMemo(() => menu.filter((category) => category.drinks.length > 0), [menu]);
   const drinkCount = categories.reduce((sum, category) => sum + category.drinks.length, 0);
@@ -89,7 +103,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
                     {drink.milk_options.map((option) => <span key={option} dir="auto">{option}</span>)}
                   </div>
                   {expanded === drink.id ? <p className="detail-copy" dir="auto">{drink.ingredients.join(', ') || 'Simple and quiet.'}</p> : null}
-                  <button type="button" onClick={() => addCartItem(drink)} aria-label={`Add ${drink.name}`}>Add to order</button>
+                  <button className={addedDrinkId === drink.id ? 'drink-add-button drink-add-button-added' : 'drink-add-button'} type="button" onClick={() => addDrink(drink)} aria-label={addedDrinkId === drink.id ? `${drink.name} added to order` : `Add ${drink.name}`}>{addedDrinkId === drink.id ? 'Order is Added' : 'Add to order'}</button>
                 </div>
               </article>
             ))}

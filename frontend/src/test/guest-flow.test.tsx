@@ -117,6 +117,7 @@ describe('Phase 3 guest frontend', () => {
     expect(screen.getByText('1 drink')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /show spanish latte details/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /add spanish latte/i }));
+    expect(screen.getByRole('button', { name: /spanish latte added to order/i })).toHaveTextContent('Order is Added');
     await userEvent.click(screen.getByRole('link', { name: /review order/i }));
 
     const cart = await screen.findByTestId('cart-page');
