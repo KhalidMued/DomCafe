@@ -77,6 +77,12 @@ button, .cart-link, .top-bar a { border: 1px solid var(--color-doum-gold); color
 .category-tabs a { flex: 0 0 auto; padding: 10px 14px; text-decoration: none; color: var(--color-hint); border: 1px solid transparent; border-radius: 999px; }
 .category-tabs a:focus, .category-tabs a:hover { color: var(--color-palm-dust); border-color: color-mix(in srgb, var(--color-doum-gold) 46%, transparent); background: color-mix(in srgb, var(--color-doum-gold) 10%, transparent); }
 .menu-count { color: var(--color-mid-tone); direction: ltr; margin-block: 22px; unicode-bidi: isolate; }
+.menu-order-progress { display: grid; gap: 14px; margin-block: -12px 18px; padding: 18px; }
+.menu-order-progress-heading { align-items: center; display: flex; gap: 16px; justify-content: space-between; }
+.menu-order-progress-heading h2 { font-size: clamp(1.45rem, 5vw, 2.2rem); letter-spacing: .08em; line-height: 1; margin: 0; }
+.menu-order-progress-heading a { border: 1px solid var(--color-doum-gold); border-radius: 999px; color: var(--color-doum-gold); flex: 0 0 auto; font-weight: 700; padding: 10px 14px; text-decoration: none; }
+.menu-order-progress .status-label { font-size: clamp(1.05rem, 3.5vw, 1.35rem); }
+.progress-track-cancelled span { border-color: color-mix(in srgb, var(--color-fired-clay) 42%, transparent); color: var(--color-hint); }
 .menu-section { padding-block: 28px; scroll-margin-top: 68px; }
 .section-heading-row { align-items: end; display: flex; gap: 18px; justify-content: space-between; margin-block-end: 20px; }
 .section-heading-row h2 { margin-bottom: 10px; }
@@ -185,6 +191,7 @@ html[dir="rtl"] .menu-hero,
 html[dir="rtl"] .cart-hero,
 html[dir="rtl"] .status-hero,
 html[dir="rtl"] .category-tabs,
+html[dir="rtl"] .menu-order-progress-heading,
 html[dir="rtl"] .drink-title-row,
 html[dir="rtl"] .cart-item-heading,
 html[dir="rtl"] .status-card-topline,
@@ -215,7 +222,7 @@ html[dir="rtl"] .admin-menu-toolbar {
   .hero-card::before { inset: 12px; }
   .welcome-status-row { justify-content: center; }
   .welcome-status-row li { font-size: .72rem; min-height: 28px; padding-inline: 10px; }
-  .top-bar, .menu-hero, .cart-hero, .status-hero, .section-heading-row, .status-card-topline { align-items: stretch; flex-direction: column; }
+  .top-bar, .menu-hero, .cart-hero, .status-hero, .section-heading-row, .status-card-topline, .menu-order-progress-heading { align-items: stretch; flex-direction: column; }
   .cart-link-strong { text-align: center; }
   .category-tabs { margin-inline: -6px; }
   .admin-top-nav { gap: 10px; grid-template-columns: 1fr auto; height: auto; min-height: 56px; padding-block: 10px; }

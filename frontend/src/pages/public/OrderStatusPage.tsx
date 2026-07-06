@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { getOrderStatus, type OrderStatus } from '../../lib/api';
+import { setActiveOrderId } from '../../store/orderProgressStore';
 
 const finalStatuses = new Set(['ready', 'cancelled']);
 const statusSteps = ['new', 'received', 'preparing', 'ready'];
@@ -17,6 +18,7 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
       try {
         const nextOrder = await getOrderStatus(orderId);
         if (!alive) return;
+        setActiveOrderId(orderId);
         setOrder(nextOrder);
         setError('');
         if (!finalStatuses.has(nextOrder.status)) {

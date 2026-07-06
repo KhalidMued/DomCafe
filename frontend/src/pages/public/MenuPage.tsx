@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { getMenu, type PublicMenuCategory } from '../../lib/api';
+import { getMenu, getOrderStatus, type OrderStatus, type PublicMenuCategory } from '../../lib/api';
 import { addCartItem, getCartItems, subscribeCart } from '../../store/cartStore';
+import { clearActiveOrderId, getActiveOrderId } from '../../store/orderProgressStore';
+
+const finalOrderStatuses = new Set(['ready', 'cancelled']);
+const orderProgressSteps = ['new', 'received', 'preparing', 'ready'];
+const orderProgressLabels: Record<string, string> = {
+  new: 'Sent',
+  received: 'Received',
+  preparing: 'Preparing',
+  ready: 'Ready',
+};
 
 export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   const [menu, setMenu] = useState<PublicMenuCategory[]>([]);
@@ -9,6 +19,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   const [notice, setNotice] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [cartCount, setCartCount] = useState(getCartItems().reduce((sum, item) => sum + item.quantity, 0));
+  const [activeOrder, setActiveOrder] = useState<OrderStatus | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [addedDrinkId, setAddedDrinkId] = useState<string | null>(null);
   const addedTimeout = useRef<number | null>(null);
@@ -32,6 +43,37 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
     };
   }, []);
 
+  useEffect(() => {
+    const orderId = getActiveOrderId();
+    if (orderId === null) return undefined;
+    const fetchOrderId: string = orderId;
+
+    let alive = true;
+    let timer: number | undefined;
+
+    async function loadOrderProgress() {
+      try {
+        const nextOrder = await getOrderStatus(fetchOrderId);
+        if (!alive) return;
+        setActiveOrder(nextOrder);
+        if (!finalOrderStatuses.has(nextOrder.status)) {
+          timer = window.setTimeout(loadOrderProgress, 15_000);
+        }
+      } catch {
+        if (!alive) return;
+        clearActiveOrderId(fetchOrderId);
+        setActiveOrder(null);
+      }
+    }
+
+    loadOrderProgress();
+
+    return () => {
+      alive = false;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, []);
+
   function addDrink(drink: PublicMenuCategory['drinks'][number]) {
     addCartItem(drink);
     setAddedDrinkId(drink.id);
@@ -45,6 +87,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   const drinkCount = categories.reduce((sum, category) => sum + category.drinks.length, 0);
   const drinkCountLabel = `${drinkCount} ${drinkCount === 1 ? 'drink' : 'drinks'}`;
   const sectionCountLabel = `${categories.length} ${categories.length === 1 ? 'section' : 'sections'}`;
+  const progressIndex = activeOrder ? Math.max(orderProgressSteps.indexOf(activeOrder.status), 0) : -1;
 
   return (
     <main className="page-shell menu-page">
@@ -56,6 +99,22 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
         </div>
         <a className="cart-link cart-link-strong" href="/cart" onClick={(event) => { event.preventDefault(); navigate('/cart'); }}>Review order ({cartCount})</a>
       </header>
+
+      {activeOrder ? (
+        <section className="status-card menu-order-progress" aria-label={`Order #${activeOrder.order_number} progress`}>
+          <div className="menu-order-progress-heading">
+            <div>
+              <p className="eyebrow">Your order</p>
+              <h2 className="brand-heading">Order #{activeOrder.order_number}</h2>
+            </div>
+            <a href={`/order/${activeOrder.id}`} onClick={(event) => { event.preventDefault(); navigate(`/order/${activeOrder.id}`); }}>Details</a>
+          </div>
+          <p className="status-label brand-heading" dir="auto">{activeOrder.status_label}</p>
+          <div className={activeOrder.status === 'cancelled' ? 'progress-track progress-track-cancelled' : 'progress-track'} aria-label={`Current status ${activeOrder.status}`}>
+            {orderProgressSteps.map((status, index) => <span className={index <= progressIndex && activeOrder.status !== 'cancelled' ? 'active' : ''} key={status}>{orderProgressLabels[status]}</span>)}
+          </div>
+        </section>
+      ) : null}
 
       {categories.length > 0 ? (
         <nav className="category-tabs" aria-label="Menu categories">

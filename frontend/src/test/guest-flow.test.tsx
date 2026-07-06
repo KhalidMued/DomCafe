@@ -159,6 +159,29 @@ describe('Phase 3 guest frontend', () => {
     expect(screen.getByRole('link', { name: /review order \(0\)/i })).toBeInTheDocument();
   });
 
+  it('shows submitted order progress above the menu and keeps polling it', async () => {
+    vi.useFakeTimers();
+    const fetchMock = mockFetch();
+    window.localStorage.setItem('dom_guest_name', 'Ahmed');
+    window.localStorage.setItem('dom_active_order_id', '41');
+    window.history.pushState({}, '', '/menu');
+    render(<App />);
+    await act(async () => {});
+
+    const progress = screen.getByRole('region', { name: /order #41 progress/i });
+    const categories = screen.getByRole('navigation', { name: /menu categories/i });
+    expect(progress.compareDocumentPosition(categories) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(progress).getByText('Your order was sent to the bar.')).toBeInTheDocument();
+    expect(within(progress).getByText('Sent')).toHaveClass('active');
+    expect(within(progress).getByRole('link', { name: /details/i })).toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(15_000);
+    });
+    await act(async () => {});
+    expect(fetchMock).toHaveBeenCalledWith('/api/orders/41', undefined);
+  });
+
   it('shows a polished empty cart state', async () => {
     mockFetch();
     window.localStorage.setItem('dom_guest_name', 'Ahmed');

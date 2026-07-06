@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Menu add-to-order feedback ready
+User-side order progress on the menu is ready
 
 ## Current branch
-fix/menu-add-feedback
+feature/order-progress-on-menu
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -57,45 +57,61 @@ fix/menu-add-feedback
 - The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
 - PR #54 added the cart Remove control, centered select chevrons, and disabled textarea resizing; it was merged into `main` and the production frontend container was rebuilt afterward.
 - PR #55 replaced the cart page native quantity number input with a custom minus/value/plus stepper, kept the minimum quantity at 1, and aligned the cart quantity badge plus Remove control to the Doum gold/fired-clay color treatment; it was merged into `main` and the production frontend container was rebuilt afterward.
-- Current branch adds menu-card feedback after clicking `Add to order`: the clicked button temporarily changes to `Order is Added` with a subtle confirmation pulse before returning to the normal label.
+- Current branch stores the submitted order id, shows a matching dark/gold order-progress card above the menu category chips when an active submitted order exists, and polls the public order status every 15 seconds until the order reaches `ready` or `cancelled`.
 
 ## Verification
-- Frontend tests: `29 passed` (`npm test -- --run`).
-- Frontend production build: passed (`npm run build`); Vite emitted updated menu route and CSS assets successfully.
-- Browser verification against a local production-build preview at `/menu`: clicking `Add to order` immediately changes the clicked drink button to `Order is Added`, applies the confirmation highlight class, increments the review-order count, then returns the label to `Add to order` after the timeout.
-- Browser screenshot verification: the highlighted `Order is Added` state renders inside the same menu-card button footprint with a mint/green confirmation treatment and no card layout shift.
-- Static diff/security scan found no added secret, shell execution, eval/exec, unsafe deserialization, or SQL string-formatting patterns.
-- Independent pre-commit review passed with no security concerns or logic errors.
+- Frontend tests: `30 passed` (`npm test -- --run`).
+- Frontend production build: passed (`npm run build`); Vite emitted the new `orderProgressStore` chunk plus updated menu/cart/status route assets.
+- Docker stack rebuilt and started successfully with `docker compose up -d --build`.
+- Live health check passed on `http://localhost:11080/api/health` with database and Redis reported `ok`.
+- Live order-progress verification created order #54 through `/api/orders`; with that order stored as the active submitted order, `/menu` displayed the progress card before the category chips and menu list.
+- Browser screenshot verification confirmed the progress card matches the site's dark card, DŌM gold accent, typography, spacing, and menu layout without obvious visual issues.
+- Backend tests: `67 passed` (`python -m pytest -q`).
+- Docker/live baseline: Nginx app entry responded on `http://localhost:11080`; `/`, `/menu`, `/cart`, `/admin`, and `/api/health` returned HTTP 200 during the audit baseline check.
+- Browser dogfood verification covered the welcome page, menu page, cart page, order status page, admin login page, and logged-out protected admin page.
+- Guest flow live test succeeded: welcome/name entry, menu add-to-order feedback, cart quantity update, order submission, and order-status display.
+- Cloudflare 502 incident check found the tunnel running but the local Nginx origin on `127.0.0.1:11080` stopped; rebuilding/starting the Docker Compose stack restored local `/` and `/api/health` HTTP 200 responses plus public `https://dom.khalidmued.com/` and `/api/health` HTTP 200 responses.
+- Pulled the latest `cloudflare/cloudflared:latest` Docker image (`sha256:12ff5c6992a9863db4da270746af7c244bcaee49353039af8104268a18d6c4f0`, version `2026.5.2`) and verified the DomCafe stack plus Cloudflare public `/` and `/api/health` responses returned HTTP 200 afterward.
+- Security spot checks: public HTML security headers were present; unauthenticated admin API requests returned HTTP 401 with a generic admin-login-required response and no-store cache behavior.
+- Audit report written to `ledger/DOGFOOD-AUDIT-2026-06-03.md` with prioritized PR recommendations.
 
 ## Hermes Tools Used
 - skill_view
-- vision_analyze
 - todo
 - read_file
+- search_files
 - terminal
 - process
-- patch
-- write_file
-- delegate_task
+- execute_code
 - browser tools
+- write_file
+- patch
 
 ## Technologies / Services Touched
-- Git / GitHub CLI
+- Docker Compose
+- Nginx
+- FastAPI
 - React
 - TypeScript
 - Vite
-- CSS
+- Vitest
+- pytest
 - documentation
 
 ## What is pending
+- PR #57 (`feature/order-progress-on-menu`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/57
 - PR #56 (`fix/menu-add-feedback`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/56
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- No active menu add-to-order feedback issues found after local test/build/browser verification.
+- Empty guest-name Start action has no visible validation message.
+- `/admin` falls back to the public welcome page instead of routing to admin login/dashboard.
+- API 401 responses did not show the same security headers observed on the public HTML response.
+- Many menu cards still use the repeated DŌM placeholder image.
+- Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- Review and merge the menu add-to-order feedback PR, then delete the merged branch.
+- Create a focused first-impression usability PR for: empty guest-name feedback, explicit `/admin` routing, and polished logged-out admin protected-page presentation.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

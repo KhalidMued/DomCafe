@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { createOrder } from '../../lib/api';
 import { clearCart, getCartItems, getGuestName, removeCartItem, updateCartItem } from '../../store/cartStore';
+import { setActiveOrderId } from '../../store/orderProgressStore';
 
 export function CartPage({ navigate }: { navigate: (path: string) => void }) {
   const [items, setItems] = useState(getCartItems());
@@ -30,6 +31,7 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
           item_note: item.item_note,
         })),
       });
+      setActiveOrderId(response.order_id);
       clearCart();
       navigate(`/order/${response.order_id}`);
     } catch {
