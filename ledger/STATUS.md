@@ -74,6 +74,9 @@ feature/order-progress-on-menu
 - Pulled the latest `cloudflare/cloudflared:latest` Docker image (`sha256:12ff5c6992a9863db4da270746af7c244bcaee49353039af8104268a18d6c4f0`, version `2026.5.2`) and verified the DomCafe stack plus Cloudflare public `/` and `/api/health` responses returned HTTP 200 afterward.
 - Security spot checks: public HTML security headers were present; unauthenticated admin API requests returned HTTP 401 with a generic admin-login-required response and no-store cache behavior.
 - Audit report written to `ledger/DOGFOOD-AUDIT-2026-06-03.md` with prioritized PR recommendations.
+- Current real admin-uploaded coffee drink photos were committed as curated menu assets, and future admin-panel drink uploads are now treated as ignored runtime data unless explicitly promoted.
+- Upload runtime-data policy verification: `docker compose config` passed and `git check-ignore uploads/drinks/manual-test-upload.png` confirmed future generated drink uploads are ignored.
+- Docker stack was rebuilt and restarted with `docker compose up -d --build`; `http://localhost:11080/api/health` returned `{"status":"ok","database":"ok","redis":"ok"}`, and a committed drink photo returned HTTP 200 from `/uploads/drinks/...`.
 
 ## Hermes Tools Used
 - skill_view
@@ -96,11 +99,12 @@ feature/order-progress-on-menu
 - Vite
 - Vitest
 - pytest
+- Git
+- DomCafe admin drink uploads
 - documentation
 
 ## What is pending
-- PR #57 (`feature/order-progress-on-menu`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/57
-- PR #56 (`fix/menu-add-feedback`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/56
+- PR #58 (`feature/order-progress-on-menu`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/58
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues

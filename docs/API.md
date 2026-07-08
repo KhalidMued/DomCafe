@@ -126,7 +126,7 @@ Response:
 }
 ```
 
-The uploaded file is stored under `/uploads/drinks/`, the drink photo URL is updated, and the public menu uses the new photo URL.
+The uploaded file is stored under `/uploads/drinks/`, the drink photo URL is updated, and the public menu uses the new photo URL. Admin-panel uploads are runtime data: back them up with the server upload directory and keep them ignored by Git unless a specific image is intentionally promoted as a curated menu asset.
 
 ### Create drink
 
