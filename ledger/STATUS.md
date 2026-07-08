@@ -76,6 +76,7 @@ feature/order-progress-on-menu
 - Audit report written to `ledger/DOGFOOD-AUDIT-2026-06-03.md` with prioritized PR recommendations.
 - Current real admin-uploaded coffee drink photos were committed as curated menu assets, and future admin-panel drink uploads are now treated as ignored runtime data unless explicitly promoted.
 - Upload runtime-data policy verification: `docker compose config` passed and `git check-ignore uploads/drinks/manual-test-upload.png` confirmed future generated drink uploads are ignored.
+- Docker stack was rebuilt and restarted with `docker compose up -d --build`; `http://localhost:11080/api/health` returned `{"status":"ok","database":"ok","redis":"ok"}`, and a committed drink photo returned HTTP 200 from `/uploads/drinks/...`.
 
 ## Hermes Tools Used
 - skill_view
