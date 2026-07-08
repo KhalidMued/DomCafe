@@ -43,6 +43,6 @@ async def create_order(
     return await create_guest_order(session, payload)
 
 
-@router.get("/orders/{order_id}", response_model=OrderStatusResponse)
-async def order_status(order_id: int, session: AsyncSession = Depends(get_session)):
-    return await get_guest_order_status(session, order_id)
+@router.get("/orders/{order_code}", response_model=OrderStatusResponse)
+async def order_status(order_code: str, session: AsyncSession = Depends(get_session)):
+    return await get_guest_order_status(session, order_code)

@@ -8,6 +8,7 @@ class Order(TimestampMixin, Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    public_code: Mapped[str] = mapped_column(String(32), nullable=False, unique=True)
     guest_name: Mapped[str] = mapped_column(String(120), nullable=False)
     guest_note: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(40), nullable=False, default="new", index=True)

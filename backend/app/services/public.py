@@ -1,3 +1,5 @@
+import secrets
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -111,6 +113,7 @@ async def create_guest_order(session: AsyncSession, payload: OrderCreate) -> dic
         )
 
     order = Order(
+        public_code=generate_order_public_code(),
         guest_name=payload.guest_name.strip(),
         guest_note=payload.guest_note.strip() if payload.guest_note else None,
         status="new",
@@ -161,20 +164,30 @@ async def create_guest_order(session: AsyncSession, payload: OrderCreate) -> dic
     await session.commit()
     await notify_new_order_if_enabled(order.id)
     return {
-        "order_id": str(order.id),
+        "order_id": order.public_code,
         "order_number": order.id,
         "status": order.status,
         "message": STATUS_LABELS[order.status],
     }
 
 
-async def get_guest_order_status(session: AsyncSession, order_id: int) -> dict[str, object]:
-    order = await session.get(Order, order_id, options=[selectinload(Order.items)])
+def generate_order_public_code() -> str:
+    return secrets.token_urlsafe(12)
+
+
+async def get_guest_order_status(session: AsyncSession, order_code: str) -> dict[str, object]:
+    order = (
+        await session.execute(
+            select(Order)
+            .where(Order.public_code == order_code)
+            .options(selectinload(Order.items))
+        )
+    ).scalar_one_or_none()
     if order is None:
         raise GuestApiError(404, "ORDER_NOT_FOUND", "We could not find that order.")
 
     return {
-        "id": str(order.id),
+        "id": order.public_code,
         "order_number": order.id,
         "guest_name": order.guest_name,
         "status": order.status,

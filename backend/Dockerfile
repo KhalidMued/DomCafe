@@ -14,4 +14,6 @@ RUN useradd --create-home --uid ${APP_UID} appuser \
     && chown -R appuser:appuser /app/uploads
 USER appuser
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Only Nginx can reach this container, so trusting all proxy hops is safe;
+# Nginx overwrites X-Forwarded-For with the resolved client IP.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

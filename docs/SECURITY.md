@@ -24,7 +24,17 @@ Nginx edge limits and Redis-backed backend fixed-window limits protect high-risk
 - `/api/admin/login`: 5 attempts per client IP per minute.
 - `/api/orders`: 10 attempts per client IP per minute.
 
-Nginx applies the public-facing limits using `$binary_remote_addr`. The backend fallback limiter uses FastAPI’s direct peer (`request.client.host`); client-supplied forwarding headers are ignored to prevent spoofing-based bypasses. Requests over the limit return HTTP `429`.
+Nginx applies the public-facing limits using `$binary_remote_addr` after restoring the real client IP: Cloudflare Tunnel traffic reaches Nginx from the Docker host network, so Nginx trusts `CF-Connecting-IP` only from `172.16.0.0/12` (`set_real_ip_from` + `real_ip_header`). Direct LAN/Tailscale clients connect from outside that range and cannot spoof the header.
+
+The backend fallback limiter uses `request.client.host` resolved through uvicorn `--proxy-headers`. Nginx overwrites `X-Forwarded-For` with the resolved `$remote_addr` (it does not append to a client-supplied chain), so clients cannot smuggle a spoofed source IP to the backend. Requests over the limit return HTTP `429`.
+
+## Guest order lookup
+
+Guest order status is looked up by a random, unguessable `public_code` (`secrets.token_urlsafe`, unique per order) instead of the sequential integer order id, so order details cannot be enumerated. The integer id remains internal and appears only as the human-friendly `order_number`.
+
+## Security headers
+
+The standard security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) live in `nginx/conf.d/security-headers.inc` and are included in the `server` block and in every `location` that declares its own `add_header` (Nginx drops inherited headers in such locations), including `/api/*` and `/uploads/*` responses.
 
 ## Upload security
 
