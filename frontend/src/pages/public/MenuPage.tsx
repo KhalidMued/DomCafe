@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { getMenu, getOrderStatus, type OrderStatus, type PublicMenuCategory } from '../../lib/api';
+import { ApiError, getMenu, getOrderStatus, type OrderStatus, type PublicMenuCategory } from '../../lib/api';
 import { addCartItem, getCartItems, subscribeCart } from '../../store/cartStore';
 import { clearActiveOrderId, getActiveOrderId } from '../../store/orderProgressStore';
 
@@ -59,10 +59,15 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
         if (!finalOrderStatuses.has(nextOrder.status)) {
           timer = window.setTimeout(loadOrderProgress, 15_000);
         }
-      } catch {
+      } catch (orderError) {
         if (!alive) return;
-        clearActiveOrderId(fetchOrderId);
-        setActiveOrder(null);
+        if (orderError instanceof ApiError && orderError.status === 404) {
+          clearActiveOrderId(fetchOrderId);
+          setActiveOrder(null);
+          return;
+        }
+        // Transient failure: keep the card and try again on the next tick.
+        timer = window.setTimeout(loadOrderProgress, 15_000);
       }
     }
 

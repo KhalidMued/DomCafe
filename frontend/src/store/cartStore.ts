@@ -8,8 +8,24 @@ export type CartItem = {
   item_note?: string;
 };
 
+// The backend rejects quantities above 10 per item.
+export const MAX_ITEM_QUANTITY = 10;
+
 const listeners = new Set<() => void>();
-let items: CartItem[] = [];
+const CART_ITEMS_KEY = 'dom_cart_items';
+
+function loadStoredItems(): CartItem[] {
+  try {
+    const raw = window.sessionStorage.getItem(CART_ITEMS_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+let items: CartItem[] = loadStoredItems();
 
 export const GUEST_NAME_KEY = 'dom_guest_name';
 
@@ -29,7 +45,7 @@ export function getCartItems() {
 export function addCartItem(drink: PublicDrink) {
   const existing = items.find((item) => item.drink.id === drink.id);
   if (existing) {
-    existing.quantity += 1;
+    existing.quantity = Math.min(existing.quantity + 1, MAX_ITEM_QUANTITY);
   } else {
     items = [
       ...items,
@@ -65,5 +81,10 @@ export function subscribeCart(listener: () => void) {
 }
 
 function emit() {
+  try {
+    window.sessionStorage.setItem(CART_ITEMS_KEY, JSON.stringify(items));
+  } catch {
+    // Storage may be unavailable (private mode quotas); the in-memory cart still works.
+  }
   listeners.forEach((listener) => listener());
 }

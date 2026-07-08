@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- Keep the menu order-progress card through transient poll failures and clear it only on a confirmed 404; the order-status page also stops polling on 404.
+- Parse non-JSON API error responses defensively with a new `ApiError` (status-aware, friendly 429 message).
+- Persist the guest cart to `sessionStorage` so page refreshes keep the order in progress.
+- Cap drink quantity at the backend maximum of 10 in the cart stepper and menu adds.
+- Self-host the Tajawal brand font (arabic+latin subsets, `font-display: swap`, immutable caching), removing the render-blocking Google Fonts import.
 - Look up guest orders by a random unguessable `public_code` instead of the sequential integer id, blocking order enumeration (migration `20260708_0003` backfills existing orders).
 - Restore real per-client rate limiting: uvicorn `--proxy-headers`, Nginx overwrites `X-Forwarded-For`, and Cloudflare Tunnel visitors are keyed by `CF-Connecting-IP` via the Nginx `real_ip` module.
 - Move security headers to `nginx/conf.d/security-headers.inc` and include them in every location, restoring them on `/api/*` and `/uploads/*` responses.

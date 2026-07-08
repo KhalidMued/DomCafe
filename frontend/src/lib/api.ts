@@ -140,11 +140,31 @@ export type AdminSettings = {
   orders_open: boolean;
 };
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
-  const data = await response.json();
+  // Rate-limit and gateway errors can come from Nginx as HTML, so the body
+  // may not be JSON.
+  let data: { message?: string; detail?: string } | null = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
   if (!response.ok) {
-    throw new Error(data?.message || data?.detail || 'We couldn’t reach DŌM right now.');
+    const fallback = response.status === 429
+      ? 'Please slow down a moment, then try again.'
+      : 'We couldn’t reach DŌM right now.';
+    throw new ApiError(response.status, data?.message || data?.detail || fallback);
   }
   return data as T;
 }
