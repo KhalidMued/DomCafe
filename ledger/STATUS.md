@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-docs/status-phase5-merged
+fix/ux-known-issues
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -65,16 +65,14 @@ docs/status-phase5-merged
 - Audit Phase 3 (PR #62) was squash merged into `main`: order-progress resilience, defensive API error parsing, sessionStorage cart persistence, the quantity-10 cap, and self-hosted Tajawal fonts.
 - Audit Phase 4 (PR #63) was squash merged into `main`: background Discord notifications, request-ID logging middleware, shared Redis client, explicit-null bean clearing, the dead-code sweep, and helper dedup.
 - Audit Phase 5 (PR #64) was squash merged into `main`: admin SPA navigation without full page reloads (M11); order status transitions record `received_at`/`preparing_at`/`ready_at`/`cancelled_at` timestamps (M14, migration `20260708_0004`); cancelled progress-track styling, stable list keys, drink-photo alt text, and mid-tone→hint contrast fixes (L6); edge Nginx gzip for API JSON, server-side WebP re-encoding of drink photo uploads capped at 1600px with EXIF stripped, and one grouped dashboard order-count query (L7). L3 (deleting replaced photo files) was deliberately skipped: it conflicts with the curated-photo runtime-data policy, which forbids deleting admin-added photos without explicit confirmation.
+- Current branch fixes three small UX items from Known issues: pressing Start without a name now shows a friendly inline validation message (with `aria-invalid`/`aria-describedby`, cleared while typing); `/admin` now redirects client-side to `/admin/dashboard` when an admin token is stored or `/admin/login` when not, instead of falling back to the public welcome page; and the menu shows a floating "Review order (N)" link once the guest scrolls past the hero with items in the cart, so the cart stays reachable on long menus.
 
 ## Verification
-Verification for `feature/phase5-polish` (2026-07-08):
+Verification for `fix/ux-known-issues` (2026-07-08):
 
-- Backend tests: `79 passed` (75 existing + 4 new in `test_phase10_polish.py` covering WebP re-encoding with the 1600px cap, non-image rejection, status-transition timestamp recording, and the grouped dashboard status counts) in a clean `python:3.12-slim` container.
-- Frontend tests: `39 passed` (36 existing + 3 new in `polish.test.tsx` covering the cancelled progress track, drink-photo alt text, and SPA navigation from the logged-out admin state) and production build passed.
-- `docker compose config -q` passed; the stack rebuilt healthy and migration `20260708_0004` was applied (`alembic current` reports it as head).
-- Live gzip check: `GET /api/menu` with `Accept-Encoding: gzip` returned `Content-Encoding: gzip` through the edge Nginx.
-- Live timestamp check: a verification order was moved `new → preparing → cancelled` through the shared `update_order_status` service (used by both admin and agent routes); `preparing_at` and `cancelled_at` were recorded as timezone-aware UTC values and `received_at` stayed null. The verification order was left cancelled.
-- Incidental ops fix during verification: PgBouncer had gone unhealthy after an earlier Postgres restart (stale DNS for `postgres`, `pgbouncer cannot connect to server`); restarting the PgBouncer container restored `/api/health` to `ok`.
+- Frontend tests: `44 passed` (39 existing + 5 new in `ux-fixes.test.tsx` covering the empty-name validation message and its clearing while typing, the `/admin` redirect for both the logged-out and token-present cases, and the floating review-order link appearing on scroll and opening the cart) and production build passed.
+- Frontend-only change: no backend, migration, or Nginx config touched.
+- The frontend container was rebuilt; the live app serves the new bundle (verified the new strings/classes are present in the served `index-*.js`), `/`, `/menu`, and `/admin` all return 200 through the edge Nginx, and `/api/health` reports `ok`.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -86,12 +84,9 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- Alembic (order status-timestamp migration)
-- Pillow (WebP re-encode pipeline)
-- Nginx (edge gzip)
-- Docker Compose
-- pytest
+- React (welcome validation, `/admin` redirect, floating cart link)
 - Vitest
+- Docker Compose (frontend container rebuild)
 - Git
 - documentation
 
@@ -101,13 +96,10 @@ Historical verification for earlier merged work lives in git history of this fil
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M11, M13–M14, L1–L2, and L6–L7 are fixed (Phases 2–5); still open by choice: M10 (localStorage JWT), M12 (retry/backoff/offline handling), L3 (old-photo deletion — conflicts with the curated-photo runtime-data policy), L4 (login timing oracle), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
-- Empty guest-name Start action has no visible validation message.
-- `/admin` falls back to the public welcome page instead of routing to admin login/dashboard.
 - Many menu cards still use the repeated DŌM placeholder image.
-- Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- The 2026-07-08 audit roadmap is complete and merged. Next candidates: the smaller UX items under Known issues (empty guest-name validation message, `/admin` fallback route, menu navigation after scrolling) or the deferred M12 fetch retry/backoff work.
+- The UX fixes PR from `fix/ux-known-issues` is open for review and merge into `main`. After that, the main remaining candidates are the deferred M12 fetch retry/backoff work and replacing the repeated DŌM placeholder images with real drink photos (content work via the admin panel).
 
 ## Notes
 - `.env` remains ignored and must not be committed.

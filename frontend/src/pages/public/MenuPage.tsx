@@ -22,7 +22,15 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   const [activeOrder, setActiveOrder] = useState<OrderStatus | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [addedDrinkId, setAddedDrinkId] = useState<string | null>(null);
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const addedTimeout = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolledPastHero(window.scrollY > 280);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const menuNotice = window.sessionStorage.getItem('dom_menu_notice');
@@ -174,6 +182,10 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
           </div>
         </section>
       ))}
+
+      {scrolledPastHero && cartCount > 0 ? (
+        <a className="cart-link cart-link-strong menu-cart-float" href="/cart" onClick={(event) => { event.preventDefault(); navigate('/cart'); }}>Review order ({cartCount})</a>
+      ) : null}
     </main>
   );
 }
