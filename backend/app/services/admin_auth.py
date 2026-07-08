@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import create_access_token, decode_admin_subject, verify_password
+from app.core.security import burn_password_check, create_access_token, decode_admin_subject, verify_password
 from app.models.user import AdminUser
 
 
@@ -12,7 +12,10 @@ async def authenticate_admin(
         select(AdminUser).where(AdminUser.username == username, AdminUser.is_active.is_(True))
     )
     admin = result.scalar_one_or_none()
-    if admin is None or not verify_password(password, admin.password_hash):
+    if admin is None:
+        burn_password_check(password)
+        return None
+    if not verify_password(password, admin.password_hash):
         return None
     return {"access_token": create_access_token(str(admin.id)), "token_type": "bearer"}
 

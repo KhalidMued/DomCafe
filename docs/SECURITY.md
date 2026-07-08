@@ -14,6 +14,7 @@ See `AGENT.md` for project rules and source requirements.
 ## Authentication
 
 - Admin routes use JWT bearer authentication after `/api/admin/login`.
+- Login verifies a throwaway bcrypt hash when the username is unknown, so response timing cannot be used to enumerate admin accounts.
 - Agent routes use the separate `AGENT_API_KEY` bearer credential.
 - Do not log passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, database passwords, or connection strings.
 
