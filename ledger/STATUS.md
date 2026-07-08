@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-fix/ux-known-issues
+fix/m12-fetch-resilience
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -65,14 +65,16 @@ fix/ux-known-issues
 - Audit Phase 3 (PR #62) was squash merged into `main`: order-progress resilience, defensive API error parsing, sessionStorage cart persistence, the quantity-10 cap, and self-hosted Tajawal fonts.
 - Audit Phase 4 (PR #63) was squash merged into `main`: background Discord notifications, request-ID logging middleware, shared Redis client, explicit-null bean clearing, the dead-code sweep, and helper dedup.
 - Audit Phase 5 (PR #64) was squash merged into `main`: admin SPA navigation without full page reloads (M11); order status transitions record `received_at`/`preparing_at`/`ready_at`/`cancelled_at` timestamps (M14, migration `20260708_0004`); cancelled progress-track styling, stable list keys, drink-photo alt text, and mid-tone→hint contrast fixes (L6); edge Nginx gzip for API JSON, server-side WebP re-encoding of drink photo uploads capped at 1600px with EXIF stripped, and one grouped dashboard order-count query (L7). L3 (deleting replaced photo files) was deliberately skipped: it conflicts with the curated-photo runtime-data policy, which forbids deleting admin-added photos without explicit confirmation.
-- Current branch fixes three small UX items from Known issues: pressing Start without a name now shows a friendly inline validation message (with `aria-invalid`/`aria-describedby`, cleared while typing); `/admin` now redirects client-side to `/admin/dashboard` when an admin token is stored or `/admin/login` when not, instead of falling back to the public welcome page; and the menu shows a floating "Review order (N)" link once the guest scrolls past the hero with items in the cart, so the cart stays reachable on long menus.
+- PR #66 (UX fixes) was squash merged into `main`: inline empty-guest-name validation message, `/admin` root redirect to login/dashboard, and the floating "Review order (N)" link on long menus.
+- Current branch implements the deferred audit finding M12 (fetch resilience) in `lib/api.ts`: every request gets a 10s abort timeout; idempotent GETs retry up to twice with exponential backoff (600ms, 1800ms) on network failures and transient edge statuses (502/503/504 — never 429, so the rate limiter is respected); POST/PATCH/PUT/DELETE never retry, so an order can never be submitted twice; and when the browser is offline requests fail fast with a friendly "You look offline" message instead of a generic error.
 
 ## Verification
-Verification for `fix/ux-known-issues` (2026-07-08):
+Verification for `fix/m12-fetch-resilience` (2026-07-08):
 
-- Frontend tests: `44 passed` (39 existing + 5 new in `ux-fixes.test.tsx` covering the empty-name validation message and its clearing while typing, the `/admin` redirect for both the logged-out and token-present cases, and the floating review-order link appearing on scroll and opening the cart) and production build passed.
+- Frontend tests: `51 passed` (44 existing + 7 new in `fetch-resilience.test.ts` covering GET retry on 503 with backoff, giving up after exhausted retries, no POST retry on either 503 or network failure, no retry on non-retryable statuses, offline fast-fail without touching fetch, and timeout-abort of a hung request followed by a successful retry) and production build passed.
+- Two existing `guest-flow` assertions were updated to expect the abort signal now attached to every fetch.
 - Frontend-only change: no backend, migration, or Nginx config touched.
-- The frontend container was rebuilt; the live app serves the new bundle (verified the new strings/classes are present in the served `index-*.js`), `/`, `/menu`, and `/admin` all return 200 through the edge Nginx, and `/api/health` reports `ok`.
+- The frontend container was rebuilt; the live app serves the new bundle (offline-message string present in the served `index-*.js`) and `/api/health` reports `ok`.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -84,8 +86,8 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- React (welcome validation, `/admin` redirect, floating cart link)
-- Vitest
+- Fetch API (timeout, retry/backoff, offline handling in `lib/api.ts`)
+- Vitest (fake-timer retry/timeout tests)
 - Docker Compose (frontend container rebuild)
 - Git
 - documentation
@@ -94,12 +96,12 @@ Historical verification for earlier merged work lives in git history of this fil
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M11, M13–M14, L1–L2, and L6–L7 are fixed (Phases 2–5); still open by choice: M10 (localStorage JWT), M12 (retry/backoff/offline handling), L3 (old-photo deletion — conflicts with the curated-photo runtime-data policy), L4 (login timing oracle), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M11, M13–M14, L1–L2, and L6–L7 are fixed (Phases 2–5), and M12 (fetch retry/backoff/offline handling) is fixed on the current branch; still open by choice: M10 (localStorage JWT), L3 (old-photo deletion — conflicts with the curated-photo runtime-data policy), L4 (login timing oracle), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Many menu cards still use the repeated DŌM placeholder image.
 
 ## Next recommended task
-- The UX fixes PR from `fix/ux-known-issues` is open for review and merge into `main`. After that, the main remaining candidates are the deferred M12 fetch retry/backoff work and replacing the repeated DŌM placeholder images with real drink photos (content work via the admin panel).
+- The M12 fetch-resilience PR from `fix/m12-fetch-resilience` is open for review and merge into `main`. After that, the main remaining candidate is replacing the repeated DŌM placeholder images with real drink photos (content work via the admin panel — needs the user's photos).
 
 ## Notes
 - `.env` remains ignored and must not be committed.

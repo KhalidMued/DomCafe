@@ -179,7 +179,7 @@ describe('Phase 3 guest frontend', () => {
       vi.advanceTimersByTime(15_000);
     });
     await act(async () => {});
-    expect(fetchMock).toHaveBeenCalledWith('/api/orders/41', undefined);
+    expect(fetchMock).toHaveBeenCalledWith('/api/orders/41', expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it('shows a polished empty cart state', async () => {
@@ -211,7 +211,7 @@ describe('Phase 3 guest frontend', () => {
 
     await act(async () => {});
     expect(screen.getByText('Your order was sent to the bar.')).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith('/api/orders/41', undefined);
+    expect(fetchMock).toHaveBeenCalledWith('/api/orders/41', expect.objectContaining({ signal: expect.any(AbortSignal) }));
 
     await act(async () => {
       vi.advanceTimersByTime(15_000);

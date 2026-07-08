@@ -150,23 +150,74 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
-  // Rate-limit and gateway errors can come from Nginx as HTML, so the body
-  // may not be JSON.
-  let data: { message?: string; detail?: string } | null = null;
+const REQUEST_TIMEOUT_MS = 10_000;
+const RETRY_DELAYS_MS = [600, 1800];
+// Transient edge/backend failures worth a quiet retry; 429 stays fatal so we
+// never fight the rate limiter.
+const RETRYABLE_STATUSES = new Set([502, 503, 504]);
+
+function offlineError() {
+  return new ApiError(0, 'You look offline. Please check your connection and try again.');
+}
+
+function networkError() {
+  return new ApiError(0, 'We couldn’t reach DŌM right now. Please check your connection and try again.');
+}
+
+async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    data = await response.json();
-  } catch {
-    data = null;
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timer);
   }
-  if (!response.ok) {
-    const fallback = response.status === 429
-      ? 'Please slow down a moment, then try again.'
-      : 'We couldn’t reach DŌM right now.';
-    throw new ApiError(response.status, data?.message || data?.detail || fallback);
+}
+
+async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  // Only idempotent reads retry: replaying a POST could duplicate an order.
+  const retryDelays = !init?.method || init.method === 'GET' ? RETRY_DELAYS_MS : [];
+  let lastError = networkError();
+
+  for (let attempt = 0; attempt <= retryDelays.length; attempt += 1) {
+    if (attempt > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, retryDelays[attempt - 1]));
+    }
+    if (navigator.onLine === false) {
+      throw offlineError();
+    }
+
+    let response: Response;
+    try {
+      response = await fetchWithTimeout(url, init);
+    } catch {
+      lastError = navigator.onLine ? networkError() : offlineError();
+      continue;
+    }
+
+    // Rate-limit and gateway errors can come from Nginx as HTML, so the body
+    // may not be JSON.
+    let data: { message?: string; detail?: string } | null = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+    if (!response.ok) {
+      const fallback = response.status === 429
+        ? 'Please slow down a moment, then try again.'
+        : 'We couldn’t reach DŌM right now.';
+      const error = new ApiError(response.status, data?.message || data?.detail || fallback);
+      if (RETRYABLE_STATUSES.has(response.status) && attempt < retryDelays.length) {
+        lastError = error;
+        continue;
+      }
+      throw error;
+    }
+    return data as T;
   }
-  return data as T;
+
+  throw lastError;
 }
 
 export function getPublicSettings() {
