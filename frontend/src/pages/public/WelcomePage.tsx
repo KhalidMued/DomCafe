@@ -11,6 +11,7 @@ const fallbackSettings: PublicSettings = {
 
 export function WelcomePage({ navigate }: { navigate: (path: string) => void }) {
   const [name, setName] = useState('');
+  const [nameError, setNameError] = useState('');
   const [settings, setSettings] = useState<PublicSettings | null>(null);
 
   useEffect(() => {
@@ -20,7 +21,11 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
   const activeSettings = settings ?? fallbackSettings;
   function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim() || !activeSettings.orders_open) return;
+    if (!activeSettings.orders_open) return;
+    if (!name.trim()) {
+      setNameError('Please tell us your name first, so the bar knows who this coffee is for.');
+      return;
+    }
     setGuestName(name);
     navigate('/menu');
   }
@@ -69,7 +74,17 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
         </ul>
         <form className="name-form" onSubmit={start}>
           <label htmlFor="guest-name">Your name</label>
-          <input id="guest-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={50} placeholder="Ahmed" dir="auto" />
+          <input
+            id="guest-name"
+            value={name}
+            onChange={(event) => { setName(event.target.value); if (nameError) setNameError(''); }}
+            maxLength={50}
+            placeholder="Ahmed"
+            dir="auto"
+            aria-invalid={nameError ? true : undefined}
+            aria-describedby={nameError ? 'guest-name-error' : undefined}
+          />
+          {nameError ? <p className="error-text" id="guest-name-error" aria-live="polite" dir="auto">{nameError}</p> : null}
           <button type="submit" disabled={!activeSettings.orders_open}>{activeSettings.orders_open ? 'Start' : 'Orders paused'}</button>
         </form>
       </section>

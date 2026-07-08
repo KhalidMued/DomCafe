@@ -16,6 +16,14 @@ function currentPath() {
   return window.location.pathname;
 }
 
+function isAdminRoot(path: string) {
+  return path === '/admin' || path === '/admin/';
+}
+
+function adminHomePath() {
+  return window.localStorage.getItem('dom_admin_token') ? '/admin/dashboard' : '/admin/login';
+}
+
 function RouteLoading() {
   return (
     <main className="app-route-loading" role="status" aria-live="polite">
@@ -28,6 +36,7 @@ function RouteLoading() {
 }
 
 function CurrentRoute({ path, navigate }: { path: string; navigate: (nextPath: string) => void }) {
+  if (isAdminRoot(path)) return <RouteLoading />; // App redirects to login/dashboard
   if (path === '/admin/login') return <AdminLoginPage navigate={navigate} />;
   if (path === '/admin/dashboard') return <AdminDashboardPage />;
   if (path === '/admin/beans') return <AdminBeansPage />;
@@ -54,6 +63,14 @@ export function App() {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
+
+  useEffect(() => {
+    if (isAdminRoot(path)) {
+      const target = adminHomePath();
+      window.history.replaceState({}, '', target);
+      setPath(target);
+    }
+  }, [path]);
 
   return (
     <Suspense fallback={<RouteLoading />}>
