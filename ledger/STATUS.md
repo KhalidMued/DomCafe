@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Post-MVP hardening — Phase 1 (stability and CI) from the 2026-07-08 production-readiness audit
+Post-MVP hardening — Phase 2 (security) from the 2026-07-08 production-readiness audit
 
 ## Current branch
-feature/phase1-stability-ci
+feature/phase2-security-hardening
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -60,20 +60,19 @@ feature/phase1-stability-ci
 - PR #58 (order progress on the menu plus upload-policy docs) was squash merged into `main`.
 - PR #59 added `CLAUDE.md` with the permanent PR-only Git workflow rule and was squash merged into `main`.
 - A full production-readiness audit was completed and recorded in `ledger/AUDIT-2026-07-08.md` with a five-phase remediation roadmap.
-- Current branch implements audit Phase 1: `restart: unless-stopped` on all six Compose services; healthchecks for postgres, redis, backend, and frontend; `depends_on` readiness conditions (backend waits for healthy postgres/redis, pgbouncer waits for healthy postgres); a GitHub Actions CI workflow running backend pytest, frontend vitest + build, and Compose config validation on every PR; and a backend image that runs as non-root `appuser` (UID 1001, matching the host owner of the bind-mounted `uploads/`) and copies only the seed brand JSON instead of all of `docs/`.
+- Audit Phase 1 (PR #60) was squash merged into `main`: self-healing Compose stack (restart policies, healthchecks, health-gated `depends_on`), the GitHub Actions CI workflow, and the non-root backend image.
+- Current branch implements audit Phase 2 (security): guest orders now carry a random unique `public_code` (`secrets.token_urlsafe`) used for all public status lookups, so order details can no longer be enumerated via sequential ids (audit H1; migration `20260708_0003` backfills existing orders); uvicorn runs with `--proxy-headers` and Nginx overwrites `X-Forwarded-For` with the resolved `$remote_addr`, restoring real per-client rate limiting instead of one global bucket keyed on the proxy IP (H2); Nginx trusts `CF-Connecting-IP` from `172.16.0.0/12` via the `real_ip` module so Cloudflare Tunnel visitors are rate-limited individually; the four security headers moved to `nginx/conf.d/security-headers.inc` and are included in every location that declares its own `add_header`, restoring them on `/api/*` and `/uploads/*` responses (H3); and whitespace-only guest names are rejected by stripping before validation (M8).
 
 ## Verification
-Verification for `feature/phase1-stability-ci` (2026-07-08):
+Verification for `feature/phase2-security-hardening` (2026-07-08):
 
-- `docker compose config -q` passed; CI workflow YAML parsed cleanly.
-- Docker stack rebuilt with `docker compose up -d --build`; startup showed health-gated ordering (postgres/redis reported Healthy before backend started).
-- `docker compose ps` showed backend, frontend, postgres, and redis as `(healthy)`; all six services carry `restart: unless-stopped` (confirmed via `docker inspect`).
-- Live health check returned `{"status":"ok","database":"ok","redis":"ok"}` on `http://localhost:11080/api/health`.
-- Backend container runs as `uid=1001(appuser)`; a write/delete test inside the bind-mounted `/app/uploads/drinks/` succeeded as the non-root user, and `alembic upgrade head` exited 0 as the non-root user.
-- Seed brand JSON confirmed present at `/app/docs/dom_hermes_agent_v1_2.json` in the trimmed image.
-- Crash-recovery test: sending SIGTERM to uvicorn (PID 1) from inside the container caused an exit and Docker auto-restarted it; the backend returned to `(healthy)` and `/api/health` returned HTTP 200 within ~20 seconds. (Note: `docker kill` does not trigger restart policies — Docker treats it as a manual stop — so the test crashes the process from inside.)
-- Backend tests: `67 passed` in a clean `python:3.12-slim` container installing `backend/requirements.txt` — the same environment the new CI workflow uses. (The host has no pytest environment; `python3 -m venv` is unavailable without `python3.12-venv`.)
-- Frontend tests: `30 passed` (`npm test -- --run`) on this branch.
+- Backend tests: `71 passed` (67 existing + 4 new security tests; one phase-2 test updated for the string order-code contract) in a clean `python:3.12-slim` container, matching the CI environment.
+- Backend rebuilt and migration `20260708_0003` applied via `alembic upgrade head`; existing orders were backfilled with unique `public_code` values and the `uq_orders_public_code` constraint is present (checked in psql).
+- Live order-creation check returned a random `order_id` public code with the sequential `order_number` alongside; `GET /api/orders/<code>` returned 200 while `GET /api/orders/<int id>` and `GET /api/orders/1` returned 404 (enumeration blocked). The verification order was marked cancelled afterwards.
+- Whitespace-only `guest_name` returned the friendly 422 `INVALID_INPUT` shape.
+- All four security headers now present on `/api/health` and `/uploads/drinks/placeholder.jpg` responses (was zero before the fix), locally and through `https://dom.khalidmued.com`.
+- Redis rate-limit key after an order was `rate-limit:order-create:172.19.0.1` (the real source of the request) and no longer the Nginx container IP (`172.19.0.7`), confirming per-client keying through `--proxy-headers`.
+- Public site and `/api/health` returned HTTP 200 through the Cloudflare Tunnel after the Nginx restart.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -94,19 +93,20 @@ Historical verification for earlier merged work lives in git history of this fil
 - documentation
 
 ## What is pending
-- The Phase 1 stability/CI PR from `feature/phase1-stability-ci` is open for review and merge into `main`.
-- Audit Phases 2–5 from `ledger/AUDIT-2026-07-08.md`: security hardening (order enumeration, real-IP rate limits, nginx header inheritance), guest UX fixes, backend hygiene, and optional polish.
+- The Phase 2 security PR from `feature/phase2-security-hardening` is open for review and merge into `main`.
+- Audit Phases 3–5 from `ledger/AUDIT-2026-07-08.md`: guest UX fixes, backend hygiene, and optional polish.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. Highest open items: public order enumeration (H1), rate limits keyed on the proxy IP instead of the client IP (H2), security headers dropped on `/api/*` and `/uploads/*` responses (H3, confirms the earlier 401-header observation), and the menu progress card clearing on transient poll errors (H4).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1/H2/H3/M8 are fixed on the Phase 2 branch; the highest remaining open item is the menu progress card clearing on transient poll errors (H4), plus the Phase 3–5 medium/low findings.
+- Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Empty guest-name Start action has no visible validation message.
 - `/admin` falls back to the public welcome page instead of routing to admin login/dashboard.
 - Many menu cards still use the repeated DŌM placeholder image.
 - Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- Audit Phase 2 (security): add a random public lookup code for guest orders, fix real-client-IP rate limiting (`--proxy-headers` + nginx real IP), and restore security headers on `/api/*` and `/uploads/*` responses.
+- Audit Phase 3 (guest UX): clear the menu progress card only on confirmed 404s, persist the cart to sessionStorage, cap the quantity stepper at 10, parse non-JSON error responses defensively, and self-host the brand fonts.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

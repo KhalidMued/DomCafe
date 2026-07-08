@@ -71,20 +71,24 @@ Response:
 
 ```json
 {
-  "order_id": "1",
+  "order_id": "k3TqX9-w2ZbYpLmA",
   "order_number": 1,
   "status": "new",
   "message": "Your order was sent to the bar."
 }
 ```
 
+`order_id` is a random, unguessable public code; keep it to check the order status. `order_number` is the human-friendly sequential number shown to staff.
+
+Leading and trailing whitespace in `guest_name` is stripped before validation; whitespace-only names are rejected.
+
 ### Get guest order status
 
 ```http
-GET /api/orders/{order_id}
+GET /api/orders/{order_code}
 ```
 
-Returns guest-safe order details, item snapshots, and a friendly status label.
+`order_code` is the `order_id` public code returned by order creation; sequential integer ids are not accepted. Returns guest-safe order details, item snapshots, and a friendly status label. The `id` field in the response is the same public code.
 
 ## Admin routes
 

@@ -115,8 +115,8 @@ def test_create_order_returns_tracking_details(monkeypatch):
 def test_get_order_status_returns_friendly_status(monkeypatch):
     from app.api.public import routes
 
-    async def fake_order_status(_session, order_id):
-        assert order_id == 12
+    async def fake_order_status(_session, order_code):
+        assert order_code == "12"
         return {
             "id": "12",
             "order_number": 12,

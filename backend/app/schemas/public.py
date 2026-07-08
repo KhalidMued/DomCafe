@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class PublicSettingsResponse(BaseModel):
@@ -46,6 +46,11 @@ class OrderCreate(BaseModel):
     guest_name: str = Field(min_length=1, max_length=50)
     guest_note: str | None = Field(default=None, max_length=300)
     items: list[OrderItemCreate] = Field(min_length=1, max_length=10)
+
+    @field_validator("guest_name", mode="before")
+    @classmethod
+    def strip_guest_name(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
 
 
 class OrderCreateResponse(BaseModel):
