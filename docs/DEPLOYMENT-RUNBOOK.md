@@ -113,6 +113,15 @@ The script verifies both:
 - application queries can pass through PgBouncer to PostgreSQL; and
 - `SHOW POOLS` exposes the expected application database pool.
 
+### DNS-staleness self-healing
+
+PgBouncer's embedded DNS resolver can wedge permanently after the postgres container restarts (observed 2026-07-08: every connection failed with `DNS lookup failed: postgres: result=0` until a manual container restart). Two layers now handle this automatically:
+
+- A container healthcheck runs a real `select 1` through PgBouncer every 15s, so `docker compose ps` shows `unhealthy` when the path to PostgreSQL is broken, and the backend's `depends_on` waits for a healthy pooler at startup.
+- An in-container watchdog (`pgbouncer/watchdog.sh`) runs the same end-to-end query and, after 4 consecutive failures (~60s), kills the pgbouncer process so `restart: unless-stopped` replaces the container with a fresh resolver. The budget is wide enough that a normal postgres restart does not trigger it. Watchdog activity appears in `docker logs` under the `domcafe-pgbouncer-watchdog:` prefix.
+
+A prolonged PostgreSQL outage will cycle the PgBouncer container roughly once a minute until PostgreSQL returns; this is expected and recovers without intervention.
+
 ## Backups and restore smoke tests
 
 Create a database backup:

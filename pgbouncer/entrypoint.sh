@@ -9,4 +9,6 @@ mkdir -p "$PG_CONFIG_DIR"
 printf '"%s" "%s"\n' "$DATABASES_USER" "$DATABASES_PASSWORD" > "$PG_CONFIG_DIR/userlist.txt"
 export PGBOUNCER_AUTH_FILE="$PG_CONFIG_DIR/userlist.txt"
 
+/usr/local/bin/domcafe-pgbouncer-watchdog.sh &
+
 exec /opt/pgbouncer/entrypoint.sh

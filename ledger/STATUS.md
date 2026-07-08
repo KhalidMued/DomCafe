@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-fix/l4-login-timing-oracle
+fix/pgbouncer-dns-selfheal
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -67,14 +67,18 @@ fix/l4-login-timing-oracle
 - Audit Phase 5 (PR #64) was squash merged into `main`: admin SPA navigation without full page reloads (M11); order status transitions record `received_at`/`preparing_at`/`ready_at`/`cancelled_at` timestamps (M14, migration `20260708_0004`); cancelled progress-track styling, stable list keys, drink-photo alt text, and mid-tone→hint contrast fixes (L6); edge Nginx gzip for API JSON, server-side WebP re-encoding of drink photo uploads capped at 1600px with EXIF stripped, and one grouped dashboard order-count query (L7). L3 (deleting replaced photo files) was deliberately skipped: it conflicts with the curated-photo runtime-data policy, which forbids deleting admin-added photos without explicit confirmation.
 - PR #66 (UX fixes) was squash merged into `main`: inline empty-guest-name validation message, `/admin` root redirect to login/dashboard, and the floating "Review order (N)" link on long menus.
 - PR #67 (M12 fetch resilience) was squash merged into `main`: 10s abort timeout on every request, exponential-backoff retry for idempotent GETs on network failures and 502/503/504 (never 429), no retry for writes, and a friendly offline fast-fail message.
-- Current branch fixes audit finding L4 (admin login timing oracle): when the username does not match an active admin, `authenticate_admin` now verifies the password against a lazily cached throwaway bcrypt hash (`burn_password_check` in `core/security.py`), so unknown and known usernames cost the same bcrypt work and response timing cannot enumerate admin accounts. `docs/SECURITY.md` documents the behavior.
+- PR #68 (L4 login timing oracle) was squash merged into `main`: unknown usernames now burn a throwaway bcrypt verification so login timing cannot enumerate admin accounts.
+- Current branch makes PgBouncer self-heal from wedged DNS (incident 2026-07-08: after a postgres restart, every connection failed with `DNS lookup failed: postgres: result=0` for two hours until a manual restart — Compose never restarts unhealthy containers by itself). The pgbouncer image now installs `postgresql-client` and gains two layers: a Compose healthcheck running a real `select 1` through the pooler (visibility + backend `depends_on` now gates on `service_healthy`), and an in-container watchdog (`pgbouncer/watchdog.sh`) that runs the same end-to-end query every 15s and kills PID 1 after 4 consecutive failures so `restart: unless-stopped` replaces the container with a fresh resolver. The ~60s failure budget means a normal postgres restart never triggers it. Documented in `docs/DEPLOYMENT-RUNBOOK.md`.
 
 ## Verification
-Verification for `fix/l4-login-timing-oracle` (2026-07-08):
+Verification for `fix/pgbouncer-dns-selfheal` (2026-07-08):
 
-- Backend tests: `82 passed` (79 existing + 3 new in `test_phase11_login_timing.py` covering the dummy burn for unknown usernames, no burn for known usernames with wrong passwords, and reuse of the single cached shield hash) in a clean `python:3.12-slim` container.
-- Backend-only change: no frontend, migration, or Nginx config touched.
-- The backend container was rebuilt and live login timing was compared through the edge with wrong passwords: unknown username 0.429s vs known username 0.422–0.423s (indistinguishable; the first-ever unknown attempt pays a one-time ~0.9s lazy hash setup). Before the fix, unknown usernames skipped bcrypt entirely and returned in a few milliseconds.
+- `docker compose config -q` passed; the pgbouncer image rebuilt cleanly (Alpine 3.9 base needs the `postgresql-client` package, not `postgresql16-client`).
+- After rebuild `docker compose ps` shows pgbouncer `healthy` and both the pgbouncer process (PID 1) and the watchdog process are running in the container.
+- Live outage drill: postgres was stopped; the watchdog logged `end-to-end check failed (1/4)` through `(4/4)` and `restarting container to recover`; the pgbouncer container self-restarted after ~55s (RestartCount 1). Postgres was then started and the full stack recovered to `/api/health` `{"status":"ok"}` within ~5s with no manual intervention — the exact failure that previously required a human restart.
+- Tolerance drill: a normal `docker compose restart postgres` caused no pgbouncer restart (RestartCount stayed 1) and health stayed ok.
+- `./scripts/check-pgbouncer.sh` passes (application query through the pooler + `SHOW POOLS` visibility).
+- No application code changed: backend and frontend containers untouched.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -86,9 +90,8 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- bcrypt (timing-shield dummy verification)
-- pytest
-- Docker Compose (backend container rebuild)
+- PgBouncer (watchdog + healthcheck, image gains postgresql-client)
+- Docker Compose (pgbouncer healthcheck, backend depends_on service_healthy)
 - Git
 - documentation
 
@@ -96,12 +99,12 @@ Historical verification for earlier merged work lives in git history of this fil
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M9, M11–M14, L1–L2, and L6–L7 are fixed and merged, and L4 (login timing oracle) is fixed on the current branch; still open by choice: M10 (localStorage JWT), L3 (old-photo deletion — conflicts with the curated-photo runtime-data policy), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M9, M11–M14, L1–L2, L4, and L6–L7 are fixed and merged; still open by choice: M10 (localStorage JWT — planned next), L3 (old-photo deletion — planned with a policy-safe design), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Many menu cards still use the repeated DŌM placeholder image.
 
 ## Next recommended task
-- The L4 login-timing PR from `fix/l4-login-timing-oracle` is open for review and merge into `main`. After that, the main remaining item is replacing the repeated DŌM placeholder images with real drink photos (content work via the admin panel — needs the user's photos); everything else still open is deferred by choice (M10, L3, L5, L8, Three.js).
+- The PgBouncer self-heal PR from `fix/pgbouncer-dns-selfheal` is open for review and merge into `main`. The agreed follow-up order (2026-07-08): next M10 (move the admin JWT from localStorage to an httpOnly cookie), then L3 (delete replaced generated drink photos while never touching curated/tracked assets). Drink-photo content work still needs the user's photos.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
