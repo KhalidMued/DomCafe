@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-User-side order progress on the menu is ready
+Post-MVP hardening — Phase 1 (stability and CI) from the 2026-07-08 production-readiness audit
 
 ## Current branch
-feature/order-progress-on-menu
+feature/phase1-stability-ci
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -12,7 +12,7 @@ feature/order-progress-on-menu
 - Phase 3 PR #7 hardened env/secret handling.
 - Phase 3 PR #8 added PostgreSQL/PgBouncer backup and restore tooling.
 - Phase 3 PR #9 added backend health, DB readiness checks, and runtime smoke tests.
-- Phase 3 PR #10 added structured backend logging, request IDs, and Nginx access logs.
+- Phase 3 PR #10 added structured backend logging, request IDs, and Nginx access logs. (Correction 2026-07-08: the backend logging/request-ID middleware is no longer present in the current code; only Nginx access logs and uvicorn defaults remain. Tracked as finding M6 in `ledger/AUDIT-2026-07-08.md`.)
 - Phase 3 PR #11 added Postgres persistent volume plus Redis-backed app caching.
 - Phase 3 PR #12 added production deployment docs and operational runbook.
 - Phase 4 PR #13 added the public ordering backend foundation.
@@ -57,65 +57,56 @@ feature/order-progress-on-menu
 - The production frontend container was rebuilt after PR #51 merged so Nginx now serves the new favicon, PNG icons, Apple touch icon, and manifest files instead of the old SPA fallback HTML.
 - PR #54 added the cart Remove control, centered select chevrons, and disabled textarea resizing; it was merged into `main` and the production frontend container was rebuilt afterward.
 - PR #55 replaced the cart page native quantity number input with a custom minus/value/plus stepper, kept the minimum quantity at 1, and aligned the cart quantity badge plus Remove control to the Doum gold/fired-clay color treatment; it was merged into `main` and the production frontend container was rebuilt afterward.
-- Current branch stores the submitted order id, shows a matching dark/gold order-progress card above the menu category chips when an active submitted order exists, and polls the public order status every 15 seconds until the order reaches `ready` or `cancelled`.
+- PR #58 (order progress on the menu plus upload-policy docs) was squash merged into `main`.
+- PR #59 added `CLAUDE.md` with the permanent PR-only Git workflow rule and was squash merged into `main`.
+- A full production-readiness audit was completed and recorded in `ledger/AUDIT-2026-07-08.md` with a five-phase remediation roadmap.
+- Current branch implements audit Phase 1: `restart: unless-stopped` on all six Compose services; healthchecks for postgres, redis, backend, and frontend; `depends_on` readiness conditions (backend waits for healthy postgres/redis, pgbouncer waits for healthy postgres); a GitHub Actions CI workflow running backend pytest, frontend vitest + build, and Compose config validation on every PR; and a backend image that runs as non-root `appuser` (UID 1001, matching the host owner of the bind-mounted `uploads/`) and copies only the seed brand JSON instead of all of `docs/`.
 
 ## Verification
-- Frontend tests: `30 passed` (`npm test -- --run`).
-- Frontend production build: passed (`npm run build`); Vite emitted the new `orderProgressStore` chunk plus updated menu/cart/status route assets.
-- Docker stack rebuilt and started successfully with `docker compose up -d --build`.
-- Live health check passed on `http://localhost:11080/api/health` with database and Redis reported `ok`.
-- Live order-progress verification created order #54 through `/api/orders`; with that order stored as the active submitted order, `/menu` displayed the progress card before the category chips and menu list.
-- Browser screenshot verification confirmed the progress card matches the site's dark card, DŌM gold accent, typography, spacing, and menu layout without obvious visual issues.
-- Backend tests: `67 passed` (`python -m pytest -q`).
-- Docker/live baseline: Nginx app entry responded on `http://localhost:11080`; `/`, `/menu`, `/cart`, `/admin`, and `/api/health` returned HTTP 200 during the audit baseline check.
-- Browser dogfood verification covered the welcome page, menu page, cart page, order status page, admin login page, and logged-out protected admin page.
-- Guest flow live test succeeded: welcome/name entry, menu add-to-order feedback, cart quantity update, order submission, and order-status display.
-- Cloudflare 502 incident check found the tunnel running but the local Nginx origin on `127.0.0.1:11080` stopped; rebuilding/starting the Docker Compose stack restored local `/` and `/api/health` HTTP 200 responses plus public `https://dom.khalidmued.com/` and `/api/health` HTTP 200 responses.
-- Pulled the latest `cloudflare/cloudflared:latest` Docker image (`sha256:12ff5c6992a9863db4da270746af7c244bcaee49353039af8104268a18d6c4f0`, version `2026.5.2`) and verified the DomCafe stack plus Cloudflare public `/` and `/api/health` responses returned HTTP 200 afterward.
-- Security spot checks: public HTML security headers were present; unauthenticated admin API requests returned HTTP 401 with a generic admin-login-required response and no-store cache behavior.
-- Audit report written to `ledger/DOGFOOD-AUDIT-2026-06-03.md` with prioritized PR recommendations.
-- Current real admin-uploaded coffee drink photos were committed as curated menu assets, and future admin-panel drink uploads are now treated as ignored runtime data unless explicitly promoted.
-- Upload runtime-data policy verification: `docker compose config` passed and `git check-ignore uploads/drinks/manual-test-upload.png` confirmed future generated drink uploads are ignored.
-- Docker stack was rebuilt and restarted with `docker compose up -d --build`; `http://localhost:11080/api/health` returned `{"status":"ok","database":"ok","redis":"ok"}`, and a committed drink photo returned HTTP 200 from `/uploads/drinks/...`.
+Verification for `feature/phase1-stability-ci` (2026-07-08):
+
+- `docker compose config -q` passed; CI workflow YAML parsed cleanly.
+- Docker stack rebuilt with `docker compose up -d --build`; startup showed health-gated ordering (postgres/redis reported Healthy before backend started).
+- `docker compose ps` showed backend, frontend, postgres, and redis as `(healthy)`; all six services carry `restart: unless-stopped` (confirmed via `docker inspect`).
+- Live health check returned `{"status":"ok","database":"ok","redis":"ok"}` on `http://localhost:11080/api/health`.
+- Backend container runs as `uid=1001(appuser)`; a write/delete test inside the bind-mounted `/app/uploads/drinks/` succeeded as the non-root user, and `alembic upgrade head` exited 0 as the non-root user.
+- Seed brand JSON confirmed present at `/app/docs/dom_hermes_agent_v1_2.json` in the trimmed image.
+- Crash-recovery test: sending SIGTERM to uvicorn (PID 1) from inside the container caused an exit and Docker auto-restarted it; the backend returned to `(healthy)` and `/api/health` returned HTTP 200 within ~20 seconds. (Note: `docker kill` does not trigger restart policies — Docker treats it as a manual stop — so the test crashes the process from inside.)
+- Backend tests: `67 passed` in a clean `python:3.12-slim` container installing `backend/requirements.txt` — the same environment the new CI workflow uses. (The host has no pytest environment; `python3 -m venv` is unavailable without `python3.12-venv`.)
+- Frontend tests: `30 passed` (`npm test -- --run`) on this branch.
+
+Historical verification for earlier merged work lives in git history of this file.
 
 ## Hermes Tools Used
-- skill_view
-- todo
 - read_file
-- search_files
-- terminal
-- process
-- execute_code
-- browser tools
 - write_file
 - patch
+- terminal
+- git/gh CLI
 
 ## Technologies / Services Touched
-- Docker Compose
-- Nginx
-- FastAPI
-- React
-- TypeScript
-- Vite
-- Vitest
+- Docker Compose (restart policies, healthchecks, depends_on conditions)
+- Docker (backend image non-root user, image slimming)
+- GitHub Actions (new CI workflow)
 - pytest
+- Vitest
 - Git
-- DomCafe admin drink uploads
 - documentation
 
 ## What is pending
-- PR #58 (`feature/order-progress-on-menu`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/58
+- The Phase 1 stability/CI PR from `feature/phase1-stability-ci` is open for review and merge into `main`.
+- Audit Phases 2–5 from `ledger/AUDIT-2026-07-08.md`: security hardening (order enumeration, real-IP rate limits, nginx header inheritance), guest UX fixes, backend hygiene, and optional polish.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. Highest open items: public order enumeration (H1), rate limits keyed on the proxy IP instead of the client IP (H2), security headers dropped on `/api/*` and `/uploads/*` responses (H3, confirms the earlier 401-header observation), and the menu progress card clearing on transient poll errors (H4).
 - Empty guest-name Start action has no visible validation message.
 - `/admin` falls back to the public welcome page instead of routing to admin login/dashboard.
-- API 401 responses did not show the same security headers observed on the public HTML response.
 - Many menu cards still use the repeated DŌM placeholder image.
 - Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- Create a focused first-impression usability PR for: empty guest-name feedback, explicit `/admin` routing, and polished logged-out admin protected-page presentation.
+- Audit Phase 2 (security): add a random public lookup code for guest orders, fix real-client-IP rate limiting (`--proxy-headers` + nginx real IP), and restore security headers on `/api/*` and `/uploads/*` responses.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

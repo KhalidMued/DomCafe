@@ -2,10 +2,17 @@ services:
   frontend:
     build:
       context: ./frontend
+    restart: unless-stopped
     expose:
       - "5173"
     environment:
       VITE_API_BASE_URL: /api
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5173/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
       - backend
 
@@ -13,18 +20,30 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    restart: unless-stopped
     expose:
       - "8000"
     env_file:
       - .env
     volumes:
       - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - pgbouncer
-      - redis
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_healthy
 
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-dom_cafe}
       POSTGRES_USER: ${POSTGRES_USER:-dom_cafe_user}
@@ -33,10 +52,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
     expose:
       - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dom_cafe_user} -d ${POSTGRES_DB:-dom_cafe}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   pgbouncer:
     build:
       context: ./pgbouncer
+    restart: unless-stopped
     environment:
       DATABASES_HOST: postgres
       DATABASES_PORT: 5432
@@ -50,18 +76,26 @@ services:
     expose:
       - "6432"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
     expose:
       - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     image: nginx:1.27-alpine
+    restart: unless-stopped
     ports:
       - "0.0.0.0:11080:80"
     volumes:
