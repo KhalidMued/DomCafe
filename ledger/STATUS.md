@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Post-MVP hardening — Phase 3 (guest UX) from the 2026-07-08 production-readiness audit
+Post-MVP hardening — Phase 4 (backend hygiene) from the 2026-07-08 production-readiness audit
 
 ## Current branch
-feature/phase3-guest-ux
+feature/phase4-backend-hygiene
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -62,15 +62,18 @@ feature/phase3-guest-ux
 - A full production-readiness audit was completed and recorded in `ledger/AUDIT-2026-07-08.md` with a five-phase remediation roadmap.
 - Audit Phase 1 (PR #60) was squash merged into `main`: self-healing Compose stack (restart policies, healthchecks, health-gated `depends_on`), the GitHub Actions CI workflow, and the non-root backend image.
 - Audit Phase 2 (PR #61) was squash merged into `main`: order enumeration blocked via random `public_code` lookups, real per-client rate limiting through `--proxy-headers`/`real_ip`, security headers restored on `/api/*` and `/uploads/*`, and whitespace-only guest names rejected.
-- Current branch implements audit Phase 3 (guest UX): the menu order-progress card is cleared only when the backend confirms 404 and otherwise survives transient poll failures and keeps retrying (H4); the API client parses non-JSON error bodies defensively, exposes the HTTP status via a new `ApiError`, and shows a friendly slow-down message on 429 (M2); the cart persists to `sessionStorage` and survives page refreshes (M3); drink quantity is capped at the backend maximum of 10 in both the cart stepper and repeated menu adds (M4); the Tajawal brand font is self-hosted from `frontend/public/fonts/` with arabic+latin subsets and `font-display: swap`, removing the render-blocking Google Fonts `@import` (M5); font files are served with immutable one-year caching; and the order-status page stops polling and clears the stored order when it hits a confirmed 404 instead of retrying forever.
+- Audit Phase 3 (PR #62) was squash merged into `main`: order-progress resilience, defensive API error parsing, sessionStorage cart persistence, the quantity-10 cap, and self-hosted Tajawal fonts.
+- Current branch implements audit Phase 4 (backend hygiene): the Discord order webhook fires as a fire-and-forget background task instead of blocking the guest's order response (M1); a request-logging middleware adds an `X-Request-ID` response header and logs request id, method, path, status, and duration for every request except the healthcheck-polled `/api/health` (M6); `get_redis()` returns one shared pooled client instead of opening and closing a connection per call (M7); an explicit `default_bean_id: null` in the admin drink PATCH now clears the drink's bean instead of erroring (M9); dead code was swept — the seven unprefixed Phase-0 admin page placeholders, `app/router.tsx`, `app/providers.tsx`, the empty `lib/errors|validators|i18n.ts` files, the empty `components/*` scaffold dirs, the redundant `docker-compose.prod.yml`, the unused `VITE_API_BASE_URL` compose env, and the unused `passlib` dependency (replaced by a direct `bcrypt==5.0.0` pin) (L1); and the triplicated `_as_bool` plus the duplicated drink/bean/category payload builders were consolidated into `app/core/parsing.py` and `app/services/serializers.py` (L2). `_current_admin_dependency` was kept and documented — it is a live test seam, not dead code as the audit first assumed.
 
 ## Verification
-Verification for `feature/phase3-guest-ux` (2026-07-08):
+Verification for `feature/phase4-backend-hygiene` (2026-07-08):
 
-- Frontend tests: `36 passed` (30 existing + 6 new in `guest-ux-hardening.test.tsx` covering non-JSON 429 handling, `ApiError` status exposure, sessionStorage cart persistence and reload, the quantity-10 cap, and keep-vs-clear behavior of the active order on transient 502 vs confirmed 404).
-- Frontend production build passed; the built CSS contains zero `fonts.googleapis`/`fonts.gstatic` references and resolves fonts from `/fonts/tajawal-*.woff2`.
-- Production frontend container rebuilt and healthy; live checks: `/fonts/tajawal-400-latin.woff2` returns HTTP 200 (10,256 bytes) with `Cache-Control: public, max-age=31536000, immutable`; `/` returns 200 locally and through `https://dom.khalidmued.com`.
-- Backend untouched this phase (frontend + frontend-nginx only); the running backend remained healthy throughout.
+- Backend tests: `75 passed` (71 existing + 4 new in `test_phase9_backend_hygiene.py` covering the `X-Request-ID` header, `as_bool` parsing, explicit-null bean clearing through the PATCH route, and non-blocking Discord scheduling) in a clean `python:3.12-slim` container with the new `bcrypt==5.0.0` pin replacing `passlib`.
+- Frontend tests: `36 passed` and production build passed after deleting the twelve dead placeholder files and empty component scaffold dirs — nothing referenced them.
+- `docker compose config -q` passed after removing `docker-compose.prod.yml` and the unused `VITE_API_BASE_URL` env.
+- Backend rebuilt and healthy; live checks: `X-Request-ID` present on responses; a structured `domcafe.request` log line (request id, method, path, status, duration) appears per request while `/api/health` stays out of the log; `pip show passlib` is empty in the container and `bcrypt 5.0.0` is installed.
+- Live rate-limit exercise through the shared Redis client: six wrong admin logins returned exactly `401 ×5` then `429`.
+- Live order creation returned HTTP 201 in 0.06s with the Discord notification scheduled in the background; no errors in backend logs. The verification order was cancelled afterwards.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -91,12 +94,12 @@ Historical verification for earlier merged work lives in git history of this fil
 - documentation
 
 ## What is pending
-- The Phase 3 guest UX PR from `feature/phase3-guest-ux` is open for review and merge into `main`.
-- Audit Phases 4–5 from `ledger/AUDIT-2026-07-08.md`: backend hygiene and optional polish.
+- The Phase 4 backend hygiene PR from `feature/phase4-backend-hygiene` is open for review and merge into `main`.
+- Audit Phase 5 (optional polish) from `ledger/AUDIT-2026-07-08.md`: admin SPA navigation, order-status timestamps, image resize/WebP pipeline, contrast fixes, edge gzip, and order history.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M2–M5, and M8 are fixed (Phases 2–3); the remaining findings are the Phase 4 backend-hygiene and Phase 5 polish items.
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M9 (except M10/M11/M14), L1, and L2 are fixed (Phases 2–4); the remaining findings are the Phase 5 polish items plus the deliberately deferred M10 (localStorage JWT) and M12 (retry/backoff/offline handling).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Empty guest-name Start action has no visible validation message.
 - `/admin` falls back to the public welcome page instead of routing to admin login/dashboard.
@@ -104,7 +107,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- Audit Phase 4 (backend hygiene): move the Discord webhook to a background task, add request-ID logging middleware, share one Redis client, allow clearing a drink's default bean, and sweep the dead placeholder files and duplicated helpers.
+- Audit Phase 5 (optional polish): admin SPA navigation, order-status transition timestamps, image resize/WebP pipeline, secondary-text contrast, edge gzip for API JSON, and old-photo cleanup on replacement.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

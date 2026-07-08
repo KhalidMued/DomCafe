@@ -1,4 +1,0 @@
-services:
-  nginx:
-    ports:
-      - "0.0.0.0:11080:80"

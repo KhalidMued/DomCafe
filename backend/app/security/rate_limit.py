@@ -24,15 +24,9 @@ def _client_ip(request: Request) -> str:
 async def _check_rate_limit(key: str, max_attempts: int, message: str) -> None:
     redis = get_redis()
     try:
-        eval_script = getattr(redis, "eval")
-        attempts = int(await eval_script(RATE_LIMIT_SCRIPT, 1, key, str(RATE_LIMIT_WINDOW_SECONDS)))
+        attempts = int(await redis.eval(RATE_LIMIT_SCRIPT, 1, key, str(RATE_LIMIT_WINDOW_SECONDS)))
     except RedisError:
         return
-    finally:
-        try:
-            await redis.aclose()
-        except RedisError:
-            pass
 
     if attempts > max_attempts:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=message)

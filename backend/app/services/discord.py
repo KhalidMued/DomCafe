@@ -6,17 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.config import get_settings
+from app.core.parsing import as_bool
 from app.db.session import AsyncSessionLocal
 from app.models.order import Order
 from app.models.setting import Setting
 
 logger = logging.getLogger(__name__)
-
-
-def _as_bool(value: str | None, default: bool) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _status_label(status: str) -> str:
@@ -34,7 +29,7 @@ async def _notifications_enabled(session: AsyncSession) -> bool:
     setting = await session.scalar(
         select(Setting.value).where(Setting.key == "discord_notifications_enabled")
     )
-    return _as_bool(setting, settings.discord_notifications_enabled)
+    return as_bool(setting, settings.discord_notifications_enabled)
 
 
 async def build_order_notification_message(session: AsyncSession, order: Order) -> str:

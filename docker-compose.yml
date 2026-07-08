@@ -5,8 +5,6 @@ services:
     restart: unless-stopped
     expose:
       - "5173"
-    environment:
-      VITE_API_BASE_URL: /api
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5173/"]
       interval: 30s

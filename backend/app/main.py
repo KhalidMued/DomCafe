@@ -1,3 +1,4 @@
+import logging
 from typing import cast
 
 from fastapi import FastAPI, status
@@ -9,10 +10,17 @@ from app.api.admin.routes import router as admin_router
 from app.api.agent.routes import router as agent_router
 from app.api.public.routes import router as public_router
 from app.core.errors import GuestApiError, guest_api_error_handler, validation_exception_handler
+from app.core.request_log import RequestLogMiddleware
 from app.db.redis import get_redis
 from app.db.session import AsyncSessionLocal
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+
 app = FastAPI(title="DŌM Home Café OS")
+app.add_middleware(RequestLogMiddleware)
 app.add_exception_handler(GuestApiError, cast(ExceptionHandler, guest_api_error_handler))
 app.add_exception_handler(
     RequestValidationError, cast(ExceptionHandler, validation_exception_handler)
@@ -29,11 +37,7 @@ async def check_database() -> bool:
 
 
 async def check_redis() -> bool:
-    redis = get_redis()
-    try:
-        await redis.ping()
-    finally:
-        await redis.aclose()
+    await get_redis().ping()
     return True
 
 

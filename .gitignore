@@ -31,3 +31,6 @@ uploads/drinks/*
 
 # Docker
 *.pid
+
+# Claude Code local settings
+.claude/settings.local.json*

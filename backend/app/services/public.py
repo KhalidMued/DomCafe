@@ -1,3 +1,4 @@
+import asyncio
 import secrets
 
 from sqlalchemy import select
@@ -5,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.errors import GuestApiError
+from app.core.parsing import as_bool
 from app.models.menu import Category, Drink
 from app.models.order import Order, OrderItem
 from app.models.setting import Setting
@@ -26,12 +28,6 @@ STATUS_LABELS = {
 }
 
 
-def _as_bool(value: str | None, default: bool) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
 async def get_public_settings(session: AsyncSession) -> dict[str, object]:
     rows = (
         await session.execute(
@@ -45,7 +41,7 @@ async def get_public_settings(session: AsyncSession) -> dict[str, object]:
         "cafe_name": stored.get("cafe_name") or DEFAULT_PUBLIC_SETTINGS["cafe_name"],
         "welcome_message": stored.get("welcome_message")
         or DEFAULT_PUBLIC_SETTINGS["welcome_message"],
-        "orders_open": _as_bool(
+        "orders_open": as_bool(
             stored.get("orders_open"), bool(DEFAULT_PUBLIC_SETTINGS["orders_open"])
         ),
     }
@@ -162,7 +158,7 @@ async def create_guest_order(session: AsyncSession, payload: OrderCreate) -> dic
         )
 
     await session.commit()
-    await notify_new_order_if_enabled(order.id)
+    _schedule_order_notification(order.id)
     return {
         "order_id": order.public_code,
         "order_number": order.id,
@@ -173,6 +169,17 @@ async def create_guest_order(session: AsyncSession, payload: OrderCreate) -> dic
 
 def generate_order_public_code() -> str:
     return secrets.token_urlsafe(12)
+
+
+# Strong references keep pending notification tasks from being garbage collected.
+_notification_tasks: set[asyncio.Task[None]] = set()
+
+
+def _schedule_order_notification(order_id: int) -> None:
+    """Fire the Discord webhook without blocking the guest's order response."""
+    task = asyncio.create_task(notify_new_order_if_enabled(order_id))
+    _notification_tasks.add(task)
+    task.add_done_callback(_notification_tasks.discard)
 
 
 async def get_guest_order_status(session: AsyncSession, order_code: str) -> dict[str, object]:

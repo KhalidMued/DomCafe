@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- Fire the Discord order notification as a background task so it no longer delays the guest's order response.
+- Add request logging middleware with an `X-Request-ID` response header (request id, method, path, status, duration; healthcheck path excluded).
+- Share one pooled Redis client instead of opening a connection per rate-limit or health check.
+- Allow clearing a drink's default bean with an explicit `default_bean_id: null` in the admin PATCH.
+- Sweep dead code: Phase-0 frontend placeholders, empty component scaffolds, redundant `docker-compose.prod.yml`, unused `VITE_API_BASE_URL` env, and the unused `passlib` dependency (replaced by a direct `bcrypt` pin).
+- Consolidate the triplicated `_as_bool` helper and duplicated menu payload builders into shared modules.
 - Keep the menu order-progress card through transient poll failures and clear it only on a confirmed 404; the order-status page also stops polling on 404.
 - Parse non-JSON API error responses defensively with a new `ApiError` (status-aware, friendly 429 message).
 - Persist the guest cart to `sessionStorage` so page refreshes keep the order in progress.
