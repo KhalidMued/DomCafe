@@ -87,6 +87,10 @@ async def _current_admin_dependency(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     session: AsyncSession = Depends(get_session),
 ) -> str:
+    # Test seam, not dead code: tests monkeypatch `require_admin` on this
+    # module, so it must be resolved at call time (a direct
+    # Depends(require_admin) captures the original function at import). The
+    # TypeError fallback lets tests substitute zero-argument fakes.
     try:
         return await require_admin(credentials, session)
     except TypeError:

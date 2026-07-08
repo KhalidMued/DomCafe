@@ -5,20 +5,16 @@ from sqlalchemy.orm import selectinload
 from app.models.menu import Bean, Category, Drink
 from app.models.order import Order
 from app.models.setting import Setting
+from app.core.parsing import as_bool
 from app.services.public import DEFAULT_PUBLIC_SETTINGS, STATUS_LABELS
+from app.services.serializers import bean_payload, category_payload, drink_payload
 
 PENDING_ORDER_STATUSES = ("new", "received", "preparing")
 
 
-def _as_bool(value: str | None, fallback: bool) -> bool:
-    if value is None:
-        return fallback
-    return value.lower() in {"1", "true", "yes", "on"}
-
-
 async def _orders_open(session: AsyncSession) -> bool:
     setting = await session.scalar(select(Setting.value).where(Setting.key == "orders_open"))
-    return _as_bool(setting, bool(DEFAULT_PUBLIC_SETTINGS["orders_open"]))
+    return as_bool(setting, bool(DEFAULT_PUBLIC_SETTINGS["orders_open"]))
 
 
 def _order_summary(order: Order) -> dict[str, object]:
@@ -30,44 +26,6 @@ def _order_summary(order: Order) -> dict[str, object]:
         "status_label": STATUS_LABELS.get(order.status, STATUS_LABELS["new"]),
         "items_count": sum(item.quantity for item in order.items),
         "created_at": order.created_at.isoformat().replace("+00:00", "Z"),
-    }
-
-
-def _drink_payload(drink: Drink) -> dict[str, object]:
-    return {
-        "id": drink.id,
-        "name": drink.name,
-        "category_id": drink.category_id,
-        "category_name": drink.category.label,
-        "bean_id": drink.default_bean_id,
-        "bean_name": drink.default_bean.name if drink.default_bean else None,
-        "description": drink.description,
-        "ingredients": drink.ingredients,
-        "photo_url": drink.photo_url,
-        "is_available": drink.is_available,
-        "temperature_options": drink.temperature_options,
-        "milk_options": drink.milk_options,
-        "estimated_time_minutes": drink.estimated_time_minutes,
-    }
-
-
-def _bean_payload(bean: Bean) -> dict[str, object]:
-    return {
-        "id": bean.id,
-        "name": bean.name,
-        "origin": bean.origin,
-        "process": bean.process,
-        "tasting_notes": bean.tasting_notes,
-        "is_available": bean.is_available,
-    }
-
-
-def _category_payload(category: Category) -> dict[str, object]:
-    return {
-        "id": category.id,
-        "label": category.label,
-        "description": category.description,
-        "is_available": category.is_available,
     }
 
 
@@ -84,9 +42,9 @@ async def get_agent_menu(session: AsyncSession) -> dict[str, object]:
     ).scalars().all()
     beans = (await session.execute(select(Bean).order_by(Bean.name))).scalars().all()
     return {
-        "categories": [_category_payload(category) for category in categories],
-        "drinks": [_drink_payload(drink) for drink in drinks],
-        "beans": [_bean_payload(bean) for bean in beans],
+        "categories": [category_payload(category) for category in categories],
+        "drinks": [drink_payload(drink) for drink in drinks],
+        "beans": [bean_payload(bean) for bean in beans],
     }
 
 
@@ -101,12 +59,12 @@ async def search_agent_drinks(session: AsyncSession, query: str) -> list[dict[st
             .limit(25)
         )
     ).scalars().all()
-    return [_drink_payload(drink) for drink in drinks]
+    return [drink_payload(drink) for drink in drinks]
 
 
 async def list_agent_beans(session: AsyncSession) -> list[dict[str, object]]:
     beans = (await session.execute(select(Bean).order_by(Bean.name))).scalars().all()
-    return [_bean_payload(bean) for bean in beans]
+    return [bean_payload(bean) for bean in beans]
 
 
 async def search_agent_beans(session: AsyncSession, query: str) -> list[dict[str, object]]:
@@ -119,7 +77,7 @@ async def search_agent_beans(session: AsyncSession, query: str) -> list[dict[str
             .limit(25)
         )
     ).scalars().all()
-    return [_bean_payload(bean) for bean in beans]
+    return [bean_payload(bean) for bean in beans]
 
 async def get_agent_status(session: AsyncSession) -> dict[str, object]:
     pending_count = await session.scalar(

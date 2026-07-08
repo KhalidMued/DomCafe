@@ -14,7 +14,9 @@ from app.schemas.admin import (
     AdminDrinkUpdate,
     AdminSettingsUpdate,
 )
-from app.services.public import _as_bool, DEFAULT_PUBLIC_SETTINGS
+from app.core.parsing import as_bool
+from app.services.public import DEFAULT_PUBLIC_SETTINGS
+from app.services.serializers import bean_payload, category_payload, drink_payload
 
 
 async def get_menu_management_summary(session: AsyncSession) -> dict[str, object]:
@@ -32,9 +34,9 @@ async def get_menu_management_summary(session: AsyncSession) -> dict[str, object
     ).scalars().all()
     return {
         "orders_open": orders_open,
-        "categories": [_category_payload(category) for category in categories],
-        "drinks": [_drink_payload(drink) for drink in drinks],
-        "beans": [_bean_payload(bean) for bean in beans],
+        "categories": [category_payload(category) for category in categories],
+        "drinks": [drink_payload(drink) for drink in drinks],
+        "beans": [bean_payload(bean) for bean in beans],
     }
 
 
@@ -45,7 +47,7 @@ async def create_category(session: AsyncSession, payload: AdminCategoryCreate) -
     session.add(category)
     await session.commit()
     await session.refresh(category)
-    return _category_payload(category)
+    return category_payload(category)
 
 
 async def update_category_details(
@@ -59,7 +61,7 @@ async def update_category_details(
         setattr(category, field, value)
     await session.commit()
     await session.refresh(category)
-    return _category_payload(category)
+    return category_payload(category)
 
 
 async def archive_category(session: AsyncSession, category_id: str) -> dict[str, object]:
@@ -69,7 +71,7 @@ async def archive_category(session: AsyncSession, category_id: str) -> dict[str,
     category.is_available = False
     await session.commit()
     await session.refresh(category)
-    return _category_payload(category)
+    return category_payload(category)
 
 
 async def create_bean(session: AsyncSession, payload: AdminBeanCreate) -> dict[str, object]:
@@ -79,7 +81,7 @@ async def create_bean(session: AsyncSession, payload: AdminBeanCreate) -> dict[s
     session.add(bean)
     await session.commit()
     await session.refresh(bean)
-    return _bean_payload(bean)
+    return bean_payload(bean)
 
 
 async def update_bean_details(
@@ -93,7 +95,7 @@ async def update_bean_details(
         setattr(bean, field, value)
     await session.commit()
     await session.refresh(bean)
-    return _bean_payload(bean)
+    return bean_payload(bean)
 
 
 async def archive_bean(session: AsyncSession, bean_id: str) -> dict[str, object]:
@@ -103,7 +105,7 @@ async def archive_bean(session: AsyncSession, bean_id: str) -> dict[str, object]
     bean.is_available = False
     await session.commit()
     await session.refresh(bean)
-    return _bean_payload(bean)
+    return bean_payload(bean)
 
 
 async def get_admin_settings(session: AsyncSession) -> dict[str, object]:
@@ -118,7 +120,7 @@ async def get_admin_settings(session: AsyncSession) -> dict[str, object]:
     return {
         "cafe_name": stored.get("cafe_name") or DEFAULT_PUBLIC_SETTINGS["cafe_name"],
         "welcome_message": stored.get("welcome_message") or DEFAULT_PUBLIC_SETTINGS["welcome_message"],
-        "orders_open": _as_bool(stored.get("orders_open"), bool(DEFAULT_PUBLIC_SETTINGS["orders_open"])),
+        "orders_open": as_bool(stored.get("orders_open"), bool(DEFAULT_PUBLIC_SETTINGS["orders_open"])),
     }
 
 
@@ -148,7 +150,7 @@ async def create_drink(session: AsyncSession, payload: AdminDrinkCreate) -> dict
     session.add(drink)
     await session.commit()
     await session.refresh(drink, attribute_names=["category", "default_bean"])
-    return _drink_payload(drink)
+    return drink_payload(drink)
 
 
 async def update_drink_details(
@@ -164,13 +166,14 @@ async def update_drink_details(
     updates = payload.model_dump(exclude_unset=True)
     if "category_id" in updates and await session.get(Category, updates["category_id"]) is None:
         raise HTTPException(status_code=404, detail="Category not found.")
-    if "default_bean_id" in updates and await session.get(Bean, updates["default_bean_id"]) is None:
+    # An explicit null clears the default bean; only validate real ids.
+    if updates.get("default_bean_id") is not None and await session.get(Bean, updates["default_bean_id"]) is None:
         raise HTTPException(status_code=404, detail="Bean not found.")
     for field, value in updates.items():
         setattr(drink, field, value)
     await session.commit()
     await session.refresh(drink, attribute_names=["category", "default_bean"])
-    return _drink_payload(drink)
+    return drink_payload(drink)
 
 
 async def archive_drink(session: AsyncSession, drink_id: str) -> dict[str, object]:
@@ -184,7 +187,7 @@ async def archive_drink(session: AsyncSession, drink_id: str) -> dict[str, objec
     drink.is_available = False
     await session.commit()
     await session.refresh(drink, attribute_names=["category", "default_bean"])
-    return _drink_payload(drink)
+    return drink_payload(drink)
 
 
 async def set_drink_availability(
@@ -233,47 +236,9 @@ async def set_orders_open(session: AsyncSession, orders_open: bool) -> dict[str,
 
 async def _get_orders_open(session: AsyncSession) -> bool:
     setting = await session.get(Setting, "orders_open")
-    return _as_bool(
+    return as_bool(
         setting.value if setting else None,
         bool(DEFAULT_PUBLIC_SETTINGS["orders_open"]),
     )
 
 
-def _drink_payload(drink: Drink) -> dict[str, object]:
-    return {
-        "id": drink.id,
-        "name": drink.name,
-        "category_id": drink.category_id,
-        "category_name": drink.category.label,
-        "bean_id": drink.default_bean_id,
-        "bean_name": drink.default_bean.name if drink.default_bean else None,
-        "description": drink.description,
-        "ingredients": drink.ingredients,
-        "photo_url": drink.photo_url,
-        "is_available": drink.is_available,
-        "temperature_options": drink.temperature_options,
-        "milk_options": drink.milk_options,
-        "estimated_time_minutes": drink.estimated_time_minutes,
-    }
-
-
-def _category_payload(category: Category) -> dict[str, object]:
-    return {
-        "id": category.id,
-        "label": category.label,
-        "description": category.description,
-        "accent_color": category.accent_color,
-        "display_order": category.display_order,
-        "is_available": category.is_available,
-    }
-
-
-def _bean_payload(bean: Bean) -> dict[str, object]:
-    return {
-        "id": bean.id,
-        "name": bean.name,
-        "origin": bean.origin,
-        "process": bean.process,
-        "tasting_notes": bean.tasting_notes,
-        "is_available": bean.is_available,
-    }
