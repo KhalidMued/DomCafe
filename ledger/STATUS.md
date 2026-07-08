@@ -105,7 +105,6 @@ feature/order-progress-on-menu
 
 ## What is pending
 - PR #58 (`feature/order-progress-on-menu`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/58
-- PR #56 (`fix/menu-add-feedback`) is open for review and merge into `main`: https://github.com/KhalidMued/DomCafe/pull/56
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
