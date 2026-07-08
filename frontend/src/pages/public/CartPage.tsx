@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { createOrder } from '../../lib/api';
-import { clearCart, getCartItems, getGuestName, removeCartItem, updateCartItem } from '../../store/cartStore';
+import { clearCart, getCartItems, getGuestName, MAX_ITEM_QUANTITY, removeCartItem, updateCartItem } from '../../store/cartStore';
 import { setActiveOrderId } from '../../store/orderProgressStore';
 
 export function CartPage({ navigate }: { navigate: (path: string) => void }) {
@@ -107,7 +107,7 @@ export function CartPage({ navigate }: { navigate: (path: string) => void }) {
                 <div className="cart-quantity-stepper" aria-label={`${item.drink.name} quantity`}>
                   <button type="button" disabled={item.quantity <= 1} onClick={() => update(item.drink.id, { quantity: item.quantity - 1 })} aria-label={`Decrease ${item.drink.name} quantity`}>−</button>
                   <span aria-live="polite">{item.quantity}</span>
-                  <button type="button" onClick={() => update(item.drink.id, { quantity: item.quantity + 1 })} aria-label={`Increase ${item.drink.name} quantity`}>+</button>
+                  <button type="button" disabled={item.quantity >= MAX_ITEM_QUANTITY} onClick={() => update(item.drink.id, { quantity: Math.min(item.quantity + 1, MAX_ITEM_QUANTITY) })} aria-label={`Increase ${item.drink.name} quantity`}>+</button>
                 </div>
               </label>
               {item.drink.temperature_options.length > 0 ? <label>Temperature<select value={item.temperature} onChange={(event) => update(item.drink.id, { temperature: event.target.value })}>{item.drink.temperature_options.map((option) => <option key={option}>{option}</option>)}</select></label> : null}

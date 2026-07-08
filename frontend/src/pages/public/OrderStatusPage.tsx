@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { getOrderStatus, type OrderStatus } from '../../lib/api';
-import { setActiveOrderId } from '../../store/orderProgressStore';
+import { ApiError, getOrderStatus, type OrderStatus } from '../../lib/api';
+import { clearActiveOrderId, setActiveOrderId } from '../../store/orderProgressStore';
 
 const finalStatuses = new Set(['ready', 'cancelled']);
 const statusSteps = ['new', 'received', 'preparing', 'ready'];
@@ -24,8 +24,13 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
         if (!finalStatuses.has(nextOrder.status)) {
           timer = window.setTimeout(load, 15_000);
         }
-      } catch {
+      } catch (statusError) {
         if (!alive) return;
+        if (statusError instanceof ApiError && statusError.status === 404) {
+          clearActiveOrderId(orderId);
+          setError('We could not find that order. Please check with the coffee bar.');
+          return;
+        }
         setError('We’re having trouble refreshing your order status. We’ll try again shortly.');
         timer = window.setTimeout(load, 15_000);
       }
