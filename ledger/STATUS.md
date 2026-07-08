@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Post-MVP hardening — Phase 4 (backend hygiene) from the 2026-07-08 production-readiness audit
+Post-MVP hardening — Phase 5 (polish) from the 2026-07-08 production-readiness audit
 
 ## Current branch
-feature/phase4-backend-hygiene
+feature/phase5-polish
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -63,17 +63,18 @@ feature/phase4-backend-hygiene
 - Audit Phase 1 (PR #60) was squash merged into `main`: self-healing Compose stack (restart policies, healthchecks, health-gated `depends_on`), the GitHub Actions CI workflow, and the non-root backend image.
 - Audit Phase 2 (PR #61) was squash merged into `main`: order enumeration blocked via random `public_code` lookups, real per-client rate limiting through `--proxy-headers`/`real_ip`, security headers restored on `/api/*` and `/uploads/*`, and whitespace-only guest names rejected.
 - Audit Phase 3 (PR #62) was squash merged into `main`: order-progress resilience, defensive API error parsing, sessionStorage cart persistence, the quantity-10 cap, and self-hosted Tajawal fonts.
-- Current branch implements audit Phase 4 (backend hygiene): the Discord order webhook fires as a fire-and-forget background task instead of blocking the guest's order response (M1); a request-logging middleware adds an `X-Request-ID` response header and logs request id, method, path, status, and duration for every request except the healthcheck-polled `/api/health` (M6); `get_redis()` returns one shared pooled client instead of opening and closing a connection per call (M7); an explicit `default_bean_id: null` in the admin drink PATCH now clears the drink's bean instead of erroring (M9); dead code was swept — the seven unprefixed Phase-0 admin page placeholders, `app/router.tsx`, `app/providers.tsx`, the empty `lib/errors|validators|i18n.ts` files, the empty `components/*` scaffold dirs, the redundant `docker-compose.prod.yml`, the unused `VITE_API_BASE_URL` compose env, and the unused `passlib` dependency (replaced by a direct `bcrypt==5.0.0` pin) (L1); and the triplicated `_as_bool` plus the duplicated drink/bean/category payload builders were consolidated into `app/core/parsing.py` and `app/services/serializers.py` (L2). `_current_admin_dependency` was kept and documented — it is a live test seam, not dead code as the audit first assumed.
+- Audit Phase 4 (PR #63) was squash merged into `main`: background Discord notifications, request-ID logging middleware, shared Redis client, explicit-null bean clearing, the dead-code sweep, and helper dedup.
+- Current branch implements audit Phase 5 (polish): admin nav links and the logged-out "Go to login" link now navigate within the SPA instead of full page reloads (M11); order status transitions record `received_at`/`preparing_at`/`ready_at`/`cancelled_at` timestamps (M14, migration `20260708_0004`); the order-status page shows the cancelled progress-track styling with no active steps, matching the menu card, and uses stable list keys (L6); drink photos carry the drink name as alt text (L6); small secondary text moved from mid-tone to hint for WCAG AA contrast on the dark background (L6); the edge Nginx gzips API JSON and other compressible proxied responses (L7); admin drink photo uploads are re-encoded server-side to WebP capped at 1600px with EXIF stripped (L7); and the dashboard's three order counts use one grouped query (L7). L3 (deleting replaced photo files) was deliberately skipped: it conflicts with the curated-photo runtime-data policy, which forbids deleting admin-added photos without explicit confirmation.
 
 ## Verification
-Verification for `feature/phase4-backend-hygiene` (2026-07-08):
+Verification for `feature/phase5-polish` (2026-07-08):
 
-- Backend tests: `75 passed` (71 existing + 4 new in `test_phase9_backend_hygiene.py` covering the `X-Request-ID` header, `as_bool` parsing, explicit-null bean clearing through the PATCH route, and non-blocking Discord scheduling) in a clean `python:3.12-slim` container with the new `bcrypt==5.0.0` pin replacing `passlib`.
-- Frontend tests: `36 passed` and production build passed after deleting the twelve dead placeholder files and empty component scaffold dirs — nothing referenced them.
-- `docker compose config -q` passed after removing `docker-compose.prod.yml` and the unused `VITE_API_BASE_URL` env.
-- Backend rebuilt and healthy; live checks: `X-Request-ID` present on responses; a structured `domcafe.request` log line (request id, method, path, status, duration) appears per request while `/api/health` stays out of the log; `pip show passlib` is empty in the container and `bcrypt 5.0.0` is installed.
-- Live rate-limit exercise through the shared Redis client: six wrong admin logins returned exactly `401 ×5` then `429`.
-- Live order creation returned HTTP 201 in 0.06s with the Discord notification scheduled in the background; no errors in backend logs. The verification order was cancelled afterwards.
+- Backend tests: `79 passed` (75 existing + 4 new in `test_phase10_polish.py` covering WebP re-encoding with the 1600px cap, non-image rejection, status-transition timestamp recording, and the grouped dashboard status counts) in a clean `python:3.12-slim` container.
+- Frontend tests: `39 passed` (36 existing + 3 new in `polish.test.tsx` covering the cancelled progress track, drink-photo alt text, and SPA navigation from the logged-out admin state) and production build passed.
+- `docker compose config -q` passed; the stack rebuilt healthy and migration `20260708_0004` was applied (`alembic current` reports it as head).
+- Live gzip check: `GET /api/menu` with `Accept-Encoding: gzip` returned `Content-Encoding: gzip` through the edge Nginx.
+- Live timestamp check: a verification order was moved `new → preparing → cancelled` through the shared `update_order_status` service (used by both admin and agent routes); `preparing_at` and `cancelled_at` were recorded as timezone-aware UTC values and `received_at` stayed null. The verification order was left cancelled.
+- Incidental ops fix during verification: PgBouncer had gone unhealthy after an earlier Postgres restart (stale DNS for `postgres`, `pgbouncer cannot connect to server`); restarting the PgBouncer container restored `/api/health` to `ok`.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -85,21 +86,21 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- Docker Compose (restart policies, healthchecks, depends_on conditions)
-- Docker (backend image non-root user, image slimming)
-- GitHub Actions (new CI workflow)
+- Alembic (order status-timestamp migration)
+- Pillow (WebP re-encode pipeline)
+- Nginx (edge gzip)
+- Docker Compose
 - pytest
 - Vitest
 - Git
 - documentation
 
 ## What is pending
-- The Phase 4 backend hygiene PR from `feature/phase4-backend-hygiene` is open for review and merge into `main`.
-- Audit Phase 5 (optional polish) from `ledger/AUDIT-2026-07-08.md`: admin SPA navigation, order-status timestamps, image resize/WebP pipeline, contrast fixes, edge gzip, and order history.
+- The Phase 5 polish PR from `feature/phase5-polish` is open for review and merge into `main`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M9 (except M10/M11/M14), L1, and L2 are fixed (Phases 2–4); the remaining findings are the Phase 5 polish items plus the deliberately deferred M10 (localStorage JWT) and M12 (retry/backoff/offline handling).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M11, M13–M14, L1–L2, and L6–L7 are fixed (Phases 2–5); still open by choice: M10 (localStorage JWT), M12 (retry/backoff/offline handling), L3 (old-photo deletion — conflicts with the curated-photo runtime-data policy), L4 (login timing oracle), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Empty guest-name Start action has no visible validation message.
 - `/admin` falls back to the public welcome page instead of routing to admin login/dashboard.
@@ -107,7 +108,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- Audit Phase 5 (optional polish): admin SPA navigation, order-status transition timestamps, image resize/WebP pipeline, secondary-text contrast, edge gzip for API JSON, and old-photo cleanup on replacement.
+- The 2026-07-08 audit roadmap is complete (Phase 5 pending merge). Next candidates: the smaller UX items under Known issues (empty guest-name validation message, `/admin` fallback route, menu navigation after scrolling) or the deferred M12 fetch retry/backoff work.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
