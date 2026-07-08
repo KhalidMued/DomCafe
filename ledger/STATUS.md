@@ -1,10 +1,10 @@
 # Status
 
 ## Current phase
-Post-MVP hardening — Phase 5 (polish) from the 2026-07-08 production-readiness audit
+Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-feature/phase5-polish
+docs/status-phase5-merged
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -64,7 +64,7 @@ feature/phase5-polish
 - Audit Phase 2 (PR #61) was squash merged into `main`: order enumeration blocked via random `public_code` lookups, real per-client rate limiting through `--proxy-headers`/`real_ip`, security headers restored on `/api/*` and `/uploads/*`, and whitespace-only guest names rejected.
 - Audit Phase 3 (PR #62) was squash merged into `main`: order-progress resilience, defensive API error parsing, sessionStorage cart persistence, the quantity-10 cap, and self-hosted Tajawal fonts.
 - Audit Phase 4 (PR #63) was squash merged into `main`: background Discord notifications, request-ID logging middleware, shared Redis client, explicit-null bean clearing, the dead-code sweep, and helper dedup.
-- Current branch implements audit Phase 5 (polish): admin nav links and the logged-out "Go to login" link now navigate within the SPA instead of full page reloads (M11); order status transitions record `received_at`/`preparing_at`/`ready_at`/`cancelled_at` timestamps (M14, migration `20260708_0004`); the order-status page shows the cancelled progress-track styling with no active steps, matching the menu card, and uses stable list keys (L6); drink photos carry the drink name as alt text (L6); small secondary text moved from mid-tone to hint for WCAG AA contrast on the dark background (L6); the edge Nginx gzips API JSON and other compressible proxied responses (L7); admin drink photo uploads are re-encoded server-side to WebP capped at 1600px with EXIF stripped (L7); and the dashboard's three order counts use one grouped query (L7). L3 (deleting replaced photo files) was deliberately skipped: it conflicts with the curated-photo runtime-data policy, which forbids deleting admin-added photos without explicit confirmation.
+- Audit Phase 5 (PR #64) was squash merged into `main`: admin SPA navigation without full page reloads (M11); order status transitions record `received_at`/`preparing_at`/`ready_at`/`cancelled_at` timestamps (M14, migration `20260708_0004`); cancelled progress-track styling, stable list keys, drink-photo alt text, and mid-tone→hint contrast fixes (L6); edge Nginx gzip for API JSON, server-side WebP re-encoding of drink photo uploads capped at 1600px with EXIF stripped, and one grouped dashboard order-count query (L7). L3 (deleting replaced photo files) was deliberately skipped: it conflicts with the curated-photo runtime-data policy, which forbids deleting admin-added photos without explicit confirmation.
 
 ## Verification
 Verification for `feature/phase5-polish` (2026-07-08):
@@ -96,7 +96,6 @@ Historical verification for earlier merged work lives in git history of this fil
 - documentation
 
 ## What is pending
-- The Phase 5 polish PR from `feature/phase5-polish` is open for review and merge into `main`.
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
@@ -108,7 +107,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Long menu navigation can be improved after scrolling away from the category chips and review-order link.
 
 ## Next recommended task
-- The 2026-07-08 audit roadmap is complete (Phase 5 pending merge). Next candidates: the smaller UX items under Known issues (empty guest-name validation message, `/admin` fallback route, menu navigation after scrolling) or the deferred M12 fetch retry/backoff work.
+- The 2026-07-08 audit roadmap is complete and merged. Next candidates: the smaller UX items under Known issues (empty guest-name validation message, `/admin` fallback route, menu navigation after scrolling) or the deferred M12 fetch retry/backoff work.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
