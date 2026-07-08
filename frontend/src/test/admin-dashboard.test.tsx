@@ -12,6 +12,7 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.history.pushState({}, '', '/admin/dashboard');
   window.scrollTo = vi.fn();
 });
@@ -23,10 +24,10 @@ afterEach(() => {
 
 describe('Phase 4 admin dashboard summary', () => {
   it('loads dashboard counts with the stored admin token', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       expect(String(input)).toBe('/api/admin/dashboard');
-      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toBeUndefined();
       return jsonResponse({
         new_orders_count: 2,
         preparing_orders_count: 1,

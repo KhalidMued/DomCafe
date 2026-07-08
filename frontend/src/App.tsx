@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 
+import { hasAdminSession } from './lib/api';
 import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import { WelcomePage } from './pages/public/WelcomePage';
 
@@ -21,7 +22,7 @@ function isAdminRoot(path: string) {
 }
 
 function adminHomePath() {
-  return window.localStorage.getItem('dom_admin_token') ? '/admin/dashboard' : '/admin/login';
+  return hasAdminSession() ? '/admin/dashboard' : '/admin/login';
 }
 
 function RouteLoading() {

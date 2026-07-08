@@ -1,5 +1,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 
+import { adminLogout } from '../../lib/api';
+
 const adminLinks = [
   { href: '/admin/dashboard', label: 'Dashboard' },
   { href: '/admin/orders', label: 'Orders' },
@@ -43,8 +45,13 @@ export function AdminLoginRequired() {
 export function AdminLayout({ children, title }: { children: ReactNode; title: string }) {
   const currentPath = window.location.pathname;
 
-  function logout() {
-    window.localStorage.removeItem('dom_admin_token');
+  async function logout() {
+    try {
+      await adminLogout();
+    } catch {
+      // Even if the API is unreachable the cookies may remain, but landing on
+      // the login page is still the best available outcome.
+    }
     window.history.pushState({}, '', '/admin/login');
     window.dispatchEvent(new PopStateEvent('popstate'));
   }

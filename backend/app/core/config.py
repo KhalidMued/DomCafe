@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     redis_url: str = "redis://" + "redis" + ":" + "6379" + "/0"
     jwt_secret: str = "change_me_long_random"
     jwt_expires_minutes: int = 1440
+    # Admin access also happens over plain-HTTP LAN/Tailscale paths, so the
+    # Secure attribute is opt-in; set ADMIN_COOKIE_SECURE=true for HTTPS-only.
+    admin_cookie_secure: bool = False
     agent_api_key: str = "change_me_long_random_agent_key"
     admin_default_username: str = "admin"
     admin_default_password: str = "change_me"

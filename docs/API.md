@@ -101,7 +101,20 @@ Content-Type: application/json
 
 Rate limit: 5 attempts per client IP/source address per minute. Extra attempts return `429`.
 
-All protected admin routes require:
+A successful login responds `{"ok": true}` and sets two cookies instead of returning the JWT in the body:
+
+- `dom_admin_jwt` — the admin JWT, `HttpOnly`, `SameSite=Strict`, scoped to `/api`, so page scripts can never read it. Set `ADMIN_COOKIE_SECURE=true` to add the `Secure` attribute when admin access is HTTPS-only.
+- `dom_admin_session` — a non-secret `1`, readable by the SPA, used only to decide whether to render admin pages or the login screen.
+
+### Admin logout
+
+```http
+POST /api/admin/logout
+```
+
+Clears both session cookies and responds `{"ok": true}`. No authentication required.
+
+All protected admin routes accept the `dom_admin_jwt` cookie (sent automatically by the browser) or, equivalently, an explicit header:
 
 ```http
 Authorization: Bearer ADMIN_TOKEN

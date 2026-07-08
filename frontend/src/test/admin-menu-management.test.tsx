@@ -61,6 +61,7 @@ const menuPayload = {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.history.pushState({}, '', '/admin/menu');
   window.scrollTo = vi.fn();
 });
@@ -72,10 +73,10 @@ afterEach(() => {
 
 describe('Phase 4 admin menu management page', () => {
   it('loads drinks, beans, and orders-open setting with the stored admin token', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       expect(String(input)).toBe('/api/admin/menu');
-      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toBeUndefined();
       return jsonResponse(menuPayload);
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -97,12 +98,12 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('toggles orders, drink, and bean availability', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       if (url === '/api/admin/menu/settings/orders-open') {
         expect(init?.body).toBe(JSON.stringify({ orders_open: false }));
         return jsonResponse({ orders_open: false });
@@ -133,7 +134,7 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('uploads a replacement drink photo from the menu page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const uploadResponse = {
       id: 'iced-doum-latte',
       photo_url: '/uploads/drinks/iced-doum-latte-new.jpg',
@@ -143,7 +144,7 @@ describe('Phase 4 admin menu management page', () => {
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(url).toBe('/api/admin/uploads/drink-photo');
       expect(init?.method).toBe('POST');
-      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toBeUndefined();
       expect(init?.body).toBeInstanceOf(FormData);
       const body = init?.body as FormData;
       expect(body.get('drink_id')).toBe('iced-doum-latte');
@@ -163,7 +164,7 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('edits drink copy and options from the menu page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const updatedDrink = {
       ...menuPayload.drinks[0],
       name: 'Iced DŌM Latte',
@@ -177,7 +178,7 @@ describe('Phase 4 admin menu management page', () => {
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(url).toBe('/api/admin/drinks/iced-doum-latte');
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify({
         name: 'Iced DŌM Latte',
         category_id: 'signature',
@@ -210,7 +211,7 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('edits drink catalog fields from the menu page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const updatedDrink = {
       ...menuPayload.drinks[0],
       category_id: 'cold-bar',
@@ -223,7 +224,7 @@ describe('Phase 4 admin menu management page', () => {
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(url).toBe('/api/admin/drinks/iced-doum-latte');
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify({
         name: 'Iced Doum Latte',
         category_id: 'cold-bar',
@@ -253,7 +254,7 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('creates category, bean, and drink entries from the menu page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const newCategory = {
       id: 'slow-bar',
       label: 'Slow Bar',
@@ -289,7 +290,7 @@ describe('Phase 4 admin menu management page', () => {
       const url = String(input);
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(init?.method).toBe('POST');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       if (url === '/api/admin/categories') {
         expect(init?.body).toBe(JSON.stringify({
           id: 'slow-bar',
@@ -365,12 +366,12 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('archives catalog items from the menu page without hard delete wording', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(init?.method).toBe('DELETE');
-      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toBeUndefined();
       if (url === '/api/admin/categories/cold-bar') {
         return jsonResponse({ ...menuPayload.categories[1], is_available: false });
       }
@@ -399,7 +400,7 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('edits category details from the menu page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const updatedCategory = {
       ...menuPayload.categories[1],
       label: 'Slow Cold Bar',
@@ -412,7 +413,7 @@ describe('Phase 4 admin menu management page', () => {
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(url).toBe('/api/admin/categories/cold-bar');
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify({
         label: 'Slow Cold Bar',
         description: 'Quiet iced coffee for warm afternoons.',
@@ -439,7 +440,7 @@ describe('Phase 4 admin menu management page', () => {
   });
 
   it('edits bean details from the menu page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const updatedBean = {
       ...menuPayload.beans[0],
       name: 'DŌM House Beans',
@@ -452,7 +453,7 @@ describe('Phase 4 admin menu management page', () => {
       if (url === '/api/admin/menu') return jsonResponse(menuPayload);
       expect(url).toBe('/api/admin/beans/dom-house-beans');
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify({
         name: 'DŌM House Beans',
         origin: 'Sudan / Brazil',

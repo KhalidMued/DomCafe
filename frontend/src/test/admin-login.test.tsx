@@ -13,6 +13,7 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.history.pushState({}, '', '/admin/login');
   window.scrollTo = vi.fn();
 });
@@ -23,16 +24,18 @@ afterEach(() => {
 });
 
 describe('Phase 4 admin login frontend', () => {
-  it('logs in an admin, stores the bearer token, and opens the dashboard shell', async () => {
+  it('logs in an admin, receives the session cookie, and opens the dashboard shell', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url === '/api/admin/login') {
         expect(init?.method).toBe('POST');
         expect(JSON.parse(String(init?.body))).toEqual({ username: 'admin', password: 'secret' });
-        return jsonResponse({ access_token: 'admin-token', token_type: 'bearer' });
+        // jsdom's stubbed fetch can't apply Set-Cookie; mirror the browser here.
+        document.cookie = 'dom_admin_session=1; path=/';
+        return jsonResponse({ ok: true });
       }
       if (url === '/api/admin/dashboard') {
-        expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+        expect(init?.headers).toBeUndefined();
         return jsonResponse({
           new_orders_count: 0,
           preparing_orders_count: 0,
@@ -52,8 +55,8 @@ describe('Phase 4 admin login frontend', () => {
     await userEvent.type(screen.getByLabelText(/password/i), 'secret');
     await userEvent.click(screen.getByRole('button', { name: /log in/i }));
 
-    await waitFor(() => expect(window.localStorage.getItem('dom_admin_token')).toBe('admin-token'));
     expect(await screen.findByRole('heading', { name: /admin dashboard/i })).toBeInTheDocument();
+    await waitFor(() => expect(document.cookie).toContain('dom_admin_session=1'));
     expect(fetchMock).toHaveBeenCalledWith('/api/admin/login', expect.objectContaining({ method: 'POST' }));
   });
 
@@ -67,6 +70,6 @@ describe('Phase 4 admin login frontend', () => {
     await userEvent.click(screen.getByRole('button', { name: /log in/i }));
 
     expect(await screen.findByText('Invalid username or password.')).toBeInTheDocument();
-    expect(window.localStorage.getItem('dom_admin_token')).toBeNull();
+    expect(document.cookie).not.toContain('dom_admin_session=1');
   });
 });

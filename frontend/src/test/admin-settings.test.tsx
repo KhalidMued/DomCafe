@@ -18,6 +18,7 @@ const settingsPayload = {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.history.pushState({}, '', '/admin/settings');
   window.scrollTo = vi.fn();
 });
@@ -29,7 +30,7 @@ afterEach(() => {
 
 describe('Phase 4 admin settings page', () => {
   it('loads and saves cafe settings with the stored admin token', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const updated = {
       cafe_name: 'DŌM Home Café',
       welcome_message: 'Welcome in. Take your time.',
@@ -38,12 +39,12 @@ describe('Phase 4 admin settings page', () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url === '/api/admin/settings' && !init?.method) {
-        expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+        expect(init?.headers).toBeUndefined();
         return jsonResponse(settingsPayload);
       }
       expect(url).toBe('/api/admin/settings');
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify(updated));
       return jsonResponse(updated);
     });

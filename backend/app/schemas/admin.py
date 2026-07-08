@@ -10,9 +10,8 @@ class AdminLoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=200)
 
 
-class AdminTokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+class AdminSessionResponse(BaseModel):
+    ok: bool = True
 
 
 class AdminDashboardResponse(BaseModel):

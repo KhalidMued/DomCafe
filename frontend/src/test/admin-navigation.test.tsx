@@ -28,6 +28,7 @@ const menuPayload = {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.history.pushState({}, '', '/admin/dashboard');
   window.scrollTo = vi.fn();
 });
@@ -39,7 +40,7 @@ afterEach(() => {
 
 describe('admin navigation usability', () => {
   it('shows admin navigation and logout on protected admin pages', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({
       new_orders_count: 0,
       preparing_orders_count: 0,
@@ -60,32 +61,41 @@ describe('admin navigation usability', () => {
     expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
   });
 
-  it('logs out, clears the stored token, and redirects to admin login', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({
-      new_orders_count: 0,
-      preparing_orders_count: 0,
-      ready_orders_count: 0,
-      orders_open: true,
-      available_drinks_count: 0,
-      available_beans_count: 1,
-    })));
+  it('logs out through the API and redirects to admin login', async () => {
+    document.cookie = 'dom_admin_session=1; path=/';
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === '/api/admin/logout') {
+        // jsdom's stubbed fetch can't apply Set-Cookie; mirror the browser here.
+        document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        return jsonResponse({ ok: true });
+      }
+      return jsonResponse({
+        new_orders_count: 0,
+        preparing_orders_count: 0,
+        ready_orders_count: 0,
+        orders_open: true,
+        available_drinks_count: 0,
+        available_beans_count: 1,
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
 
     render(<App />);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Logout' }));
 
-    expect(window.localStorage.getItem('dom_admin_token')).toBeNull();
-    expect(window.location.pathname).toBe('/admin/login');
     expect(await screen.findByRole('button', { name: /log in/i })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/admin/login');
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/logout', expect.objectContaining({ method: 'POST' }));
+    expect(document.cookie).not.toContain('dom_admin_session=1');
   });
 
   it('loads beans at /admin/beans from the existing admin menu API', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     window.history.pushState({}, '', '/admin/beans');
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       expect(String(input)).toBe('/api/admin/menu');
-      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toBeUndefined();
       return jsonResponse(menuPayload);
     });
     vi.stubGlobal('fetch', fetchMock);

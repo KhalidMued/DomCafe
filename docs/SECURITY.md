@@ -13,7 +13,8 @@ See `AGENT.md` for project rules and source requirements.
 
 ## Authentication
 
-- Admin routes use JWT bearer authentication after `/api/admin/login`.
+- Admin routes use JWT authentication after `/api/admin/login`. The JWT is delivered in an `HttpOnly`, `SameSite=Strict` cookie scoped to `/api` and never appears in the response body or localStorage, so page scripts cannot exfiltrate it (audit M10). A separate non-secret `dom_admin_session` hint cookie tells the SPA whether to render admin pages. `SameSite=Strict` prevents cross-site requests from carrying the admin cookie (CSRF). Set `ADMIN_COOKIE_SECURE=true` when admin access is HTTPS-only; it defaults to false because admin access also happens over plain-HTTP LAN/Tailscale paths.
+- Protected admin routes also accept an explicit `Authorization: Bearer` header (used by tests and tooling).
 - Login verifies a throwaway bcrypt hash when the username is unknown, so response timing cannot be used to enumerate admin accounts.
 - Agent routes use the separate `AGENT_API_KEY` bearer credential.
 - Do not log passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, database passwords, or connection strings.
