@@ -38,7 +38,7 @@ The standard security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Ref
 
 ## Upload security
 
-Drink photo uploads are restricted to safe image types, size-limited, verified as images, renamed server-side, and stored under `/uploads/drinks/`.
+Drink photo uploads are restricted to safe image types, size-limited, verified as images, renamed server-side, and stored under `/uploads/drinks/`. Every upload is re-encoded to WebP (capped at 1600px, EXIF metadata stripped), so the original uploaded bytes are never served.
 
 ## Dependency security
 

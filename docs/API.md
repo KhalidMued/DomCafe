@@ -126,11 +126,11 @@ Response:
 ```json
 {
   "id": "spanish_latte",
-  "photo_url": "/uploads/drinks/spanish_latte-generated-name.jpg"
+  "photo_url": "/uploads/drinks/spanish_latte-generated-name.webp"
 }
 ```
 
-The uploaded file is stored under `/uploads/drinks/`, the drink photo URL is updated, and the public menu uses the new photo URL. Admin-panel uploads are runtime data: back them up with the server upload directory and keep them ignored by Git unless a specific image is intentionally promoted as a curated menu asset.
+Uploads are re-encoded server-side to WebP (max 1600px on the longest side, EXIF stripped), stored under `/uploads/drinks/`, and the drink photo URL is updated so the public menu uses the new photo. Admin-panel uploads are runtime data: back them up with the server upload directory and keep them ignored by Git unless a specific image is intentionally promoted as a curated menu asset.
 
 ### Create drink
 

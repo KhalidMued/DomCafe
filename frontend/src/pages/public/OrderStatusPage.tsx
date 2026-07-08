@@ -64,12 +64,12 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
             <span>{order.items.length} {order.items.length === 1 ? 'drink' : 'drinks'}</span>
           </div>
           <p className="status-label brand-heading" dir="auto">{order.status_label}</p>
-          <div className="progress-track" aria-label={`Current status ${order.status}`}>
-            {statusSteps.map((status, index) => <span className={index <= activeIndex ? 'active' : ''} key={status}>{status}</span>)}
+          <div className={order.status === 'cancelled' ? 'progress-track progress-track-cancelled' : 'progress-track'} aria-label={`Current status ${order.status}`}>
+            {statusSteps.map((status, index) => <span className={index <= activeIndex && order.status !== 'cancelled' ? 'active' : ''} key={status}>{status}</span>)}
           </div>
           <div className="status-items-list">
-            {order.items.map((item) => (
-              <article className="status-item" key={`${item.drink_name}-${item.quantity}`}>
+            {order.items.map((item, index) => (
+              <article className="status-item" key={`${item.drink_name}-${index}`}>
                 <strong dir="auto">{item.quantity}× {item.drink_name}</strong>
                 <span dir="auto">{[item.temperature, item.milk_option, item.bean_name].filter(Boolean).join(' · ')}</span>
               </article>

@@ -153,7 +153,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
             {category.drinks.map((drink) => (
               <article className="drink-card" key={drink.id}>
                 <button className="drink-image-button" type="button" onClick={() => setExpanded(expanded === drink.id ? null : drink.id)} aria-label={`Show ${drink.name} details`}>
-                  <img src={drink.photo_url} alt="" />
+                  <img src={drink.photo_url} alt={drink.name} />
                 </button>
                 <div className="drink-content">
                   <div className="drink-title-row">

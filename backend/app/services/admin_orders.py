@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +8,13 @@ from sqlalchemy.orm import selectinload
 from app.models.order import Order
 from app.schemas.admin import OrderStatus
 from app.services.public import STATUS_LABELS
+
+_STATUS_TIMESTAMP_FIELDS = {
+    "received": "received_at",
+    "preparing": "preparing_at",
+    "ready": "ready_at",
+    "cancelled": "cancelled_at",
+}
 
 
 async def list_recent_orders(session: AsyncSession) -> list[dict[str, object]]:
@@ -38,6 +47,9 @@ async def update_order_status(
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found.")
     order.status = order_status
+    timestamp_field = _STATUS_TIMESTAMP_FIELDS.get(order_status)
+    if timestamp_field is not None:
+        setattr(order, timestamp_field, datetime.now(timezone.utc))
     await session.commit()
     return {
         "id": str(order.id),

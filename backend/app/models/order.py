@@ -1,4 +1,6 @@
-from sqlalchemy import ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -12,6 +14,10 @@ class Order(TimestampMixin, Base):
     guest_name: Mapped[str] = mapped_column(String(120), nullable=False)
     guest_note: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(40), nullable=False, default="new", index=True)
+    received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    preparing_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    ready_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
 
