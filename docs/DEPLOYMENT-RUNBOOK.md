@@ -141,6 +141,26 @@ Restore into the configured application database only when intentionally rolling
 
 For readiness checks, test restore into a temporary database instead of overwriting the application database, then drop the temporary database after validation.
 
+## Uploaded drink photos
+
+Admin-panel drink photo uploads are runtime data, not ordinary source code. The Compose stack persists them through the shared `./uploads:/app/uploads` mount used by the backend and Nginx.
+
+Keep the repo policy simple:
+
+- committed files under `uploads/drinks/` are intentional curated menu assets;
+- new admin-panel uploads are ignored by Git by default;
+- promote a new curated menu asset explicitly with `git add -f uploads/drinks/<file>`;
+- back up the `uploads/` directory together with the database because drink rows store `/uploads/drinks/...` photo URLs.
+
+For a server backup, copy both database and upload data before major deployment changes:
+
+```bash
+./scripts/backup-db.sh
+rsync -a uploads/ /backups/dom-cafe/uploads/
+```
+
+Longer term, the same runtime-data boundary can move from the local filesystem mount to object storage such as Cloudflare R2/S3 without changing the public URL contract stored in menu rows.
+
 ## Phase 6 readiness checklist
 
 Before declaring the deployment ready, verify:

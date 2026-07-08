@@ -74,6 +74,8 @@ feature/order-progress-on-menu
 - Pulled the latest `cloudflare/cloudflared:latest` Docker image (`sha256:12ff5c6992a9863db4da270746af7c244bcaee49353039af8104268a18d6c4f0`, version `2026.5.2`) and verified the DomCafe stack plus Cloudflare public `/` and `/api/health` responses returned HTTP 200 afterward.
 - Security spot checks: public HTML security headers were present; unauthenticated admin API requests returned HTTP 401 with a generic admin-login-required response and no-store cache behavior.
 - Audit report written to `ledger/DOGFOOD-AUDIT-2026-06-03.md` with prioritized PR recommendations.
+- Current real admin-uploaded coffee drink photos were committed as curated menu assets, and future admin-panel drink uploads are now treated as ignored runtime data unless explicitly promoted.
+- Upload runtime-data policy verification: `docker compose config` passed and `git check-ignore uploads/drinks/manual-test-upload.png` confirmed future generated drink uploads are ignored.
 
 ## Hermes Tools Used
 - skill_view
@@ -96,6 +98,8 @@ feature/order-progress-on-menu
 - Vite
 - Vitest
 - pytest
+- Git
+- DomCafe admin drink uploads
 - documentation
 
 ## What is pending

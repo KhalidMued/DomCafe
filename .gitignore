@@ -25,6 +25,9 @@ coverage/
 *.log
 .DS_Store
 uploads/**/*.tmp
+# Admin-panel uploads are runtime data. Already tracked/curated menu images
+# remain in Git; promote new curated assets explicitly with `git add -f`.
+uploads/drinks/*
 
 # Docker
 *.pid
