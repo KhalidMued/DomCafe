@@ -145,6 +145,8 @@ Response:
 
 Uploads are re-encoded server-side to WebP (max 1600px on the longest side, EXIF stripped), stored under `/uploads/drinks/`, and the drink photo URL is updated so the public menu uses the new photo. Admin-panel uploads are runtime data: back them up with the server upload directory and keep them ignored by Git unless a specific image is intentionally promoted as a curated menu asset.
 
+When an upload replaces a previous **server-generated** photo of the same drink (a `/uploads/drinks/<drink_id>-<32-hex>.webp` file), the replaced file is deleted from disk after the new photo is committed, as long as no other drink still references it. Curated assets never match that pattern (`placeholder.jpg`, the tracked `.png` photos, or any hand-named file), so they are never deleted. Cleanup is best-effort: a file that cannot be deleted is logged and the upload still succeeds.
+
 ### Create drink
 
 ```http

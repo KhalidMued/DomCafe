@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-feature/m10-admin-cookie-auth
+fix/l3-replaced-photo-cleanup
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -69,15 +69,15 @@ feature/m10-admin-cookie-auth
 - PR #67 (M12 fetch resilience) was squash merged into `main`: 10s abort timeout on every request, exponential-backoff retry for idempotent GETs on network failures and 502/503/504 (never 429), no retry for writes, and a friendly offline fast-fail message.
 - PR #68 (L4 login timing oracle) was squash merged into `main`: unknown usernames now burn a throwaway bcrypt verification so login timing cannot enumerate admin accounts.
 - PR #69 (PgBouncer DNS self-heal) was squash merged into `main`: end-to-end Compose healthcheck plus an in-container watchdog that restarts the pooler after ~60s of confirmed failure.
-- Current branch implements audit finding M10 (admin JWT hardening): the login response no longer returns the JWT; it sets an `HttpOnly`, `SameSite=Strict` `dom_admin_jwt` cookie scoped to `/api` plus a non-secret readable `dom_admin_session` hint cookie the SPA uses to gate admin pages; a new `POST /api/admin/logout` clears both; `require_admin` accepts the cookie or the existing `Authorization: Bearer` header; the frontend dropped all localStorage token handling and token parameters from admin API calls; `ADMIN_COOKIE_SECURE` (default false, because admin access includes plain-HTTP LAN/Tailscale paths) adds the `Secure` attribute for HTTPS-only setups. `docs/API.md` and `docs/SECURITY.md` document the new flow.
+- PR #70 (M10 admin JWT hardening) was squash merged into `main`: the login response no longer returns the JWT; it sets an `HttpOnly`, `SameSite=Strict` `dom_admin_jwt` cookie scoped to `/api` plus a non-secret readable `dom_admin_session` hint cookie the SPA uses to gate admin pages; a new `POST /api/admin/logout` clears both; `require_admin` accepts the cookie or the existing `Authorization: Bearer` header; the frontend dropped all localStorage token handling and token parameters from admin API calls; `ADMIN_COOKIE_SECURE` (default false, because admin access includes plain-HTTP LAN/Tailscale paths) adds the `Secure` attribute for HTTPS-only setups. `docs/API.md` and `docs/SECURITY.md` document the new flow.
+- Current branch implements audit finding L3 (replaced drink photos accumulating on disk) with a policy-safe design: after a photo upload commits, the previously referenced file is deleted only if it matches the exact server-generated pattern for that same drink (`<drink_id>-<32-hex>.webp`) and no other drink row still references the URL. Curated assets never qualify — `placeholder.jpg`, the tracked `.png` photos, and any hand-named file fall outside the pattern — so the curated-photo runtime-data policy is preserved. Deletion is best-effort (logged on failure, upload still succeeds). Documented in `docs/API.md` and `docs/SECURITY.md`, including the one caveat: a generated `.webp` later promoted to a tracked curated asset would still be deleted from the working tree on replacement (recoverable via `git checkout`).
 
 ## Verification
-Verification for `feature/m10-admin-cookie-auth` (2026-07-08):
+Verification for `fix/l3-replaced-photo-cleanup` (2026-07-09):
 
-- Backend tests: `84 passed` (82 existing + 2 net-new in `test_phase4_admin_auth.py`: login sets the `HttpOnly` JWT cookie and readable hint cookie with the JWT absent from the body, logout clears both, and admin routes authenticate via the cookie alone; the old bearer-body login test was replaced) in a clean `python:3.12-slim` container.
-- Frontend tests: `51 passed` after migrating all admin tests from localStorage tokens/`Authorization` header assertions to the `dom_admin_session` hint cookie (set with explicit `path=/` to match the backend and allow cleanup between tests); production build passed.
-- Live flow through the edge Nginx with credentials sourced in-memory (never printed): login returned 200 with no token in the body and exactly one `HttpOnly` cookie line in the jar (`dom_admin_jwt`) plus the readable `dom_admin_session`; `/api/admin/dashboard` returned 200 with the cookie jar and 401 without; logout returned 200 and the dashboard then returned 401 again.
-- Backend and frontend containers rebuilt; `/api/health` reports `ok`.
+- Backend tests: new `tests/test_phase12_photo_cleanup.py` (7 tests: pattern matching incl. traversal/hostile URLs, generated-file deletion, curated `.png` kept, placeholder kept, shared-reference kept, missing-file tolerated) plus the existing upload suites — `13 passed` for the three upload-related files, `88 passed` overall in the backend container. Two known-flaky failures (`test_invalid_order_input_returns_friendly_error_shape`, `test_admin_login_rejects_invalid_credentials`) reproduce identically against unmodified `main` code in the live container (event-loop/Redis reuse), unrelated to this change.
+- Live flow through the edge Nginx with credentials sourced in-memory (never printed): cookie login, then uploading a photo for `hot_latte` (placeholder-backed) left `placeholder.jpg` on disk; a second upload deleted the first generated `.webp` and kept only the new one; all 7 curated `.png` files and `git status uploads/` remained clean. Test data was fully reverted (drink restored to placeholder, test `.webp` removed).
+- Backend container rebuilt; `/api/health` reports `ok`.
 
 Historical verification for earlier merged work lives in git history of this file.
 
@@ -89,10 +89,9 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- FastAPI (cookie auth, logout route)
-- React (tokenless admin API layer, session-hint gating)
-- pytest / Vitest
-- Docker Compose (backend + frontend rebuilds)
+- FastAPI (upload service photo cleanup)
+- pytest
+- Docker Compose (backend rebuild)
 - Git
 - documentation
 
@@ -100,12 +99,12 @@ Historical verification for earlier merged work lives in git history of this fil
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M9, M11–M14, L1–L2, L4, and L6–L7 are fixed and merged, and M10 (localStorage JWT) is fixed on the current branch; still open by choice: L3 (old-photo deletion — planned next with a policy-safe design), L5 (PgBouncer plain auth, internal-only), and L8 (harmless in-container `env_file` path).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M14, L1–L2, L4, and L6–L7 are fixed and merged, and L3 (old-photo deletion) is fixed on the current branch; still open by choice: L5 (PgBouncer plain auth, internal-only) and L8 (harmless in-container `env_file` path).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Many menu cards still use the repeated DŌM placeholder image.
 
 ## Next recommended task
-- The M10 cookie-auth PR from `feature/m10-admin-cookie-auth` is open for review and merge into `main`. Per the agreed order (2026-07-08), L3 follows: delete replaced generated drink photos while never touching curated/tracked assets. Drink-photo content work still needs the user's photos.
+- The L3 photo-cleanup PR from `fix/l3-replaced-photo-cleanup` is open for review and merge into `main`. After that, the audit list is done except the deliberately open L5/L8; drink-photo content work still needs the user's photos.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
