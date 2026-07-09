@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-fix/l5-pgbouncer-scram
+fix/l8-env-file-path
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -72,9 +72,16 @@ fix/l5-pgbouncer-scram
 - PR #70 (M10 admin JWT hardening) was squash merged into `main`: the login response no longer returns the JWT; it sets an `HttpOnly`, `SameSite=Strict` `dom_admin_jwt` cookie scoped to `/api` plus a non-secret readable `dom_admin_session` hint cookie the SPA uses to gate admin pages; a new `POST /api/admin/logout` clears both; `require_admin` accepts the cookie or the existing `Authorization: Bearer` header; the frontend dropped all localStorage token handling and token parameters from admin API calls; `ADMIN_COOKIE_SECURE` (default false, because admin access includes plain-HTTP LAN/Tailscale paths) adds the `Secure` attribute for HTTPS-only setups. `docs/API.md` and `docs/SECURITY.md` document the new flow.
 - PR #71 (L3 replaced-photo cleanup) was squash merged into `main` with a policy-safe design: after a photo upload commits, the previously referenced file is deleted only if it matches the exact server-generated pattern for that same drink (`<drink_id>-<32-hex>.webp`) and no other drink row still references the URL. Curated assets never qualify — `placeholder.jpg`, the tracked `.png` photos, and any hand-named file fall outside the pattern — so the curated-photo runtime-data policy is preserved. Deletion is best-effort (logged on failure, upload still succeeds). Documented in `docs/API.md` and `docs/SECURITY.md`, including the one caveat: a generated `.webp` later promoted to a tracked curated asset would still be deleted from the working tree on replacement (recoverable via `git checkout`).
 - PR #72 (CI actions Node 24 bump) was squash merged into `main`: `actions/checkout` v4→v5, `actions/setup-python` v5→v6, `actions/setup-node` v4→v5, removing the Node 20 deprecation warnings.
-- Current branch implements audit finding L5: PgBouncer `auth_type` moved from `plain` to `scram-sha-256`, so backend→PgBouncer and PgBouncer→PostgreSQL authentication are both challenge–response and the database password no longer crosses the Docker network in clear text. The entrypoint also chmods the generated `userlist.txt` to `0600`.
+- PR #73 (L5 PgBouncer SCRAM) was squash merged into `main`: `auth_type` moved from `plain` to `scram-sha-256`, so backend→PgBouncer and PgBouncer→PostgreSQL authentication are both challenge–response and the database password no longer crosses the Docker network in clear text; the entrypoint also chmods the generated `userlist.txt` to `0600`.
+- Current branch implements audit finding L8: removed the dead `env_file="../.env"` dotenv source from `Settings.model_config` — it resolved nowhere in-container (workdir `/app` → `/.env`) and was masked by Compose's `env_file:` environment injection, which is the only supported configuration path and is now stated in a comment.
 
 ## Verification
+Verification for `fix/l8-env-file-path` (2026-07-09):
+
+- Backend container rebuilt; `/api/health` reports `ok` for database and Redis.
+- In-container settings probe confirms values still come from the Compose-injected environment (non-default `jwt_secret`, `.env`-driven Discord flag, correct PgBouncer database URL) — nothing was actually reading the dead dotenv path.
+- Backend suite in the container: `88 passed` plus the two known-flaky live-container failures documented under the L3 verification (they pass in clean CI).
+
 Verification for `fix/l5-pgbouncer-scram` (2026-07-09):
 
 - `docker compose config -q` passed; PgBouncer container rebuilt and reported healthy; backend restarted and `/api/health` reports `ok` for database and Redis (asyncpg authenticating via SCRAM).
@@ -97,9 +104,9 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- PgBouncer (SCRAM-SHA-256 auth, userlist permissions)
-- Docker Compose (pgbouncer rebuild, backend restart)
-- PostgreSQL (SCRAM verification via psql/asyncpg)
+- FastAPI / pydantic-settings (config source cleanup)
+- Docker Compose (backend rebuild)
+- pytest
 - Git
 - documentation
 
@@ -107,12 +114,12 @@ Historical verification for earlier merged work lives in git history of this fil
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M14, L1–L4, and L6–L7 are fixed and merged, and L5 (PgBouncer SCRAM auth) is fixed on the current branch; still open by choice: L8 (harmless in-container `env_file` path).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M14, and L1–L7 are fixed and merged; L8 (dead `env_file` path) is fixed on the current branch. Once it merges, every audit finding is closed.
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Many menu cards still use the repeated DŌM placeholder image.
 
 ## Next recommended task
-- The L5 PgBouncer SCRAM PR from `fix/l5-pgbouncer-scram` is open for review and merge into `main`. After that, the audit list is done except the deliberately open L8 (harmless); drink-photo content work still needs the user's photos.
+- The L8 PR from `fix/l8-env-file-path` is open for review and merge into `main`. It closes the last finding of the 2026-07-08 audit. Next up afterwards: drink-photo content work, which still needs the user's photos.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
