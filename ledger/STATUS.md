@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-ci/bump-actions-node24
+fix/l5-pgbouncer-scram
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -71,10 +71,17 @@ ci/bump-actions-node24
 - PR #69 (PgBouncer DNS self-heal) was squash merged into `main`: end-to-end Compose healthcheck plus an in-container watchdog that restarts the pooler after ~60s of confirmed failure.
 - PR #70 (M10 admin JWT hardening) was squash merged into `main`: the login response no longer returns the JWT; it sets an `HttpOnly`, `SameSite=Strict` `dom_admin_jwt` cookie scoped to `/api` plus a non-secret readable `dom_admin_session` hint cookie the SPA uses to gate admin pages; a new `POST /api/admin/logout` clears both; `require_admin` accepts the cookie or the existing `Authorization: Bearer` header; the frontend dropped all localStorage token handling and token parameters from admin API calls; `ADMIN_COOKIE_SECURE` (default false, because admin access includes plain-HTTP LAN/Tailscale paths) adds the `Secure` attribute for HTTPS-only setups. `docs/API.md` and `docs/SECURITY.md` document the new flow.
 - PR #71 (L3 replaced-photo cleanup) was squash merged into `main` with a policy-safe design: after a photo upload commits, the previously referenced file is deleted only if it matches the exact server-generated pattern for that same drink (`<drink_id>-<32-hex>.webp`) and no other drink row still references the URL. Curated assets never qualify — `placeholder.jpg`, the tracked `.png` photos, and any hand-named file fall outside the pattern — so the curated-photo runtime-data policy is preserved. Deletion is best-effort (logged on failure, upload still succeeds). Documented in `docs/API.md` and `docs/SECURITY.md`, including the one caveat: a generated `.webp` later promoted to a tracked curated asset would still be deleted from the working tree on replacement (recoverable via `git checkout`).
-- Current branch bumps the CI workflow actions off the deprecated Node 20 runtime: `actions/checkout` v4→v5, `actions/setup-python` v5→v6, `actions/setup-node` v4→v5 (GitHub is forcing Node-20 actions onto Node 24 with a warning; these majors target Node 24 natively with unchanged inputs).
+- PR #72 (CI actions Node 24 bump) was squash merged into `main`: `actions/checkout` v4→v5, `actions/setup-python` v5→v6, `actions/setup-node` v4→v5, removing the Node 20 deprecation warnings.
+- Current branch implements audit finding L5: PgBouncer `auth_type` moved from `plain` to `scram-sha-256`, so backend→PgBouncer and PgBouncer→PostgreSQL authentication are both challenge–response and the database password no longer crosses the Docker network in clear text. The entrypoint also chmods the generated `userlist.txt` to `0600`.
 
 ## Verification
-Verification for `fix/l3-replaced-photo-cleanup` (2026-07-09; `ci/bump-actions-node24` is verified by its own green CI run without the Node 20 deprecation warning):
+Verification for `fix/l5-pgbouncer-scram` (2026-07-09):
+
+- `docker compose config -q` passed; PgBouncer container rebuilt and reported healthy; backend restarted and `/api/health` reports `ok` for database and Redis (asyncpg authenticating via SCRAM).
+- `SHOW CONFIG` through the stats user confirms the live `auth_type` is `scram-sha-256` (changed from the `md5`/`plain` default).
+- `./scripts/check-pgbouncer.sh` passed (application query through PgBouncer plus `SHOW POOLS` visibility), `/api/menu` serves DB-backed data through the edge, `userlist.txt` inside the container is `-rw-------`, and the DNS watchdog process is still running.
+
+Verification for `fix/l3-replaced-photo-cleanup` (2026-07-09; `ci/bump-actions-node24` was verified by its own green CI run without the Node 20 deprecation warning):
 
 - Backend tests: new `tests/test_phase12_photo_cleanup.py` (7 tests: pattern matching incl. traversal/hostile URLs, generated-file deletion, curated `.png` kept, placeholder kept, shared-reference kept, missing-file tolerated) plus the existing upload suites — `13 passed` for the three upload-related files, `88 passed` overall in the backend container. Two known-flaky failures (`test_invalid_order_input_returns_friendly_error_shape`, `test_admin_login_rejects_invalid_credentials`) reproduce identically against unmodified `main` code in the live container (event-loop/Redis reuse), unrelated to this change.
 - Live flow through the edge Nginx with credentials sourced in-memory (never printed): cookie login, then uploading a photo for `hot_latte` (placeholder-backed) left `placeholder.jpg` on disk; a second upload deleted the first generated `.webp` and kept only the new one; all 7 curated `.png` files and `git status uploads/` remained clean. Test data was fully reverted (drink restored to placeholder, test `.webp` removed).
@@ -90,9 +97,9 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- FastAPI (upload service photo cleanup)
-- pytest
-- Docker Compose (backend rebuild)
+- PgBouncer (SCRAM-SHA-256 auth, userlist permissions)
+- Docker Compose (pgbouncer rebuild, backend restart)
+- PostgreSQL (SCRAM verification via psql/asyncpg)
 - Git
 - documentation
 
@@ -100,12 +107,12 @@ Historical verification for earlier merged work lives in git history of this fil
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M14, L1–L2, L4, and L6–L7 are fixed and merged, and L3 (old-photo deletion) is fixed on the current branch; still open by choice: L5 (PgBouncer plain auth, internal-only) and L8 (harmless in-container `env_file` path).
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M14, L1–L4, and L6–L7 are fixed and merged, and L5 (PgBouncer SCRAM auth) is fixed on the current branch; still open by choice: L8 (harmless in-container `env_file` path).
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 - Many menu cards still use the repeated DŌM placeholder image.
 
 ## Next recommended task
-- The L3 photo-cleanup PR from `fix/l3-replaced-photo-cleanup` is open for review and merge into `main`. After that, the audit list is done except the deliberately open L5/L8; drink-photo content work still needs the user's photos.
+- The L5 PgBouncer SCRAM PR from `fix/l5-pgbouncer-scram` is open for review and merge into `main`. After that, the audit list is done except the deliberately open L8 (harmless); drink-photo content work still needs the user's photos.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
