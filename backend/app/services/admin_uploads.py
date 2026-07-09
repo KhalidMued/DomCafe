@@ -1,18 +1,24 @@
+import logging
+import re
 from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile
 from PIL import Image, ImageOps, UnidentifiedImageError
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.models.menu import Drink
 
+logger = logging.getLogger(__name__)
+
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 # Menu photos render at card size; larger originals waste guest bandwidth.
 _MAX_DIMENSION = 1600
 _WEBP_QUALITY = 85
+_PHOTO_URL_PREFIX = "/uploads/drinks/"
 
 
 async def upload_drink_photo(
@@ -40,10 +46,48 @@ async def upload_drink_photo(
     destination = uploads_dir / filename
     destination.write_bytes(normalized)
 
-    photo_url = f"/uploads/drinks/{filename}"
+    replaced_photo_url = drink.photo_url
+    photo_url = f"{_PHOTO_URL_PREFIX}{filename}"
     drink.photo_url = photo_url
     await session.commit()
+    await _delete_replaced_photo(session, drink_id, replaced_photo_url, uploads_dir)
     return {"id": drink.id, "photo_url": photo_url}
+
+
+def _generated_photo_filename(drink_id: str, photo_url: str) -> str | None:
+    """Return the filename only if photo_url is a server-generated photo of this drink.
+
+    Generated uploads are always `{drink_id}-{uuid4().hex}.webp`. Curated assets
+    (tracked `.png` files, `placeholder.jpg`, anything hand-promoted) never match,
+    so they are never candidates for deletion.
+    """
+    if not photo_url.startswith(_PHOTO_URL_PREFIX):
+        return None
+    filename = photo_url[len(_PHOTO_URL_PREFIX) :]
+    if re.fullmatch(rf"{re.escape(drink_id)}-[0-9a-f]{{32}}\.webp", filename):
+        return filename
+    return None
+
+
+async def _delete_replaced_photo(
+    session: AsyncSession,
+    drink_id: str,
+    replaced_photo_url: str,
+    uploads_dir: Path,
+) -> None:
+    """Best-effort cleanup of the replaced generated file; the upload already succeeded."""
+    filename = _generated_photo_filename(drink_id, replaced_photo_url or "")
+    if filename is None:
+        return
+    still_referenced = await session.execute(
+        select(Drink.id).where(Drink.photo_url == replaced_photo_url).limit(1)
+    )
+    if still_referenced.scalar_one_or_none() is not None:
+        return
+    try:
+        (uploads_dir / filename).unlink(missing_ok=True)
+    except OSError:
+        logger.warning("Could not delete replaced drink photo %s", filename)
 
 
 def _normalize_image(contents: bytes) -> bytes:

@@ -42,6 +42,8 @@ The standard security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Ref
 
 Drink photo uploads are restricted to safe image types, size-limited, verified as images, renamed server-side, and stored under `/uploads/drinks/`. Every upload is re-encoded to WebP (capped at 1600px, EXIF metadata stripped), so the original uploaded bytes are never served.
 
+Replaced photos do not accumulate on disk (audit finding L3): when a new upload replaces a server-generated photo of the same drink, the old file is deleted, but only if its name matches the exact server-generated pattern (`<drink_id>-<32-hex>.webp`) and no other drink still references it. Curated assets (`placeholder.jpg`, the tracked `.png` photos, hand-promoted files) never match the pattern and are never touched. Caveat: if a generated `.webp` is later promoted to a curated Git-tracked asset, replacing that drink's photo in the admin panel still deletes the working-tree file — restore it with `git checkout -- uploads/drinks/<file>`.
+
 ## Dependency security
 
 Phase 6 dependency audits run `pip-audit` for Python dependencies and `npm audit --audit-level=high` for frontend dependencies. High and critical findings must be resolved before deployment.
