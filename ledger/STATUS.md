@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-content/curated-drink-photos
+chore/status-ledger-sync
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -75,9 +75,14 @@ content/curated-drink-photos
 - PR #73 (L5 PgBouncer SCRAM) was squash merged into `main`: `auth_type` moved from `plain` to `scram-sha-256`, so backend→PgBouncer and PgBouncer→PostgreSQL authentication are both challenge–response and the database password no longer crosses the Docker network in clear text; the entrypoint also chmods the generated `userlist.txt` to `0600`.
 - PR #74 (L8 dead dotenv path) was squash merged into `main`: removed the dead `env_file="../.env"` dotenv source from `Settings.model_config` — it resolved nowhere in-container and was masked by Compose's `env_file:` environment injection, which is the only supported configuration path and is now stated in a comment. This closed the final finding of the 2026-07-08 audit.
 - The user uploaded real photos for all remaining drinks through the admin panel (2026-07-09): all 22 drinks now have real photos (16 new WebP uploads, 6 pre-existing curated PNGs), zero placeholder cards remain, and the L3 cleanup kept the uploads directory one-file-per-drink throughout the session.
-- Current branch promotes the 16 new drink photos to Git-tracked curated assets (`git add -f`, ~1.6 MB total) per the runtime-data policy, and removes the superseded orphaned `cortado-c205a2f8….png` (user-confirmed; no drink references it). Caveat now in effect for all curated `.webp` photos: replacing one via the admin panel deletes the working-tree file (documented in `docs/SECURITY.md`; recoverable with `git checkout`).
+- PR #75 (curated drink photos) was squash merged into `main`: promoted the 16 new drink photos to Git-tracked curated assets (`git add -f`, ~1.6 MB total) per the runtime-data policy, and removed the superseded orphaned `cortado-c205a2f8….png` (user-confirmed; no drink referenced it). Caveat now in effect for all curated `.webp` photos: replacing one via the admin panel deletes the working-tree file (documented in `docs/SECURITY.md`; recoverable with `git checkout`).
+- A full backup was taken after the photo work merged (2026-07-09): database dumps plus the `uploads/` directory now live under the canonical `/backups/dom-cafe` location (created with correct ownership), and the latest dump was proven restorable via a smoke restore into a temporary database (22 drinks, 0 placeholders, 16 orders) that was dropped afterward.
 
 ## Verification
+Verification for `chore/status-ledger-sync` (2026-07-09):
+
+- Documentation-only change to this ledger; no code or runtime behavior touched. Facts recorded (PR #75 merged, backup in `/backups/dom-cafe`, smoke restore) were verified live earlier the same day.
+
 Verification for `content/curated-drink-photos` (2026-07-09):
 
 - Database survey: all 22 drinks reference a real photo (16 `.webp`, 6 curated `.png`), zero placeholders; every referenced URL exists on disk and no generated files are orphaned (only `placeholder.jpg` and the deliberately removed duplicate PNG were unreferenced).
@@ -106,15 +111,12 @@ Historical verification for earlier merged work lives in git history of this fil
 
 ## Hermes Tools Used
 - read_file
-- write_file
 - patch
 - terminal
 - git/gh CLI
 
 ## Technologies / Services Touched
-- Git (curated photo promotion via `git add -f`, orphan removal)
-- Nginx static uploads serving (verification)
-- PostgreSQL (photo-reference survey)
+- Git (ledger sync after PR #75 merge)
 - documentation
 
 ## What is pending
@@ -125,7 +127,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 
 ## Next recommended task
-- The curated-photos PR from `content/curated-drink-photos` is open for review and merge into `main`. With the audit closed and all drinks photographed, the backlog is clear; remaining ideas are optional (e.g. the deferred Three.js enhancement). A fresh `./scripts/backup-db.sh` plus an uploads-directory backup is recommended now that the full menu content exists.
+- The backlog is clear: the 2026-07-08 audit is fully closed, all drinks are photographed and curated, and the post-content backup is in `/backups/dom-cafe`. Remaining ideas are optional (e.g. the deferred Three.js enhancement). Routine care from here: periodic `./scripts/backup-db.sh` plus an uploads rsync after meaningful content changes.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
