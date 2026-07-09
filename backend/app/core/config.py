@@ -21,7 +21,10 @@ class Settings(BaseSettings):
     discord_webhook_url: str = ""
     discord_notifications_enabled: bool = False
 
-    model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
+    # No dotenv source: Docker Compose injects .env into the container
+    # environment (env_file: in docker-compose.yml); a dotenv path here
+    # resolved nowhere in-container and only masked that fact.
+    model_config = SettingsConfigDict(extra="ignore")
 
     @property
     def sqlalchemy_database_url(self) -> str:
