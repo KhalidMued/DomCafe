@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-fix/l8-env-file-path
+content/curated-drink-photos
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -73,9 +73,17 @@ fix/l8-env-file-path
 - PR #71 (L3 replaced-photo cleanup) was squash merged into `main` with a policy-safe design: after a photo upload commits, the previously referenced file is deleted only if it matches the exact server-generated pattern for that same drink (`<drink_id>-<32-hex>.webp`) and no other drink row still references the URL. Curated assets never qualify — `placeholder.jpg`, the tracked `.png` photos, and any hand-named file fall outside the pattern — so the curated-photo runtime-data policy is preserved. Deletion is best-effort (logged on failure, upload still succeeds). Documented in `docs/API.md` and `docs/SECURITY.md`, including the one caveat: a generated `.webp` later promoted to a tracked curated asset would still be deleted from the working tree on replacement (recoverable via `git checkout`).
 - PR #72 (CI actions Node 24 bump) was squash merged into `main`: `actions/checkout` v4→v5, `actions/setup-python` v5→v6, `actions/setup-node` v4→v5, removing the Node 20 deprecation warnings.
 - PR #73 (L5 PgBouncer SCRAM) was squash merged into `main`: `auth_type` moved from `plain` to `scram-sha-256`, so backend→PgBouncer and PgBouncer→PostgreSQL authentication are both challenge–response and the database password no longer crosses the Docker network in clear text; the entrypoint also chmods the generated `userlist.txt` to `0600`.
-- Current branch implements audit finding L8: removed the dead `env_file="../.env"` dotenv source from `Settings.model_config` — it resolved nowhere in-container (workdir `/app` → `/.env`) and was masked by Compose's `env_file:` environment injection, which is the only supported configuration path and is now stated in a comment.
+- PR #74 (L8 dead dotenv path) was squash merged into `main`: removed the dead `env_file="../.env"` dotenv source from `Settings.model_config` — it resolved nowhere in-container and was masked by Compose's `env_file:` environment injection, which is the only supported configuration path and is now stated in a comment. This closed the final finding of the 2026-07-08 audit.
+- The user uploaded real photos for all remaining drinks through the admin panel (2026-07-09): all 22 drinks now have real photos (16 new WebP uploads, 6 pre-existing curated PNGs), zero placeholder cards remain, and the L3 cleanup kept the uploads directory one-file-per-drink throughout the session.
+- Current branch promotes the 16 new drink photos to Git-tracked curated assets (`git add -f`, ~1.6 MB total) per the runtime-data policy, and removes the superseded orphaned `cortado-c205a2f8….png` (user-confirmed; no drink references it). Caveat now in effect for all curated `.webp` photos: replacing one via the admin panel deletes the working-tree file (documented in `docs/SECURITY.md`; recoverable with `git checkout`).
 
 ## Verification
+Verification for `content/curated-drink-photos` (2026-07-09):
+
+- Database survey: all 22 drinks reference a real photo (16 `.webp`, 6 curated `.png`), zero placeholders; every referenced URL exists on disk and no generated files are orphaned (only `placeholder.jpg` and the deliberately removed duplicate PNG were unreferenced).
+- Sample new photos serve `200 image/webp` through the edge Nginx.
+- `git check-ignore` behavior preserved: only the 16 photos were force-added; future generated uploads remain ignored.
+
 Verification for `fix/l8-env-file-path` (2026-07-09):
 
 - Backend container rebuilt; `/api/health` reports `ok` for database and Redis.
@@ -104,22 +112,20 @@ Historical verification for earlier merged work lives in git history of this fil
 - git/gh CLI
 
 ## Technologies / Services Touched
-- FastAPI / pydantic-settings (config source cleanup)
-- Docker Compose (backend rebuild)
-- pytest
-- Git
+- Git (curated photo promotion via `git add -f`, orphan removal)
+- Nginx static uploads serving (verification)
+- PostgreSQL (photo-reference survey)
 - documentation
 
 ## What is pending
 - Three.js is intentionally deferred for a later optional enhancement.
 
 ## Known issues
-- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) tracks the full prioritized list. H1–H4, M1–M14, and L1–L7 are fixed and merged; L8 (dead `env_file` path) is fixed on the current branch. Once it merges, every audit finding is closed.
+- The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
-- Many menu cards still use the repeated DŌM placeholder image.
 
 ## Next recommended task
-- The L8 PR from `fix/l8-env-file-path` is open for review and merge into `main`. It closes the last finding of the 2026-07-08 audit. Next up afterwards: drink-photo content work, which still needs the user's photos.
+- The curated-photos PR from `content/curated-drink-photos` is open for review and merge into `main`. With the audit closed and all drinks photographed, the backlog is clear; remaining ideas are optional (e.g. the deferred Three.js enhancement). A fresh `./scripts/backup-db.sh` plus an uploads-directory backup is recommended now that the full menu content exists.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
