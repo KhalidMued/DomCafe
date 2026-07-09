@@ -17,6 +17,7 @@ See `AGENT.md` for project rules and source requirements.
 - Protected admin routes also accept an explicit `Authorization: Bearer` header (used by tests and tooling).
 - Login verifies a throwaway bcrypt hash when the username is unknown, so response timing cannot be used to enumerate admin accounts.
 - Agent routes use the separate `AGENT_API_KEY` bearer credential.
+- Database connections authenticate with SCRAM-SHA-256 end to end (audit L5): PgBouncer runs `auth_type = scram-sha-256`, so both the backend→PgBouncer and PgBouncer→PostgreSQL legs use challenge–response and the password never crosses the Docker network in clear text. The PgBouncer auth file stores the secret in plain form (required to serve both legs) but is written `0600` inside the container, which already receives the same secret via its environment.
 - Do not log passwords, JWTs, `AGENT_API_KEY`, Discord webhook URLs, database passwords, or connection strings.
 
 ## Rate limits

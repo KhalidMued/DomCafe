@@ -69,7 +69,7 @@ services:
       DATABASES_DBNAME: ${POSTGRES_DB:-dom_cafe}
       PGBOUNCER_POOL_MODE: transaction
       PGBOUNCER_LISTEN_PORT: 6432
-      PGBOUNCER_AUTH_TYPE: plain
+      PGBOUNCER_AUTH_TYPE: scram-sha-256
       PGBOUNCER_STATS_USERS: ${POSTGRES_USER:-dom_cafe_user}
     expose:
       - "6432"
