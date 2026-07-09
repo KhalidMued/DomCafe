@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import {
   getAdminOrders,
+  hasAdminSession,
   updateAdminOrderStatus,
   type AdminOrderListItem,
   type AdminOrderStatus,
@@ -23,26 +24,26 @@ export function AdminOrdersPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState('');
-  const token = window.localStorage.getItem('dom_admin_token');
+  const hasSession = hasAdminSession();
 
   useEffect(() => {
-    if (!token) return;
-    getAdminOrders(token)
+    if (!hasSession) return;
+    getAdminOrders()
       .then(setOrders)
       .catch((ordersError) => {
         setError(ordersError instanceof Error ? ordersError.message : 'Could not load recent orders.');
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [hasSession]);
 
-  if (!token) return <AdminLoginRequired />;
+  if (!hasSession) return <AdminLoginRequired />;
 
   async function handleStatusChange(orderId: string, nextStatus: AdminOrderStatus) {
-    if (!token) return;
+    if (!hasSession) return;
     setUpdatingId(orderId);
     setError('');
     try {
-      const updated = await updateAdminOrderStatus(token, orderId, nextStatus);
+      const updated = await updateAdminOrderStatus(orderId, nextStatus);
       setOrders((current) =>
         current.map((order) =>
           order.id === orderId

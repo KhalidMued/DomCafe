@@ -13,8 +13,9 @@ export function AdminLoginPage({ navigate }: { navigate: (path: string) => void 
     setError('');
     setIsSubmitting(true);
     try {
-      const token = await adminLogin({ username, password });
-      window.localStorage.setItem('dom_admin_token', token.access_token);
+      await adminLogin({ username, password });
+      // The session now lives in httpOnly cookies; drop any legacy token.
+      window.localStorage.removeItem('dom_admin_token');
       navigate('/admin/dashboard');
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : 'Admin login failed.');

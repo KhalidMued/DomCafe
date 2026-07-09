@@ -8,6 +8,7 @@ import {
   createAdminCategory,
   createAdminDrink,
   getAdminMenu,
+  hasAdminSession,
   updateAdminBeanAvailability,
   updateAdminBeanDetails,
   updateAdminCategoryAvailability,
@@ -72,53 +73,53 @@ export function AdminMenuPage() {
   const [newDrinkDraft, setNewDrinkDraft] = useState<NewDrinkDraft | null>(null);
   const [newCategoryDraft, setNewCategoryDraft] = useState<NewCategoryDraft | null>(null);
   const [newBeanDraft, setNewBeanDraft] = useState<NewBeanDraft | null>(null);
-  const token = window.localStorage.getItem('dom_admin_token');
+  const hasSession = hasAdminSession();
 
   useEffect(() => {
-    if (!token) return;
-    getAdminMenu(token).then(setMenu).catch((menuError) => {
+    if (!hasSession) return;
+    getAdminMenu().then(setMenu).catch((menuError) => {
       setError(menuError instanceof Error ? menuError.message : 'Could not load menu management.');
     });
-  }, [token]);
+  }, [hasSession]);
 
-  if (!token) return <AdminLoginRequired />;
+  if (!hasSession) return <AdminLoginRequired />;
 
   async function toggleOrdersOpen() {
-    if (!token || !menu) return;
+    if (!hasSession || !menu) return;
     setUpdatingId('orders-open');
-    const updated = await updateAdminOrdersOpen(token, !menu.orders_open);
+    const updated = await updateAdminOrdersOpen(!menu.orders_open);
     setMenu({ ...menu, orders_open: updated.orders_open });
     setUpdatingId('');
   }
 
   async function toggleDrink(drinkId: string, nextValue: boolean) {
-    if (!token || !menu) return;
+    if (!hasSession || !menu) return;
     setUpdatingId(drinkId);
-    const updated = await updateAdminDrinkAvailability(token, drinkId, nextValue);
+    const updated = await updateAdminDrinkAvailability(drinkId, nextValue);
     setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? { ...drink, is_available: updated.is_available } : drink) });
     setUpdatingId('');
   }
 
   async function toggleBean(beanId: string, nextValue: boolean) {
-    if (!token || !menu) return;
+    if (!hasSession || !menu) return;
     setUpdatingId(beanId);
-    const updated = await updateAdminBeanAvailability(token, beanId, nextValue);
+    const updated = await updateAdminBeanAvailability(beanId, nextValue);
     setMenu({ ...menu, beans: menu.beans.map((bean) => bean.id === beanId ? { ...bean, is_available: updated.is_available } : bean) });
     setUpdatingId('');
   }
 
   async function toggleCategory(categoryId: string, nextValue: boolean) {
-    if (!token || !menu) return;
+    if (!hasSession || !menu) return;
     setUpdatingId(categoryId);
-    const updated = await updateAdminCategoryAvailability(token, categoryId, nextValue);
+    const updated = await updateAdminCategoryAvailability(categoryId, nextValue);
     setMenu({ ...menu, categories: menu.categories.map((category) => category.id === categoryId ? { ...category, is_available: updated.is_available } : category) });
     setUpdatingId('');
   }
 
   async function replaceDrinkPhoto(drinkId: string, photo: File | undefined) {
-    if (!token || !menu || !photo) return;
+    if (!hasSession || !menu || !photo) return;
     setUpdatingId(`${drinkId}-photo`);
-    const updated = await uploadAdminDrinkPhoto(token, drinkId, photo);
+    const updated = await uploadAdminDrinkPhoto(drinkId, photo);
     setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? { ...drink, photo_url: updated.photo_url } : drink) });
     setUpdatingId('');
   }
@@ -142,9 +143,9 @@ export function AdminMenuPage() {
   }
 
   async function saveDrinkEdit(drinkId: string) {
-    if (!token || !menu || !drinkDraft) return;
+    if (!hasSession || !menu || !drinkDraft) return;
     setUpdatingId(`${drinkId}-details`);
-    const updated = await updateAdminDrinkDetails(token, drinkId, {
+    const updated = await updateAdminDrinkDetails(drinkId, {
       name: drinkDraft.name,
       category_id: drinkDraft.categoryId,
       default_bean_id: drinkDraft.beanId,
@@ -175,9 +176,9 @@ export function AdminMenuPage() {
   }
 
   async function saveCategoryEdit(categoryId: string) {
-    if (!token || !menu || !categoryDraft) return;
+    if (!hasSession || !menu || !categoryDraft) return;
     setUpdatingId(`${categoryId}-details`);
-    const updated = await updateAdminCategoryDetails(token, categoryId, {
+    const updated = await updateAdminCategoryDetails(categoryId, {
       label: categoryDraft.label,
       description: categoryDraft.description,
       accent_color: categoryDraft.accentColor,
@@ -204,9 +205,9 @@ export function AdminMenuPage() {
   }
 
   async function saveBeanEdit(beanId: string) {
-    if (!token || !menu || !beanDraft) return;
+    if (!hasSession || !menu || !beanDraft) return;
     setUpdatingId(`${beanId}-details`);
-    const updated = await updateAdminBeanDetails(token, beanId, {
+    const updated = await updateAdminBeanDetails(beanId, {
       name: beanDraft.name,
       origin: beanDraft.origin,
       process: beanDraft.process,
@@ -219,8 +220,8 @@ export function AdminMenuPage() {
   }
 
   async function saveNewCategory() {
-    if (!token || !menu || !newCategoryDraft) return;
-    const created = await createAdminCategory(token, {
+    if (!hasSession || !menu || !newCategoryDraft) return;
+    const created = await createAdminCategory({
       id: newCategoryDraft.id,
       label: newCategoryDraft.label,
       description: newCategoryDraft.description,
@@ -232,8 +233,8 @@ export function AdminMenuPage() {
   }
 
   async function saveNewBean() {
-    if (!token || !menu || !newBeanDraft) return;
-    const created = await createAdminBean(token, {
+    if (!hasSession || !menu || !newBeanDraft) return;
+    const created = await createAdminBean({
       id: newBeanDraft.id,
       name: newBeanDraft.name,
       origin: newBeanDraft.origin,
@@ -245,8 +246,8 @@ export function AdminMenuPage() {
   }
 
   async function saveNewDrink() {
-    if (!token || !menu || !newDrinkDraft) return;
-    const created = await createAdminDrink(token, {
+    if (!hasSession || !menu || !newDrinkDraft) return;
+    const created = await createAdminDrink({
       id: newDrinkDraft.id,
       name: newDrinkDraft.name,
       category_id: newDrinkDraft.categoryId,
@@ -263,20 +264,20 @@ export function AdminMenuPage() {
   }
 
   async function archiveDrink(drinkId: string) {
-    if (!token || !menu) return;
-    const archived = await archiveAdminDrink(token, drinkId);
+    if (!hasSession || !menu) return;
+    const archived = await archiveAdminDrink(drinkId);
     setMenu({ ...menu, drinks: menu.drinks.map((drink) => drink.id === drinkId ? archived : drink) });
   }
 
   async function archiveCategory(categoryId: string) {
-    if (!token || !menu) return;
-    const archived = await archiveAdminCategory(token, categoryId);
+    if (!hasSession || !menu) return;
+    const archived = await archiveAdminCategory(categoryId);
     setMenu({ ...menu, categories: menu.categories.map((category) => category.id === categoryId ? archived : category) });
   }
 
   async function archiveBean(beanId: string) {
-    if (!token || !menu) return;
-    const archived = await archiveAdminBean(token, beanId);
+    if (!hasSession || !menu) return;
+    const archived = await archiveAdminBean(beanId);
     setMenu({ ...menu, beans: menu.beans.map((bean) => bean.id === beanId ? archived : bean) });
   }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getAdminDashboard, type AdminDashboardSummary } from '../../lib/api';
+import { getAdminDashboard, hasAdminSession, type AdminDashboardSummary } from '../../lib/api';
 import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 function SummaryCard({ label, value }: { label: string; value: string | number }) {
@@ -15,16 +15,16 @@ function SummaryCard({ label, value }: { label: string; value: string | number }
 export function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null);
   const [error, setError] = useState('');
-  const token = window.localStorage.getItem('dom_admin_token');
+  const hasSession = hasAdminSession();
 
   useEffect(() => {
-    if (!token) return;
-    getAdminDashboard(token).then(setSummary).catch((dashboardError) => {
+    if (!hasSession) return;
+    getAdminDashboard().then(setSummary).catch((dashboardError) => {
       setError(dashboardError instanceof Error ? dashboardError.message : 'Could not load the dashboard.');
     });
-  }, [token]);
+  }, [hasSession]);
 
-  if (!token) return <AdminLoginRequired />;
+  if (!hasSession) return <AdminLoginRequired />;
 
   return (
     <AdminLayout title="Admin dashboard">

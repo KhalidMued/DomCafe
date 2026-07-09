@@ -57,6 +57,7 @@ function mockFetch() {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.sessionStorage.clear();
   window.history.pushState({}, '', '/');
   window.scrollTo = vi.fn();
@@ -106,7 +107,7 @@ describe('/admin root route', () => {
   });
 
   it('redirects to the dashboard when an admin token is stored', async () => {
-    window.localStorage.setItem('dom_admin_token', 'test-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     window.history.pushState({}, '', '/admin');
 
     render(<App />);

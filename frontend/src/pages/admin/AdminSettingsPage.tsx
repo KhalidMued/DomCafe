@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getAdminSettings, updateAdminSettings, type AdminSettings } from '../../lib/api';
+import { getAdminSettings, hasAdminSession, updateAdminSettings, type AdminSettings } from '../../lib/api';
 import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 export function AdminSettingsPage() {
@@ -8,23 +8,23 @@ export function AdminSettingsPage() {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
-  const token = window.localStorage.getItem('dom_admin_token');
+  const hasSession = hasAdminSession();
 
   useEffect(() => {
-    if (!token) return;
-    getAdminSettings(token).then(setSettings).catch((settingsError) => {
+    if (!hasSession) return;
+    getAdminSettings().then(setSettings).catch((settingsError) => {
       setError(settingsError instanceof Error ? settingsError.message : 'Could not load settings.');
     });
-  }, [token]);
+  }, [hasSession]);
 
-  if (!token) return <AdminLoginRequired />;
+  if (!hasSession) return <AdminLoginRequired />;
 
   async function saveSettings(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token || !settings) return;
+    if (!hasSession || !settings) return;
     setSaving(true);
     setStatus('');
-    const updated = await updateAdminSettings(token, settings);
+    const updated = await updateAdminSettings(settings);
     setSettings(updated);
     setSaving(false);
     setStatus('Settings saved.');

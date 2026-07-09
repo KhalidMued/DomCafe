@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.db.session import get_session
 from app.schemas.admin import (
     AdminAvailabilityResponse,
@@ -24,9 +25,9 @@ from app.schemas.admin import (
     AdminOrderStatusUpdate,
     AdminOrdersOpenResponse,
     AdminOrdersOpenUpdate,
+    AdminSessionResponse,
     AdminSettingsResponse,
     AdminSettingsUpdate,
-    AdminTokenResponse,
 )
 from app.services.admin_auth import authenticate_admin, get_active_admin_id
 from app.services.admin_dashboard import get_dashboard_summary
@@ -55,35 +56,80 @@ from app.services.admin_uploads import upload_drink_photo
 router = APIRouter(tags=["admin"])
 bearer_scheme = HTTPBearer(auto_error=False)
 
+# The JWT lives in an httpOnly cookie so page scripts can never read it; the
+# separate non-httpOnly session-hint cookie carries no secret and only lets
+# the SPA decide whether to render admin pages or the login screen.
+JWT_COOKIE = "dom_admin_jwt"
+SESSION_HINT_COOKIE = "dom_admin_session"
 
-@router.post("/admin/login", response_model=AdminTokenResponse)
+
+def _set_session_cookies(response: Response, token: str) -> None:
+    settings = get_settings()
+    max_age = settings.jwt_expires_minutes * 60
+    response.set_cookie(
+        JWT_COOKIE,
+        token,
+        max_age=max_age,
+        httponly=True,
+        samesite="strict",
+        secure=settings.admin_cookie_secure,
+        path="/api",
+    )
+    response.set_cookie(
+        SESSION_HINT_COOKIE,
+        "1",
+        max_age=max_age,
+        httponly=False,
+        samesite="strict",
+        secure=settings.admin_cookie_secure,
+        path="/",
+    )
+
+
+def _clear_session_cookies(response: Response) -> None:
+    response.delete_cookie(JWT_COOKIE, path="/api")
+    response.delete_cookie(SESSION_HINT_COOKIE, path="/")
+
+
+@router.post("/admin/login", response_model=AdminSessionResponse)
 async def login(
     payload: AdminLoginRequest,
+    response: Response,
     _rate_limit: None = Depends(enforce_admin_login_rate_limit),
     session: AsyncSession = Depends(get_session),
-) -> dict[str, str]:
+) -> dict[str, bool]:
     token = await authenticate_admin(session, payload.username, payload.password)
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password.",
         )
-    return token
+    _set_session_cookies(response, token["access_token"])
+    return {"ok": True}
+
+
+@router.post("/admin/logout", response_model=AdminSessionResponse)
+async def logout(response: Response) -> dict[str, bool]:
+    _clear_session_cookies(response)
+    return {"ok": True}
 
 
 async def require_admin(
+    request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     session: AsyncSession = Depends(get_session),
 ) -> str:
-    if credentials is None:
+    token = credentials.credentials if credentials is not None else request.cookies.get(JWT_COOKIE)
+    if token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin login required.")
-    admin_id = await get_active_admin_id(session, credentials.credentials)
+    admin_id = await get_active_admin_id(session, token)
     if admin_id is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin login required.")
     return admin_id
 
 
 async def _current_admin_dependency(
+    request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     session: AsyncSession = Depends(get_session),
 ) -> str:
@@ -92,7 +138,7 @@ async def _current_admin_dependency(
     # Depends(require_admin) captures the original function at import). The
     # TypeError fallback lets tests substitute zero-argument fakes.
     try:
-        return await require_admin(credentials, session)
+        return await require_admin(request, credentials, session)
     except TypeError:
         return await require_admin()
 

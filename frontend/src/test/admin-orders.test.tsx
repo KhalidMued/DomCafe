@@ -12,6 +12,7 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.cookie = 'dom_admin_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   window.history.pushState({}, '', '/admin/orders');
   window.scrollTo = vi.fn();
 });
@@ -23,10 +24,10 @@ afterEach(() => {
 
 describe('Phase 4 admin orders page', () => {
   it('loads recent orders with the stored admin token', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       expect(String(input)).toBe('/api/admin/orders');
-      expect(init?.headers).toEqual({ Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toBeUndefined();
       return jsonResponse([
         {
           id: '18',
@@ -52,7 +53,7 @@ describe('Phase 4 admin orders page', () => {
   });
 
   it('updates an order status from the orders page', async () => {
-    window.localStorage.setItem('dom_admin_token', 'admin-token');
+    document.cookie = 'dom_admin_session=1; path=/';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       if (String(input) === '/api/admin/orders') {
         return jsonResponse([
@@ -69,7 +70,7 @@ describe('Phase 4 admin orders page', () => {
       }
       expect(String(input)).toBe('/api/admin/orders/18/status');
       expect(init?.method).toBe('PATCH');
-      expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer admin-token' });
+      expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify({ status: 'preparing' }));
       return jsonResponse({
         id: '18',

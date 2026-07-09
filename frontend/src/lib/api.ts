@@ -66,9 +66,8 @@ export type AdminLoginPayload = {
   password: string;
 };
 
-export type AdminTokenResponse = {
-  access_token: string;
-  token_type: 'bearer';
+export type AdminSessionResponse = {
+  ok: boolean;
 };
 
 export type AdminDashboardSummary = {
@@ -240,103 +239,104 @@ export function getOrderStatus(orderId: string) {
   return request<OrderStatus>(`/api/orders/${orderId}`);
 }
 
+// The admin JWT lives in an httpOnly cookie the browser attaches to
+// same-origin requests automatically; this hint cookie is the only part
+// page scripts can see, and it carries no secret.
+export function hasAdminSession() {
+  return document.cookie.split('; ').some((part) => part.startsWith('dom_admin_session='));
+}
+
 export function adminLogin(payload: AdminLoginPayload) {
-  return request<AdminTokenResponse>('/api/admin/login', {
+  return request<AdminSessionResponse>('/api/admin/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
-export function getAdminDashboard(token: string) {
-  return request<AdminDashboardSummary>('/api/admin/dashboard', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export function adminLogout() {
+  return request<AdminSessionResponse>('/api/admin/logout', { method: 'POST' });
 }
 
-export function getAdminOrders(token: string) {
-  return request<AdminOrderListItem[]>('/api/admin/orders', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export function getAdminDashboard() {
+  return request<AdminDashboardSummary>('/api/admin/dashboard');
 }
 
-export function updateAdminOrderStatus(token: string, orderId: string, status: AdminOrderStatus) {
+export function getAdminOrders() {
+  return request<AdminOrderListItem[]>('/api/admin/orders');
+}
+
+export function updateAdminOrderStatus(orderId: string, status: AdminOrderStatus) {
   return request<AdminOrderStatusResponse>(`/api/admin/orders/${orderId}/status`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   });
 }
 
-export function getAdminMenu(token: string) {
-  return request<AdminMenuManagement>('/api/admin/menu', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export function getAdminMenu() {
+  return request<AdminMenuManagement>('/api/admin/menu');
 }
 
-export function updateAdminDrinkAvailability(token: string, drinkId: string, isAvailable: boolean) {
+export function updateAdminDrinkAvailability(drinkId: string, isAvailable: boolean) {
   return request<{ id: string; is_available: boolean }>(`/api/admin/menu/drinks/${drinkId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ is_available: isAvailable }),
   });
 }
 
-export function updateAdminBeanAvailability(token: string, beanId: string, isAvailable: boolean) {
+export function updateAdminBeanAvailability(beanId: string, isAvailable: boolean) {
   return request<{ id: string; is_available: boolean }>(`/api/admin/menu/beans/${beanId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ is_available: isAvailable }),
   });
 }
 
-export function updateAdminCategoryAvailability(token: string, categoryId: string, isAvailable: boolean) {
+export function updateAdminCategoryAvailability(categoryId: string, isAvailable: boolean) {
   return request<{ id: string; is_available: boolean }>(`/api/admin/menu/categories/${categoryId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ is_available: isAvailable }),
   });
 }
 
 export function createAdminCategory(
-  token: string,
   payload: { id: string; label: string; description: string; accent_color: string; display_order: number },
 ) {
   return request<AdminMenuManagement['categories'][number]>('/api/admin/categories', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
-export function archiveAdminCategory(token: string, categoryId: string) {
+export function archiveAdminCategory(categoryId: string) {
   return request<AdminMenuManagement['categories'][number]>(`/api/admin/categories/${categoryId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
-export function updateAdminOrdersOpen(token: string, ordersOpen: boolean) {
+export function updateAdminOrdersOpen(ordersOpen: boolean) {
   return request<{ orders_open: boolean }>('/api/admin/menu/settings/orders-open', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ orders_open: ordersOpen }),
   });
 }
 
-export function uploadAdminDrinkPhoto(token: string, drinkId: string, photo: File) {
+export function uploadAdminDrinkPhoto(drinkId: string, photo: File) {
   const body = new FormData();
   body.append('drink_id', drinkId);
   body.append('photo', photo);
   return request<{ id: string; photo_url: string }>('/api/admin/uploads/drink-photo', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
     body,
   });
 }
 
 export function updateAdminDrinkDetails(
-  token: string,
   drinkId: string,
   payload: {
     name: string;
@@ -351,13 +351,12 @@ export function updateAdminDrinkDetails(
 ) {
   return request<AdminMenuManagement['drinks'][number]>(`/api/admin/drinks/${drinkId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
 export function createAdminDrink(
-  token: string,
   payload: {
     id: string;
     name: string;
@@ -373,20 +372,18 @@ export function createAdminDrink(
 ) {
   return request<AdminMenuManagement['drinks'][number]>('/api/admin/drinks', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
-export function archiveAdminDrink(token: string, drinkId: string) {
+export function archiveAdminDrink(drinkId: string) {
   return request<AdminMenuManagement['drinks'][number]>(`/api/admin/drinks/${drinkId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 export function updateAdminBeanDetails(
-  token: string,
   beanId: string,
   payload: {
     name: string;
@@ -397,31 +394,28 @@ export function updateAdminBeanDetails(
 ) {
   return request<AdminMenuManagement['beans'][number]>(`/api/admin/beans/${beanId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
 export function createAdminBean(
-  token: string,
   payload: { id: string; name: string; origin: string; process: string; tasting_notes: string[] },
 ) {
   return request<AdminMenuManagement['beans'][number]>('/api/admin/beans', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
-export function archiveAdminBean(token: string, beanId: string) {
+export function archiveAdminBean(beanId: string) {
   return request<AdminMenuManagement['beans'][number]>(`/api/admin/beans/${beanId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 export function updateAdminCategoryDetails(
-  token: string,
   categoryId: string,
   payload: {
     label: string;
@@ -432,21 +426,19 @@ export function updateAdminCategoryDetails(
 ) {
   return request<AdminMenuManagement['categories'][number]>(`/api/admin/categories/${categoryId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
 
-export function getAdminSettings(token: string) {
-  return request<AdminSettings>('/api/admin/settings', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export function getAdminSettings() {
+  return request<AdminSettings>('/api/admin/settings');
 }
 
-export function updateAdminSettings(token: string, payload: AdminSettings) {
+export function updateAdminSettings(payload: AdminSettings) {
   return request<AdminSettings>('/api/admin/settings', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }

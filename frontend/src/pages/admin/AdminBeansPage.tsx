@@ -4,6 +4,7 @@ import {
   archiveAdminBean,
   createAdminBean,
   getAdminMenu,
+  hasAdminSession,
   updateAdminBeanAvailability,
   updateAdminBeanDetails,
   type AdminMenuManagement,
@@ -36,26 +37,26 @@ export function AdminBeansPage() {
   const [newBeanDraft, setNewBeanDraft] = useState<BeanDraft | null>(null);
   const [editingBeanId, setEditingBeanId] = useState('');
   const [beanDraft, setBeanDraft] = useState<BeanDraft | null>(null);
-  const token = window.localStorage.getItem('dom_admin_token');
+  const hasSession = hasAdminSession();
 
   useEffect(() => {
-    if (!token) return;
-    getAdminMenu(token)
+    if (!hasSession) return;
+    getAdminMenu()
       .then((menu) => setBeans(menu.beans))
       .catch((beansError) => {
         setError(beansError instanceof Error ? beansError.message : 'Could not load beans.');
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [hasSession]);
 
-  if (!token) return <AdminLoginRequired />;
+  if (!hasSession) return <AdminLoginRequired />;
 
   async function saveNewBean() {
-    if (!token || !newBeanDraft) return;
+    if (!hasSession || !newBeanDraft) return;
     setUpdatingId('new-bean');
     setError('');
     try {
-      const created = await createAdminBean(token, {
+      const created = await createAdminBean({
         id: newBeanDraft.id,
         name: newBeanDraft.name,
         origin: newBeanDraft.origin,
@@ -83,11 +84,11 @@ export function AdminBeansPage() {
   }
 
   async function saveBeanEdit(beanId: string) {
-    if (!token || !beanDraft) return;
+    if (!hasSession || !beanDraft) return;
     setUpdatingId(`${beanId}-details`);
     setError('');
     try {
-      const updated = await updateAdminBeanDetails(token, beanId, {
+      const updated = await updateAdminBeanDetails(beanId, {
         name: beanDraft.name,
         origin: beanDraft.origin,
         process: beanDraft.process,
@@ -104,11 +105,11 @@ export function AdminBeansPage() {
   }
 
   async function toggleBean(beanId: string, nextValue: boolean) {
-    if (!token) return;
+    if (!hasSession) return;
     setUpdatingId(beanId);
     setError('');
     try {
-      const updated = await updateAdminBeanAvailability(token, beanId, nextValue);
+      const updated = await updateAdminBeanAvailability(beanId, nextValue);
       setBeans((current) => current.map((bean) => bean.id === beanId ? { ...bean, is_available: updated.is_available } : bean));
     } catch (toggleError) {
       setError(toggleError instanceof Error ? toggleError.message : 'Could not update bean.');
@@ -118,11 +119,11 @@ export function AdminBeansPage() {
   }
 
   async function archiveBean(beanId: string) {
-    if (!token) return;
+    if (!hasSession) return;
     setUpdatingId(`${beanId}-archive`);
     setError('');
     try {
-      const archived = await archiveAdminBean(token, beanId);
+      const archived = await archiveAdminBean(beanId);
       setBeans((current) => current.map((bean) => bean.id === beanId ? archived : bean));
     } catch (archiveError) {
       setError(archiveError instanceof Error ? archiveError.message : 'Could not archive bean.');
