@@ -220,8 +220,8 @@ Important UI constraints:
 - Full RTL and Arabic support matter.
 - Use the Tajawal font where applicable, with Cairo/Almarai fallbacks.
 - Keep first-screen performance light.
-- Avoid decorative blobs/orbits and unnecessary Three.js before MVP/performance acceptance (Three.js has been deliberately deferred — see `ledger/STATUS.md` PR #49).
-- The welcome screen should remain the simple dark card style unless asked otherwise.
+- Three.js is used in exactly one place: the lazy-loaded drifting-beans background on the welcome page (`components/three/WelcomeBeans.tsx`, gated by `lib/webgl.ts`). Keep it welcome-page only, lazy, and gated on WebGL + `prefers-reduced-motion` per `AGENT.md` §14; do not add Three.js to menu, cart, or order tracking.
+- The welcome screen should remain the simple dark card style (the 3D bean layer sits behind it and must never compete with the card) unless asked otherwise.
 - For welcome wordmark work, preserve the existing convention from project history: visible D/O/M spans, normal `O` with CSS macron overlay, D-only negative margin for D→O tightening, and tight centered logo/tagline lockup.
 
 Brand tokens (from `AGENT.md` / `docs/dom_hermes_agent_v1_2.json`, mapped to CSS variables):
