@@ -1,7 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react';
 
 import { getPublicSettings, type PublicSettings } from '../../lib/api';
+import { canShowDecorative3D } from '../../lib/webgl';
 import { setGuestName } from '../../store/cartStore';
+
+// Decorative only, welcome page only (AGENT.md §14): the Three.js chunk is
+// downloaded lazily and never when WebGL is missing or reduced motion is set.
+const WelcomeBeans = lazy(() => import('../../components/three/WelcomeBeans'));
 
 const fallbackSettings: PublicSettings = {
   cafe_name: 'DŌM',
@@ -13,9 +18,11 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState('');
   const [settings, setSettings] = useState<PublicSettings | null>(null);
+  const [showBeans, setShowBeans] = useState(false);
 
   useEffect(() => {
     getPublicSettings().then(setSettings).catch(() => setSettings(fallbackSettings));
+    setShowBeans(canShowDecorative3D());
   }, []);
 
   const activeSettings = settings ?? fallbackSettings;
@@ -32,6 +39,11 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
 
   return (
     <main className="welcome-page page-shell">
+      {showBeans ? (
+        <Suspense fallback={null}>
+          <WelcomeBeans />
+        </Suspense>
+      ) : null}
       <section className="hero-card welcome-hero-card" aria-label="DŌM Home Café">
         <div style={{ textAlign: 'center' }}>
           <svg width="100%" viewBox="0 0 680 220" role="img" xmlns="http://www.w3.org/2000/svg">

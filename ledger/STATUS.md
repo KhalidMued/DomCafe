@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-chore/status-ledger-sync
+feat/threejs-welcome-beans
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -77,8 +77,17 @@ chore/status-ledger-sync
 - The user uploaded real photos for all remaining drinks through the admin panel (2026-07-09): all 22 drinks now have real photos (16 new WebP uploads, 6 pre-existing curated PNGs), zero placeholder cards remain, and the L3 cleanup kept the uploads directory one-file-per-drink throughout the session.
 - PR #75 (curated drink photos) was squash merged into `main`: promoted the 16 new drink photos to Git-tracked curated assets (`git add -f`, ~1.6 MB total) per the runtime-data policy, and removed the superseded orphaned `cortado-c205a2f8….png` (user-confirmed; no drink referenced it). Caveat now in effect for all curated `.webp` photos: replacing one via the admin panel deletes the working-tree file (documented in `docs/SECURITY.md`; recoverable with `git checkout`).
 - A full backup was taken after the photo work merged (2026-07-09): database dumps plus the `uploads/` directory now live under the canonical `/backups/dom-cafe` location (created with correct ownership), and the latest dump was proven restorable via a smoke restore into a temporary database (22 drinks, 0 placeholders, 16 orders) that was dropped afterward.
+- Current branch adds the long-deferred optional Three.js welcome enhancement (user-requested, 2026-07-11), choosing the "drifting coffee beans" concept from `AGENT.md` §14: a sparse field of 22 low-poly 3D beans in doum-gold/fired-clay/roast tones drifting slowly behind the welcome card with gentle pointer parallax. Guardrails per spec: welcome page only (canvas unmounts on navigation), Three.js loaded as a separate lazy chunk (~129 kB gz; main bundle unchanged), never downloaded at all when WebGL is missing or `prefers-reduced-motion` is set (`lib/webgl.ts` gate), static dark background as fallback, rendering paused when the tab is hidden, pixel ratio capped at 2, full dispose/cleanup on unmount. The card, wordmark, and copy are untouched.
 
 ## Verification
+Verification for `feat/threejs-welcome-beans` (2026-07-11):
+
+- Frontend suite: `npm test -- --run` — 56 passed (5 new in `welcome-beans.test.tsx`: WebGL/reduced-motion gating, WebGL-failure fallback renders no canvas without crashing, welcome page renders fully with no beans layer when WebGL is absent).
+- `npm run build` passes; Three.js lands entirely in the lazy `WelcomeBeans` chunk (512 kB / 129 kB gz) and the eager `index` chunk is unchanged (~201 kB / 63 kB gz), so first paint is unaffected.
+- Docker frontend container rebuilt; `/api/health` ok; the page HTML and the `WelcomeBeans` chunk both serve `200` through the edge Nginx.
+- Headless Chromium (Playwright) against `http://localhost:11080`: canvas mounts behind the card, two screenshots 3 s apart show beans in different positions (animation live), zero console/page errors, and after submitting a name and landing on `/menu` the canvas is fully removed (welcome-page-only rule).
+- `npm audit --audit-level=high`: `three`/`@types/three` introduce no advisories; the reported vite/undici/esbuild dev-tooling advisories pre-date this branch on `main` (vite pinned at 7.3.3) and are noted as a follow-up.
+
 Verification for `chore/status-ledger-sync` (2026-07-09):
 
 - Documentation-only change to this ledger; no code or runtime behavior touched. Facts recorded (PR #75 merged, backup in `/backups/dom-cafe`, smoke restore) were verified live earlier the same day.
@@ -111,23 +120,28 @@ Historical verification for earlier merged work lives in git history of this fil
 
 ## Hermes Tools Used
 - read_file
+- write_file
 - patch
 - terminal
 - git/gh CLI
 
 ## Technologies / Services Touched
-- Git (ledger sync after PR #75 merge)
+- Three.js (new frontend dependency, lazy-loaded welcome background)
+- React 19 / Vite (lazy chunk splitting, Suspense)
+- Vitest + Testing Library (new gating/fallback tests)
+- Playwright headless Chromium (live visual verification)
+- Docker Compose / Nginx (frontend rebuild, edge serving checks)
 - documentation
 
 ## What is pending
-- Three.js is intentionally deferred for a later optional enhancement.
+- Nothing — the optional Three.js welcome enhancement (the last deferred idea) is on this branch.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 
 ## Next recommended task
-- The backlog is clear: the 2026-07-08 audit is fully closed, all drinks are photographed and curated, and the post-content backup is in `/backups/dom-cafe`. Remaining ideas are optional (e.g. the deferred Three.js enhancement). Routine care from here: periodic `./scripts/backup-db.sh` plus an uploads rsync after meaningful content changes.
+- With the Three.js welcome enhancement merged, the idea backlog is empty. Routine care from here: periodic `./scripts/backup-db.sh` plus an uploads rsync after meaningful content changes. Optional hygiene follow-up: bump vite past 7.3.3 (and refresh the lockfile) to clear the pre-existing Windows-oriented dev-tooling `npm audit` advisories (vite/undici/esbuild).
 
 ## Notes
 - `.env` remains ignored and must not be committed.
