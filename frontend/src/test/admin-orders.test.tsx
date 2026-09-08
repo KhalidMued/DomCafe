@@ -49,6 +49,12 @@ describe('Phase 4 admin orders page', () => {
     expect(within(orders).getByText('Mona')).toBeInTheDocument();
     expect(within(orders).getAllByText('New').length).toBeGreaterThan(0);
     expect(within(orders).getByText('2 items')).toBeInTheDocument();
+    const submitted = within(orders).getByText('Submitted', { exact: false });
+    const time = submitted.querySelector('time');
+    expect(time).toHaveAttribute('datetime', '2026-05-30T18:00:00Z');
+    expect(time).toHaveTextContent(new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium', timeStyle: 'short',
+    }).format(new Date('2026-05-30T18:00:00Z')));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 
@@ -84,10 +90,13 @@ describe('Phase 4 admin orders page', () => {
     render(<App />);
 
     const orderCard = await screen.findByLabelText('Order #18 controls');
+    const originalTime = orderCard.querySelector('time')?.textContent;
     fireEvent.change(within(orderCard).getByLabelText('Update status'), { target: { value: 'preparing' } });
 
     expect(await within(orderCard).findByText('Preparing')).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(orderCard.querySelector('time')).toHaveAttribute('datetime', '2026-05-30T18:00:00Z');
+    expect(orderCard.querySelector('time')?.textContent).toBe(originalTime);
   });
 
   it('asks the admin to log in when no token is stored', () => {

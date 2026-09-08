@@ -17,6 +17,11 @@ const statusLabels: Record<AdminOrderStatus, string> = {
   cancelled: 'Cancelled',
 };
 
+const submittedDateFormat = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+
 const statuses: AdminOrderStatus[] = ['new', 'received', 'preparing', 'ready', 'cancelled'];
 
 export function AdminOrdersPage() {
@@ -70,6 +75,9 @@ export function AdminOrdersPage() {
               <div>
                 <p className="eyebrow">Order #{order.order_number}</p>
                 <h2 className="brand-heading" dir="auto">{order.guest_name}</h2>
+                <p className="detail-copy">
+                  Submitted <time dateTime={order.created_at}>{submittedDateFormat.format(new Date(order.created_at))}</time>
+                </p>
                 <p className="detail-copy">{order.items_count === 1 ? '1 item' : `${order.items_count} items`}</p>
               </div>
               <p className="status-label brand-heading">{statusLabels[order.status]}</p>
