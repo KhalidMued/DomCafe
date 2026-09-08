@@ -85,7 +85,9 @@ Verification for `feat/admin-order-submitted-time` (2026-09-08):
 
 - Admin order cards now show the original `created_at` as a Submitted date/time in the browser locale/timezone, using a semantic `time` element. No backend/schema changes.
 - Regression test failed before implementation; all 56 frontend tests and the production build pass afterward. Tests check timestamp rendering and preservation after status changes.
-- Live rebuild and browser verification pending.
+- `docker compose up -d --build` completed successfully; public `/api/health` reports application/database/Redis ok.
+- Authenticated Playwright against the public HTTPS site verified all 16 real order timestamps against API `created_at`, using Asia/Riyadh timezone; zero page errors and no mobile horizontal overflow. Desktop 1440×1000 and mobile 390×844 screenshots visually inspected: timestamps are legible with no overlap. Local evidence: `/tmp/dom-browser-qa/orders-desktop.png` and `/tmp/dom-browser-qa/orders-mobile.png` (not committed; real admin data). No order data changed.
+- Branch pushed via SSH; PR creation blocked by GitHub CLI HTTP 401 (saved token invalid, also confirmed without token environment overrides). Re-authentication required before opening PR.
 
 Verification for `feat/realistic-bean-visuals` (2026-07-11):
 
@@ -141,6 +143,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - execute_code
 - terminal
 - todo
+- process
 - write_file
 - vision_analyze
 
@@ -153,7 +156,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- Admin submission-time PR awaits human review and merge.
+- Re-authenticate GitHub CLI, open the pushed `feat/admin-order-submitted-time` branch as a PR, and wait for human review/merge. Change is already deployed for live verification.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
