@@ -87,7 +87,7 @@ Verification for `feat/admin-order-submitted-time` (2026-09-08):
 - Regression test failed before implementation; all 56 frontend tests and the production build pass afterward. Tests check timestamp rendering and preservation after status changes.
 - `docker compose up -d --build` completed successfully; public `/api/health` reports application/database/Redis ok.
 - Authenticated Playwright against the public HTTPS site verified all 16 real order timestamps against API `created_at`, using Asia/Riyadh timezone; zero page errors and no mobile horizontal overflow. Desktop 1440×1000 and mobile 390×844 screenshots visually inspected: timestamps are legible with no overlap. Local evidence: `/tmp/dom-browser-qa/orders-desktop.png` and `/tmp/dom-browser-qa/orders-mobile.png` (not committed; real admin data). No order data changed.
-- Branch pushed via SSH; PR creation blocked by GitHub CLI HTTP 401 (saved token invalid, also confirmed without token environment overrides). Re-authentication required before opening PR.
+- GitHub authentication restored by the user; PR #79 opened: https://github.com/KhalidMued/DomCafe/pull/79. Awaiting human review and merge.
 
 Verification for `feat/realistic-bean-visuals` (2026-07-11):
 
@@ -156,7 +156,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- Re-authenticate GitHub CLI, open the pushed `feat/admin-order-submitted-time` branch as a PR, and wait for human review/merge. Change is already deployed for live verification.
+- PR #79 awaits human review/merge. Change is already deployed and live-verified.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
