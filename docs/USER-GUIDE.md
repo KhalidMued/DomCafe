@@ -62,4 +62,4 @@ The status page shows:
 - Progress stages.
 - Ordered items.
 
-The page refreshes order status every 15 seconds until the order is ready or cancelled.
+The page receives live status-change notifications and refreshes the authoritative order details immediately. If the live connection is unavailable, it automatically falls back to refreshing every 15 seconds; while connected, a 60-second safety refresh guarantees eventual convergence until the order is ready or cancelled.

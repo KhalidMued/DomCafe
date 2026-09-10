@@ -42,10 +42,11 @@ export function AdminLoginRequired() {
   );
 }
 
-export function AdminLayout({ children, title }: { children: ReactNode; title: string }) {
+export function AdminLayout({ children, title, onLogout }: { children: ReactNode; title: string; onLogout?: () => void }) {
   const currentPath = window.location.pathname;
 
   async function logout() {
+    onLogout?.();
     try {
       await adminLogout();
     } catch {

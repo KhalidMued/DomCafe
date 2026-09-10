@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ApiError, getMenu, getOrderStatus, type OrderStatus, type PublicMenuCategory } from '../../lib/api';
+import { subscribeOrderEvents } from '../../lib/orderEvents';
 import { addCartItem, getCartItems, subscribeCart } from '../../store/cartStore';
 import { clearActiveOrderId, getActiveOrderId } from '../../store/orderProgressStore';
 
@@ -54,37 +55,24 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   useEffect(() => {
     const orderId = getActiveOrderId();
     if (orderId === null) return undefined;
-    const fetchOrderId: string = orderId;
-
-    let alive = true;
-    let timer: number | undefined;
-
-    async function loadOrderProgress() {
-      try {
-        const nextOrder = await getOrderStatus(fetchOrderId);
-        if (!alive) return;
+    const subscription = subscribeOrderEvents(
+      `/api/orders/${encodeURIComponent(orderId)}/events`,
+      'order-changed',
+      () => getOrderStatus(orderId),
+      (nextOrder) => {
         setActiveOrder(nextOrder);
-        if (!finalOrderStatuses.has(nextOrder.status)) {
-          timer = window.setTimeout(loadOrderProgress, 15_000);
-        }
-      } catch (orderError) {
-        if (!alive) return;
+        return finalOrderStatuses.has(nextOrder.status);
+      },
+      (orderError) => {
         if (orderError instanceof ApiError && orderError.status === 404) {
-          clearActiveOrderId(fetchOrderId);
+          clearActiveOrderId(orderId);
           setActiveOrder(null);
-          return;
+          return true;
         }
-        // Transient failure: keep the card and try again on the next tick.
-        timer = window.setTimeout(loadOrderProgress, 15_000);
-      }
-    }
-
-    loadOrderProgress();
-
-    return () => {
-      alive = false;
-      if (timer) window.clearTimeout(timer);
-    };
+        // Transient failure: keep the card and let the fallback retry.
+      },
+    );
+    return subscription.stop;
   }, []);
 
   function addDrink(drink: PublicMenuCategory['drinks'][number]) {

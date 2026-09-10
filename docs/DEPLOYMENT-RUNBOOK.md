@@ -89,6 +89,19 @@ Restart after config changes:
 sudo systemctl restart cloudflared
 ```
 
+## Live order event streams
+
+Order updates use Server-Sent Events through the existing Nginx entrypoint. Nginx disables proxy buffering, response caching, and gzip for the two `/events` routes so notifications are delivered immediately; normal API routes keep their existing behavior. Redis Pub/Sub distributes empty invalidation messages between backend workers.
+
+If Redis cannot establish a subscription, the stream returns `503` and browsers fall back to 15-second REST polling. Connected clients also reconcile through REST every 60 seconds so a best-effort publication failure cannot leave them stale indefinitely. Nginx limits each client to 30 stream-connection requests per minute (with a burst of 20) and 10 concurrent streams. After deployment, confirm that a stream receives its initial `connected` event without printing authentication credentials:
+
+```bash
+# Guest: substitute a disposable/test order public code.
+curl -N --max-time 5 http://localhost:11080/api/orders/<public-code>/events
+```
+
+An unknown public code must return `404`; the admin stream must return `401` without a valid admin session. Do not place JWTs or other credentials in stream query strings.
+
 ## PgBouncer pool health
 
 PgBouncer runs as an internal-only Compose service on port `6432`; it must not publish a host port.

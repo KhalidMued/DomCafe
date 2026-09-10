@@ -93,11 +93,19 @@ def test_upload_rejects_non_image_bytes(monkeypatch, tmp_path):
     assert failure.value.status_code == 400
 
 
-def test_update_order_status_records_transition_timestamp():
-    from app.services.admin_orders import update_order_status
+def test_update_order_status_records_transition_timestamp(monkeypatch):
+    from app.services import admin_orders
 
+    published = []
+
+    async def fake_publish(public_code):
+        assert session.committed
+        published.append(public_code)
+
+    monkeypatch.setattr(admin_orders, "publish_order_changed", fake_publish)
     order = SimpleNamespace(
         id=12,
+        public_code="private-order-code",
         status="new",
         received_at=None,
         preparing_at=None,
@@ -106,13 +114,14 @@ def test_update_order_status_records_transition_timestamp():
     )
     session = FakeSession(entity=order)
 
-    result = asyncio.run(update_order_status(session, 12, "preparing"))
+    result = asyncio.run(admin_orders.update_order_status(session, 12, "preparing"))
 
     assert result["status"] == "preparing"
     assert order.preparing_at is not None
     assert order.preparing_at.tzinfo is not None
     assert order.received_at is None
     assert session.committed
+    assert published == ["private-order-code"]
 
 
 def test_dashboard_summary_uses_grouped_status_counts():

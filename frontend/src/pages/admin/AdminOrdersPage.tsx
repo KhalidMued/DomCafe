@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
+  ApiError,
   getAdminOrders,
   hasAdminSession,
   updateAdminOrderStatus,
   type AdminOrderListItem,
   type AdminOrderStatus,
 } from '../../lib/api';
+import { subscribeOrderEvents } from '../../lib/orderEvents';
 import { AdminLayout, AdminLoginRequired } from './AdminLayout';
 
 const statusLabels: Record<AdminOrderStatus, string> = {
@@ -27,28 +29,46 @@ const statuses: AdminOrderStatus[] = ['new', 'received', 'preparing', 'ready', '
 export function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrderListItem[]>([]);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState('');
+  const live = useRef<ReturnType<typeof subscribeOrderEvents> | null>(null);
+  const writing = useRef(false);
   const hasSession = hasAdminSession();
 
   useEffect(() => {
     if (!hasSession) return;
-    getAdminOrders()
-      .then(setOrders)
-      .catch((ordersError) => {
-        setError(ordersError instanceof Error ? ordersError.message : 'Could not load recent orders.');
-      })
-      .finally(() => setLoading(false));
+    const subscription = subscribeOrderEvents(
+      '/api/admin/orders/events',
+      'orders-changed',
+      getAdminOrders,
+      (nextOrders) => {
+        setOrders(nextOrders);
+        setLoadError('');
+        setLoading(false);
+      },
+      (ordersError) => {
+        setLoadError(ordersError instanceof Error ? ordersError.message : 'Could not load recent orders.');
+        setLoading(false);
+        return ordersError instanceof ApiError && [401, 403].includes(ordersError.status);
+      },
+    );
+    live.current = subscription;
+    return () => { subscription.stop(); live.current = null; };
   }, [hasSession]);
 
   if (!hasSession) return <AdminLoginRequired />;
 
   async function handleStatusChange(orderId: string, nextStatus: AdminOrderStatus) {
-    if (!hasSession) return;
+    const subscription = live.current;
+    if (!hasSession || !subscription || writing.current) return;
+    writing.current = true;
+    subscription.pause(); // invalidate reads started before this write
     setUpdatingId(orderId);
     setError('');
     try {
       const updated = await updateAdminOrderStatus(orderId, nextStatus);
+      if (live.current !== subscription) return;
       setOrders((current) =>
         current.map((order) =>
           order.id === orderId
@@ -57,15 +77,20 @@ export function AdminOrdersPage() {
         ),
       );
     } catch (statusError) {
+      if (live.current !== subscription) return;
       setError(statusError instanceof Error ? statusError.message : 'Could not update this order.');
     } finally {
-      setUpdatingId('');
+      writing.current = false;
+      if (live.current === subscription) {
+        setUpdatingId('');
+        subscription.resume(); // reconcile after writes, including failed responses
+      }
     }
   }
 
   return (
-    <AdminLayout title="Orders">
-      {error ? <p className="error-text">{error}</p> : null}
+    <AdminLayout title="Orders" onLogout={() => { live.current?.stop(); live.current = null; }}>
+      {error || loadError ? <p className="error-text">{error || loadError}</p> : null}
       {loading ? <section className="skeleton-card">Loading recent orders…</section> : null}
       {!loading && orders.length === 0 ? <section className="skeleton-card">No orders yet.</section> : null}
       {orders.length > 0 ? (
@@ -85,7 +110,7 @@ export function AdminOrdersPage() {
                 Update status
                 <select
                   value={order.status}
-                  disabled={updatingId === order.id}
+                  disabled={updatingId !== ''}
                   onChange={(event) => handleStatusChange(order.id, event.target.value as AdminOrderStatus)}
                 >
                   {statuses.map((status) => (

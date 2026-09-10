@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { ApiError, getOrderStatus, type OrderStatus } from '../../lib/api';
+import { subscribeOrderEvents } from '../../lib/orderEvents';
 import { clearActiveOrderId, setActiveOrderId } from '../../store/orderProgressStore';
 
 const finalStatuses = new Set(['ready', 'cancelled']);
@@ -11,36 +12,29 @@ export function OrderStatusPage({ orderId, navigate }: { orderId: string; naviga
   const [error, setError] = useState('');
 
   useEffect(() => {
-    let alive = true;
-    let timer: number | undefined;
-
-    async function load() {
-      try {
-        const nextOrder = await getOrderStatus(orderId);
-        if (!alive) return;
+    setOrder(null);
+    setError('');
+    const subscription = subscribeOrderEvents(
+      `/api/orders/${encodeURIComponent(orderId)}/events`,
+      'order-changed',
+      () => getOrderStatus(orderId),
+      (nextOrder) => {
         setActiveOrderId(orderId);
         setOrder(nextOrder);
         setError('');
-        if (!finalStatuses.has(nextOrder.status)) {
-          timer = window.setTimeout(load, 15_000);
-        }
-      } catch (statusError) {
-        if (!alive) return;
+        return finalStatuses.has(nextOrder.status);
+      },
+      (statusError) => {
         if (statusError instanceof ApiError && statusError.status === 404) {
           clearActiveOrderId(orderId);
+          setOrder(null);
           setError('We could not find that order. Please check with the coffee bar.');
-          return;
+          return true;
         }
         setError('We’re having trouble refreshing your order status. We’ll try again shortly.');
-        timer = window.setTimeout(load, 15_000);
-      }
-    }
-
-    load();
-    return () => {
-      alive = false;
-      if (timer) window.clearTimeout(timer);
-    };
+      },
+    );
+    return subscription.stop;
   }, [orderId]);
 
   const activeIndex = order ? Math.max(statusSteps.indexOf(order.status), 0) : -1;
