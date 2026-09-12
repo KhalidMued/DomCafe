@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ApiError, getMenu, getOrderStatus, type OrderStatus, type PublicMenuCategory } from '../../lib/api';
 import { subscribeOrderEvents } from '../../lib/orderEvents';
+import { menuPhotoUrl } from '../../lib/menuPhotos';
 import { addCartItem, getCartItems, subscribeCart } from '../../store/cartStore';
 import { clearActiveOrderId, getActiveOrderId } from '../../store/orderProgressStore';
 
@@ -85,6 +86,8 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
   }
 
   const categories = useMemo(() => menu.filter((category) => category.drinks.length > 0), [menu]);
+  // Cover the first desktop row; native lazy loading handles later/near-viewport photos.
+  const eagerPhotoIds = categories.flatMap((category) => category.drinks).slice(0, 2).map((drink) => drink.id);
   const drinkCount = categories.reduce((sum, category) => sum + category.drinks.length, 0);
   const drinkCountLabel = `${drinkCount} ${drinkCount === 1 ? 'drink' : 'drinks'}`;
   const sectionCountLabel = `${categories.length} ${categories.length === 1 ? 'section' : 'sections'}`;
@@ -149,7 +152,7 @@ export function MenuPage({ navigate }: { navigate: (path: string) => void }) {
             {category.drinks.map((drink) => (
               <article className="drink-card" key={drink.id}>
                 <button className="drink-image-button" type="button" onClick={() => setExpanded(expanded === drink.id ? null : drink.id)} aria-label={`Show ${drink.name} details`}>
-                  <img src={drink.photo_url} alt={drink.name} />
+                  <img src={menuPhotoUrl(drink.photo_url)} alt={drink.name} loading={eagerPhotoIds.includes(drink.id) ? 'eager' : 'lazy'} decoding="async" />
                 </button>
                 <div className="drink-content">
                   <div className="drink-title-row">

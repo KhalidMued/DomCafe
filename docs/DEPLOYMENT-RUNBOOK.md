@@ -224,3 +224,11 @@ Expected results:
 HTTP/2 200
 {"status":"ok","database":"ok","redis":"ok"}
 ```
+
+## Curated menu photo optimization
+
+The guest menu uses `frontend/src/lib/menuPhotos.ts` to map exactly six older curated PNG URLs to checked-in `/uploads/drinks/menu-*.webp` copies. Originals and database URLs remain unchanged; all other URLs (including future admin uploads) pass through unchanged. Admin views continue to use the original URL.
+
+Copies retain source dimensions and use Pillow WebP quality 82, method 6. Their hand-named filenames deliberately do not match the generated-upload cleanup pattern. Keep these curated copies in deployments/backups alongside the originals; do not delete either. When replacing a photo through the admin panel, its new URL naturally bypasses the old mapping.
+
+The menu eagerly loads the first two images, uses native lazy loading for later images, and decodes asynchronously. Browser prefetch distance varies. Verify fresh desktop/mobile sessions, then scroll through all sections and confirm every image loads. Roll back by reverting this PR and rebuilding; no database rollback is required.

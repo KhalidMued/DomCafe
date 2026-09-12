@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-feat/order-sse
+fix/menu-photo-performance
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -83,6 +83,12 @@ feat/order-sse
 - Current branch adds Redis-backed Server-Sent Events for immediate admin order-list and guest order-status invalidations, while retaining automatic 15-second REST polling whenever streaming is unsupported, disconnected, or a reconciliation read fails.
 
 ## Verification
+Menu photo performance (2026-09-12, `fix/menu-photo-performance`):
+- Preserved all original photos and database URLs. The guest menu maps exactly six legacy curated PNG URLs to same-dimension WebP copies (Pillow quality 82, method 6); other and future upload URLs pass through unchanged. First two photos load eagerly, later photos use native lazy loading; all decode asynchronously.
+- Frontend: 87 tests passed, production build passed; backend: 99 tests passed. Compose validation, rebuild, health and PgBouncer checks passed.
+- Public HTTPS Chromium verification at desktop 1440×1000 and mobile 390×844: all 22 photos load after scrolling, no PNG image requests, no page errors or horizontal overflow. Initial image payload was 1,744,794 bytes desktop and 612,428 bytes mobile; full menu 2,055,112 bytes versus 14,270,107 bytes before (85.6% smaller). Native lazy-load prefetch distance varies by browser/network.
+- Desktop/mobile screenshots and original-versus-WebP inspection preserved framing and acceptable detail with no layout change. Local evidence: `/tmp/dom-menu-photo-qa/{desktop,mobile}.png` and `results.json`.
+
 Verification for `feat/order-sse` (2026-09-10):
 
 - Backend suite: `99 passed`; coverage includes subscription acknowledgement before `connected`, guest-channel isolation, authentication before admin subscription, unknown guest codes, heartbeat/headers, bounded Redis failures, cleanup, PII-free event payloads, post-commit publication, and no publication after a failed status commit.
@@ -146,6 +152,9 @@ Verification for `fix/l3-replaced-photo-cleanup` (2026-07-09; `ci/bump-actions-n
 Historical verification for earlier merged work lives in git history of this file.
 
 ## Hermes Tools Used
+- execute_code
+- vision_analyze
+- browser_navigate / browser_console / browser_vision
 - skill_view
 - session_search
 - read_file
@@ -158,6 +167,8 @@ Historical verification for earlier merged work lives in git history of this fil
 - write_file
 
 ## Technologies / Services Touched
+- Pillow / WebP / curated photo assets
+- Playwright / Chromium / public HTTPS
 - FastAPI / Python / pytest
 - Redis Pub/Sub / Server-Sent Events
 - React / TypeScript / EventSource
@@ -167,7 +178,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- PR #80 awaits human review/merge: https://github.com/KhalidMued/DomCafe/pull/80. The change is already rebuilt and live-verified.
+- PR #80 is merged. Menu photo performance fix is deployed and awaits its PR review/merge.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
