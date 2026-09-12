@@ -236,7 +236,7 @@ export function createOrder(payload: CreateOrderPayload) {
 }
 
 export function getOrderStatus(orderId: string) {
-  return request<OrderStatus>(`/api/orders/${orderId}`);
+  return request<OrderStatus>(`/api/orders/${encodeURIComponent(orderId)}`);
 }
 
 // The admin JWT lives in an httpOnly cookie the browser attaches to

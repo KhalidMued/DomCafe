@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+import jwt
 
 from app.core.config import get_settings
 from app.db.session import get_session
+from app.db.session import AsyncSessionLocal
+from app.services.order_events import ADMIN_CHANNEL, order_event_response
 from app.schemas.admin import (
     AdminAvailabilityResponse,
     AdminAvailabilityUpdate,
@@ -157,6 +160,22 @@ async def admin_orders(
     session: AsyncSession = Depends(get_session),
 ) -> list[dict[str, object]]:
     return await list_recent_orders(session)
+
+
+@router.get("/admin/orders/events")
+async def admin_order_events(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+):
+    token = credentials.credentials if credentials is not None else request.cookies.get(JWT_COOKIE)
+    try:
+        payload = jwt.decode(token or "", get_settings().jwt_secret, algorithms=["HS256"], options={"require": ["exp"]})
+        expires_at = float(payload["exp"])
+    except (jwt.PyJWTError, ValueError, TypeError):
+        raise HTTPException(status_code=401, detail="Admin login required.") from None
+    async with AsyncSessionLocal() as session:
+        await require_admin(request, credentials, session)
+    return await order_event_response(ADMIN_CHANNEL, "orders-changed", expires_at)
 
 
 @router.get("/admin/menu", response_model=AdminMenuManagementResponse)

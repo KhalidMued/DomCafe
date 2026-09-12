@@ -12,6 +12,7 @@ from app.models.order import Order, OrderItem
 from app.models.setting import Setting
 from app.schemas.public import OrderCreate
 from app.services.discord import notify_new_order_if_enabled
+from app.services.order_events import publish_orders_changed
 
 DEFAULT_PUBLIC_SETTINGS = {
     "cafe_name": "DŌM",
@@ -158,6 +159,7 @@ async def create_guest_order(session: AsyncSession, payload: OrderCreate) -> dic
         )
 
     await session.commit()
+    await publish_orders_changed()
     _schedule_order_notification(order.id)
     return {
         "order_id": order.public_code,

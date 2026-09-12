@@ -90,6 +90,26 @@ GET /api/orders/{order_code}
 
 `order_code` is the `order_id` public code returned by order creation; sequential integer ids are not accepted. Returns guest-safe order details, item snapshots, and a friendly status label. The `id` field in the response is the same public code.
 
+## Live order updates (Server-Sent Events)
+
+```http
+GET /api/admin/orders/events
+GET /api/orders/{order_code}/events
+```
+
+The admin stream requires the same admin cookie/bearer authentication as the orders API. A guest stream is scoped to a single existing, unguessable public order code; numeric order IDs do not grant access.
+
+Responses use `text/event-stream`. Events carry only `data: {}` as an invalidation signal, never guest names, order contents, IDs, or credentials:
+
+- `connected`: sent after subscribing, on every connection. Refetch the matching REST snapshot to recover changes missed while disconnected.
+- `orders-changed`: admin list invalidation after a committed order creation or status change.
+- `order-changed`: private order invalidation after a committed status change.
+- Comment heartbeats keep otherwise idle streams alive through the reverse proxy.
+
+Clients continue using normal REST requests for reads and writes. There is no durable event history or `Last-Event-ID` replay; reconnecting clients fetch the current authoritative snapshot. Redis Pub/Sub distributes invalidations across backend workers. Publication is best-effort and must not turn a successful database write into a failed response.
+
+The browser reconnects automatically and uses 15-second REST polling when streaming is unavailable. A healthy stream also performs a bounded 60-second reconciliation read because Redis publication is deliberately best-effort. Guest tracking closes on ready/cancelled, confirmed order-not-found, or page cleanup. Admin tracking closes when leaving the page or logging out. No tokens belong in stream query strings.
+
 ## Admin routes
 
 ### Admin login

@@ -60,6 +60,7 @@ describe('Phase 4 admin orders page', () => {
 
   it('updates an order status from the orders page', async () => {
     document.cookie = 'dom_admin_session=1; path=/';
+    let status = 'new';
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       if (String(input) === '/api/admin/orders') {
         return jsonResponse([
@@ -67,7 +68,7 @@ describe('Phase 4 admin orders page', () => {
             id: '18',
             order_number: 18,
             guest_name: 'Mona',
-            status: 'new',
+            status,
             status_label: 'Your order was sent to the bar.',
             items_count: 1,
             created_at: '2026-05-30T18:00:00Z',
@@ -78,6 +79,7 @@ describe('Phase 4 admin orders page', () => {
       expect(init?.method).toBe('PATCH');
       expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
       expect(init?.body).toBe(JSON.stringify({ status: 'preparing' }));
+      status = 'preparing';
       return jsonResponse({
         id: '18',
         order_number: 18,
@@ -94,7 +96,8 @@ describe('Phase 4 admin orders page', () => {
     fireEvent.change(within(orderCard).getByLabelText('Update status'), { target: { value: 'preparing' } });
 
     expect(await within(orderCard).findByText('Preparing')).toBeInTheDocument();
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(within(orderCard).getByRole('combobox')).toHaveValue('preparing');
     expect(orderCard.querySelector('time')).toHaveAttribute('datetime', '2026-05-30T18:00:00Z');
     expect(orderCard.querySelector('time')?.textContent).toBe(originalTime);
   });

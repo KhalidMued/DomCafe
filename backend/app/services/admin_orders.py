@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.models.order import Order
 from app.schemas.admin import OrderStatus
 from app.services.public import STATUS_LABELS
+from app.services.order_events import publish_order_changed
 
 _STATUS_TIMESTAMP_FIELDS = {
     "received": "received_at",
@@ -51,6 +52,7 @@ async def update_order_status(
     if timestamp_field is not None:
         setattr(order, timestamp_field, datetime.now(timezone.utc))
     await session.commit()
+    await publish_order_changed(order.public_code)
     return {
         "id": str(order.id),
         "order_number": order.id,

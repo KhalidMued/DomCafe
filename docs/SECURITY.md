@@ -35,6 +35,8 @@ The backend fallback limiter uses `request.client.host` resolved through uvicorn
 
 Guest order status is looked up by a random, unguessable `public_code` (`secrets.token_urlsafe`, unique per order) instead of the sequential integer order id, so order details cannot be enumerated. The integer id remains internal and appears only as the human-friendly `order_number`.
 
+The matching guest Server-Sent Events stream is protected by the same unguessable `public_code`; numeric order ids are not accepted. The admin stream requires the existing admin JWT cookie or bearer authentication. Stream messages are invalidation-only (`data: {}`) and never contain guest names, order contents, order identifiers, or credentials. Clients fetch authoritative details from the existing authenticated/scoped REST endpoints after a notification. Redis Pub/Sub carries only these empty invalidations between backend workers, and Nginx applies per-client request-rate and concurrent-connection limits to bound stream setup and long-lived resources.
+
 ## Security headers
 
 The standard security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) live in `nginx/conf.d/security-headers.inc` and are included in the `server` block and in every `location` that declares its own `add_header` (Nginx drops inherited headers in such locations), including `/api/*` and `/uploads/*` responses.
