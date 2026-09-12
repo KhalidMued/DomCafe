@@ -178,7 +178,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- PR #80 is merged. Menu photo performance fix is deployed and awaits its PR review/merge.
+- PR #80 is merged. Menu photo performance PR #81 is deployed and awaits human review/merge: https://github.com/KhalidMued/DomCafe/pull/81.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
