@@ -33,6 +33,7 @@ from app.schemas.admin import (
     AdminSettingsUpdate,
 )
 from app.services.admin_auth import authenticate_admin, get_active_admin_id
+from app.services.admin_sessions import active_admin_subject, revoke_admin_session
 from app.services.admin_dashboard import get_dashboard_summary
 from app.services.admin_menu import (
     archive_bean,
@@ -112,7 +113,18 @@ async def login(
 
 
 @router.post("/admin/logout", response_model=AdminSessionResponse)
-async def logout(response: Response) -> dict[str, bool]:
+async def logout(
+    request: Request,
+    response: Response,
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+) -> dict[str, bool]:
+    # Revoke both presented sessions if cookie and bearer differ.
+    tokens = {request.cookies.get(JWT_COOKIE)}
+    if credentials is not None:
+        tokens.add(credentials.credentials)
+    for token in tokens:
+        if token:
+            await revoke_admin_session(token)
     _clear_session_cookies(response)
     return {"ok": True}
 
@@ -175,7 +187,12 @@ async def admin_order_events(
         raise HTTPException(status_code=401, detail="Admin login required.") from None
     async with AsyncSessionLocal() as session:
         await require_admin(request, credentials, session)
-    return await order_event_response(ADMIN_CHANNEL, "orders-changed", expires_at)
+    async def session_check():
+        return await active_admin_subject(token or "") is not None
+
+    return await order_event_response(
+        ADMIN_CHANNEL, "orders-changed", expires_at, session_check=session_check,
+    )
 
 
 @router.get("/admin/menu", response_model=AdminMenuManagementResponse)

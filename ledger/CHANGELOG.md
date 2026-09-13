@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Harden admin sessions with Redis-backed revocation, 60-minute expiry, Secure cookies, loopback-only origin exposure, CSP/HSTS headers, audited dependencies, and remediated container images.
 - Fire the Discord order notification as a background task so it no longer delays the guest's order response.
 - Add request logging middleware with an `X-Request-ID` response header (request id, method, path, status, duration; healthcheck path excluded).
 - Share one pooled Redis client instead of opening a connection per rate-limit or health check.

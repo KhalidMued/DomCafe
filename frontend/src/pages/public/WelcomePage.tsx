@@ -46,29 +46,7 @@ export function WelcomePage({ navigate }: { navigate: (path: string) => void }) 
       ) : null}
       <section className="hero-card welcome-hero-card" aria-label="DŌM Home Café">
         <div style={{ textAlign: 'center' }}>
-          <svg width="100%" viewBox="0 0 680 220" role="img" xmlns="http://www.w3.org/2000/svg">
-            <style>{`
-    .hc-label {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 6px;
-      fill: #BA7517;
-    }
-    .wordmark-letter {
-      font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-      font-size: 108px;
-      font-weight: 300;
-      fill: #F1EFE8;
-    }
-    .tagline {
-      font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-      font-size: 15px;
-      font-weight: 400;
-      letter-spacing: 2.5px;
-      fill: #F1EFE8;
-    }
-  `}</style>
+          <svg className="dom-logo-svg" width="100%" viewBox="0 0 680 220" role="img" xmlns="http://www.w3.org/2000/svg">
             <text x="340" y="14" textAnchor="middle" className="hc-label">HOME CAFÉ</text>
             <rect x="316" y="24" width="48" height="1.5" fill="#BA7517" />
             <text x="148" y="148" textAnchor="middle" className="wordmark-letter">D</text>

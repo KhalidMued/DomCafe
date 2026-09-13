@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 import hashlib
+from uuid import uuid4
 
 import bcrypt
 import jwt
-from jwt import PyJWTError
 
 from app.core.config import get_settings
 
@@ -35,16 +35,5 @@ def burn_password_check(password: str) -> None:
 def create_access_token(subject: str) -> str:
     settings = get_settings()
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expires_minutes)
-    payload = {"sub": subject, "exp": expires_at, "scope": "admin"}
+    payload = {"sub": subject, "exp": expires_at, "scope": "admin", "jti": uuid4().hex}
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
-
-
-def decode_admin_subject(token: str) -> str | None:
-    try:
-        payload = jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
-    except PyJWTError:
-        return None
-    if payload.get("scope") != "admin":
-        return None
-    subject = payload.get("sub")
-    return subject if isinstance(subject, str) and subject else None

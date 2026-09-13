@@ -123,7 +123,7 @@ Rate limit: 5 attempts per client IP/source address per minute. Extra attempts r
 
 A successful login responds `{"ok": true}` and sets two cookies instead of returning the JWT in the body:
 
-- `dom_admin_jwt` — the admin JWT, `HttpOnly`, `SameSite=Strict`, scoped to `/api`, so page scripts can never read it. Set `ADMIN_COOKIE_SECURE=true` to add the `Secure` attribute when admin access is HTTPS-only.
+- `dom_admin_jwt` — the 60-minute admin JWT, `HttpOnly`, `Secure`, `SameSite=Strict`, scoped to `/api`, so page scripts can never read it.
 - `dom_admin_session` — a non-secret `1`, readable by the SPA, used only to decide whether to render admin pages or the login screen.
 
 ### Admin logout
@@ -132,7 +132,7 @@ A successful login responds `{"ok": true}` and sets two cookies instead of retur
 POST /api/admin/logout
 ```
 
-Clears both session cookies and responds `{"ok": true}`. No authentication required.
+Revokes any presented valid session server-side in Redis, clears both cookies, and responds `{"ok": true}`. The operation remains idempotent when no session is present. A revoked JWT is rejected even if a copy is later supplied as a bearer token.
 
 All protected admin routes accept the `dom_admin_jwt` cookie (sent automatically by the browser) or, equivalently, an explicit header:
 

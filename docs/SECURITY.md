@@ -7,14 +7,15 @@ See `AGENT.md` for project rules and source requirements.
 - Nginx is the only service with a published host port and is the expected public entry point.
 - Backend, PostgreSQL, PgBouncer, and Redis stay on Docker-internal networks only.
 - If another reverse proxy/CDN/load balancer is placed in front of Nginx, configure Nginx `real_ip` with explicit trusted upstreams before relying on per-client edge rate limits.
-- For private Tailscale development access, Nginx is bound to `0.0.0.0:11080:80`.
+- Nginx is bound to `127.0.0.1:11080:80`, preventing LAN, Tailscale, and direct-origin access from bypassing Cloudflare. Local server checks still use loopback.
 - Cloudflare Tunnel routes `dom.khalidmued.com` to `http://127.0.0.1:11080`, so the public domain still reaches only the Nginx entrypoint.
 - The `cloudflared` system service uses HTTP/2 because QUIC was unstable on this server/network during setup.
 
 ## Authentication
 
-- Admin routes use JWT authentication after `/api/admin/login`. The JWT is delivered in an `HttpOnly`, `SameSite=Strict` cookie scoped to `/api` and never appears in the response body or localStorage, so page scripts cannot exfiltrate it (audit M10). A separate non-secret `dom_admin_session` hint cookie tells the SPA whether to render admin pages. `SameSite=Strict` prevents cross-site requests from carrying the admin cookie (CSRF). Set `ADMIN_COOKIE_SECURE=true` when admin access is HTTPS-only; it defaults to false because admin access also happens over plain-HTTP LAN/Tailscale paths.
-- Protected admin routes also accept an explicit `Authorization: Bearer` header (used by tests and tooling).
+- Admin routes use 60-minute JWT sessions after `/api/admin/login`. The JWT is delivered in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie scoped to `/api` and never appears in the response body or localStorage, so page scripts cannot exfiltrate it. A separate non-secret `dom_admin_session` hint cookie tells the SPA whether to render admin pages. The public HTTPS hostname is the supported browser-admin path.
+- Each JWT has a unique `jti` and is registered in a TTL-bounded Redis allowlist. Every protected REST request and admin event-stream authorization checks that active-session record and fails closed if Redis is unavailable. Logout revokes the server-side session before clearing cookies, so a copied cookie or bearer token stops working immediately; an already-connected admin stream rechecks the session every 15 seconds and then closes after revocation.
+- Protected admin routes also accept an explicit `Authorization: Bearer …` header for tests and tooling. The same Redis session requirements apply.
 - Login verifies a throwaway bcrypt hash when the username is unknown, so response timing cannot be used to enumerate admin accounts.
 - Agent routes use the separate `AGENT_API_KEY` bearer credential.
 - Database connections authenticate with SCRAM-SHA-256 end to end (audit L5): PgBouncer runs `auth_type = scram-sha-256`, so both the backend→PgBouncer and PgBouncer→PostgreSQL legs use challenge–response and the password never crosses the Docker network in clear text. The PgBouncer auth file stores the secret in plain form (required to serve both legs) but is written `0600` inside the container, which already receives the same secret via its environment.
@@ -39,7 +40,7 @@ The matching guest Server-Sent Events stream is protected by the same unguessabl
 
 ## Security headers
 
-The standard security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) live in `nginx/conf.d/security-headers.inc` and are included in the `server` block and in every `location` that declares its own `add_header` (Nginx drops inherited headers in such locations), including `/api/*` and `/uploads/*` responses.
+The security headers (`Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) live in `nginx/conf.d/security-headers.inc` and are included in the `server` block and in every `location` that declares its own `add_header` (Nginx drops inherited headers in such locations), including `/api/*` and `/uploads/*` responses. The one-day HSTS policy omits `includeSubDomains` and `preload`; browsers enforce HSTS only when it is received over HTTPS.
 
 ## Upload security
 
@@ -56,3 +57,5 @@ Current audit hardening:
 - Backend dependency pins were updated to remove known Python advisories in FastAPI/Starlette, `python-multipart`, Pillow, pytest, and `python-jose`.
 - Admin JWT handling uses `PyJWT` instead of `python-jose` because `python-jose` still had an advisory without a fixed release.
 - `pytest-asyncio` is pinned explicitly because the backend test suite contains async tests.
+- The 2026-09-13 refresh updated `python-multipart`, Pillow, Vite, Vitest, and their lockfile dependencies; fresh `pip-audit` and `npm audit --audit-level=high` runs report no known vulnerabilities.
+- Runtime images are rebuilt from current pinned or maintained upstream bases and scanned with Trivy. Base-image findings without an available fix are documented in the deployment record rather than hidden or patched with unverified replacements.
