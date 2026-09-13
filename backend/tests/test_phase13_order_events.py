@@ -155,7 +155,13 @@ def test_admin_route_authenticates_before_subscribing(monkeypatch):
     asyncio.run(routes.admin_order_events(request, credentials))
 
     authenticated.assert_awaited_once()
-    event_response.assert_awaited_once_with(routes.ADMIN_CHANNEL, 'orders-changed', 12345.0)
+    event_response.assert_awaited_once()
+    assert event_response.await_args.args == (routes.ADMIN_CHANNEL, 'orders-changed', 12345.0)
+    check = event_response.await_args.kwargs['session_check']
+    active = AsyncMock(return_value='1')
+    monkeypatch.setattr(routes, 'active_admin_subject', active)
+    assert asyncio.run(check()) is True
+    active.assert_awaited_once_with('token')
 
 
 def test_failed_status_commit_does_not_publish(monkeypatch):

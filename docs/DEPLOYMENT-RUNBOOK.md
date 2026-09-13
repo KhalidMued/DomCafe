@@ -9,10 +9,12 @@ DomCafe is served through the Compose `nginx` service on host port `11080`.
 Only Nginx publishes a host port:
 
 ```text
-0.0.0.0:11080:80
+127.0.0.1:11080:80
 ```
 
 Backend, PostgreSQL, PgBouncer, and Redis must stay Docker-internal and must not publish host ports.
+
+The loopback bind is intentional: Cloudflare Tunnel runs on this host and reaches `127.0.0.1:11080`, while LAN, Tailscale, and direct-origin clients cannot bypass Cloudflare. Browser admin access must use the public HTTPS hostname because admin cookies are `Secure`. Keep `ADMIN_COOKIE_SECURE=true` and `JWT_EXPIRES_MINUTES=60` in production.
 
 Verify the effective Compose config before deployment changes:
 

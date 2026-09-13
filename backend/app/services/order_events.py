@@ -12,6 +12,7 @@ from app.db.redis import get_redis
 logger = logging.getLogger(__name__)
 ADMIN_CHANNEL = "dom:orders:admin"
 HEARTBEAT_SECONDS = 15
+SESSION_CHECK_SECONDS = 15
 IO_TIMEOUT = 1
 
 
@@ -42,8 +43,9 @@ async def _publish_channels(*channels: str) -> None:
 
 
 class OrderEventResponse(StreamingResponse):
-    def __init__(self, pubsub, channel: str, event: str, expires_at: float | None):
+    def __init__(self, pubsub, channel: str, event: str, expires_at: float | None, *, session_check=None):
         self.pubsub = pubsub
+        self.session_check = session_check
         self.closed = False
         super().__init__(
             self.events(channel, event, expires_at),
@@ -72,9 +74,13 @@ class OrderEventResponse(StreamingResponse):
         try:
             if expires_at is not None and time.time() >= expires_at:
                 return
+            if self.session_check is not None and not await self.session_check():
+                return
             yield "event: connected\ndata: {}\n\n"
             while True:
                 timeout = HEARTBEAT_SECONDS
+                if self.session_check is not None:
+                    timeout = min(timeout, SESSION_CHECK_SECONDS)
                 if expires_at is not None:
                     timeout = min(timeout, expires_at - time.time())
                     if timeout <= 0:
@@ -86,6 +92,8 @@ class OrderEventResponse(StreamingResponse):
                     message = None
                 if expires_at is not None and time.time() >= expires_at:
                     return
+                if self.session_check is not None and not await self.session_check():
+                    return
                 if message and message["type"] == "message" and message["channel"] == channel:
                     yield f"event: {event}\ndata: {{}}\n\n"
                 elif message is None:
@@ -96,12 +104,12 @@ class OrderEventResponse(StreamingResponse):
             await self.close()
 
 
-async def order_event_response(channel: str, event: str, expires_at: float | None = None):
+async def order_event_response(channel: str, event: str, expires_at: float | None = None, *, session_check=None):
     try:
         pubsub = get_redis().pubsub()
     except Exception:
         raise HTTPException(status_code=503, detail="Live updates unavailable.") from None
-    response = OrderEventResponse(pubsub, channel, event, expires_at)
+    response = OrderEventResponse(pubsub, channel, event, expires_at, session_check=session_check)
     try:
         async with asyncio.timeout(IO_TIMEOUT):
             await pubsub.subscribe(channel)

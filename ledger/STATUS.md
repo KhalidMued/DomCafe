@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-fix/menu-photo-performance
+security/dependency-session-hardening
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -80,9 +80,17 @@ fix/menu-photo-performance
 - PR #77 (Three.js drifting-beans welcome background) was squash merged into `main` (2026-07-11): a sparse field of 22 low-poly 3D beans drifting slowly behind the welcome card with gentle pointer parallax, gated on WebGL + `prefers-reduced-motion`, welcome page only, lazy chunk, full dispose/cleanup.
 - PR #78 replaced the placeholder welcome visuals with photoreal roasted beans and was squash merged into `main`.
 - PR #79 added the original order submission date/time to admin order cards and was squash merged into `main`.
-- Current branch adds Redis-backed Server-Sent Events for immediate admin order-list and guest order-status invalidations, while retaining automatic 15-second REST polling whenever streaming is unsupported, disconnected, or a reconciliation read fails.
+- Current branch hardens dependencies, containers, origin exposure, security headers, and revocable admin sessions without changing the database schema.
 
 ## Verification
+Security/dependency/session hardening (2026-09-13, `security/dependency-session-hardening`):
+- Admin JWTs now have unique `jti` values and 60-minute expiry, use `Secure`/`HttpOnly`/`SameSite=Strict` cookies, and require a TTL-bounded Redis allowlist entry. Protected REST and SSE authorization fails closed on session-store errors; logout revokes the server-side session, and connected admin streams revalidate every 15 seconds.
+- Live HTTPS session check: login `200`, authenticated dashboard `200`, logout `200`, then the copied bearer token returned `401`; cookie flags and 3600-second lifetime were confirmed without printing credentials.
+- Dependency checks: backend `pip-audit` reports no known vulnerabilities; frontend `npm audit --audit-level=high` reports 0 vulnerabilities. Backend 115 tests and frontend 87 tests passed; the frontend production build passed.
+- Trivy 0.74.0 with a refreshed database reports zero vulnerabilities at all severities for the final backend, frontend, Nginx, PostgreSQL, PgBouncer, and Redis runtime images. The backend uses a pinned Alpine base and removes package-manager/build helpers; PostgreSQL uses patched Alpine packages plus gosu 1.19 rebuilt with Go 1.25.13 and `golang.org/x/sys` 0.44.0.
+- Compose config, Nginx syntax, all service healthchecks, PgBouncer application/pool checks, loopback and public `/api/health` passed. Only `127.0.0.1:11080` listens; a LAN-address connection failed, confirming direct-origin bypass is closed while Cloudflare Tunnel remains healthy.
+- Live HTTPS headers include CSP, one-day HSTS, anti-framing, nosniff, referrer, and permissions policies. Chromium showed zero page/JavaScript errors under CSP after moving inline SVG rules into the stylesheet and allowing same-origin blob texture fetches; the DŌM logo, macron, tagline, form, and coffee-bean background were visually verified.
+
 Menu photo performance (2026-09-12, `fix/menu-photo-performance`):
 - Preserved all original photos and database URLs. The guest menu maps exactly six legacy curated PNG URLs to same-dimension WebP copies (Pillow quality 82, method 6); other and future upload URLs pass through unchanged. First two photos load eagerly, later photos use native lazy loading; all decode asynchronously.
 - Frontend: 87 tests passed, production build passed; backend: 99 tests passed. Compose validation, rebuild, health and PgBouncer checks passed.
@@ -167,6 +175,10 @@ Historical verification for earlier merged work lives in git history of this fil
 - write_file
 
 ## Technologies / Services Touched
+- Trivy / pip-audit / npm audit
+- PyJWT / Redis-backed admin sessions
+- Alpine Linux / Go / gosu
+- Content Security Policy / HSTS
 - Pillow / WebP / curated photo assets
 - Playwright / Chromium / public HTTPS
 - FastAPI / Python / pytest
@@ -178,14 +190,14 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- PR #80 is merged. Menu photo performance PR #81 is deployed and awaits human review/merge: https://github.com/KhalidMued/DomCafe/pull/81.
+- PR #80 and menu photo performance PR #81 are merged. The current security hardening branch is deployed and awaits PR review/merge.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 
 ## Next recommended task
-- Routine care: periodic `./scripts/backup-db.sh` plus an uploads rsync after meaningful content changes. Optional hygiene follow-up: bump vite past 7.3.3 (and refresh the lockfile) to clear the pre-existing Windows-oriented dev-tooling `npm audit` advisories (vite/undici/esbuild).
+- Configure Cloudflare Access MFA for the admin path through the guided dashboard workflow, then continue routine database/upload backups.
 
 ## Notes
 - `.env` remains ignored and must not be committed.

@@ -40,7 +40,8 @@ services:
         condition: service_healthy
 
   postgres:
-    image: postgres:16-alpine
+    build:
+      context: ./postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-dom_cafe}
@@ -98,10 +99,11 @@ services:
       retries: 5
 
   nginx:
-    image: nginx:1.27-alpine
+    build:
+      context: ./nginx
     restart: unless-stopped
     ports:
-      - "0.0.0.0:11080:80"
+      - "127.0.0.1:11080:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
