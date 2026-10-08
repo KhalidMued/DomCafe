@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-docs/sync-post-security-status
+`main` is the stable baseline; no implementation branch is active.
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -81,6 +81,7 @@ docs/sync-post-security-status
 - PR #78 replaced the placeholder welcome visuals with photoreal roasted beans and was squash merged into `main`.
 - PR #79 added the original order submission date/time to admin order cards and was squash merged into `main`.
 - PR #82 was squash merged into `main`: dependencies, containers, origin exposure, security headers, and revocable admin sessions were hardened without changing the database schema. Local `main` was synchronized afterward, and the merged `security/dependency-session-hardening` branch was deleted locally and remotely.
+- PR #83 was squash merged into `main`: the post-security status ledger was synchronized, and its merged documentation branch was deleted locally and remotely.
 
 ## Verification
 Security/dependency/session hardening (2026-09-13, merged PR #82):
@@ -190,7 +191,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- PRs #80, #81, and #82 are merged. Documentation-only PR #83 awaits human review/merge; no feature or security implementation remains open.
+- No feature, security implementation, or earlier pull request remains open. Routine database and uploaded-photo backups are the next planned maintenance task.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
