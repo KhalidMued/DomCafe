@@ -4,7 +4,7 @@
 Post-MVP maintenance — the 2026-07-08 production-readiness audit roadmap (Phases 1–5) is complete and merged
 
 ## Current branch
-security/dependency-session-hardening
+docs/sync-post-security-status
 
 ## What works
 - Phase 2 PR #5 was merged into `main` and local `main` was fast-forwarded.
@@ -80,10 +80,10 @@ security/dependency-session-hardening
 - PR #77 (Three.js drifting-beans welcome background) was squash merged into `main` (2026-07-11): a sparse field of 22 low-poly 3D beans drifting slowly behind the welcome card with gentle pointer parallax, gated on WebGL + `prefers-reduced-motion`, welcome page only, lazy chunk, full dispose/cleanup.
 - PR #78 replaced the placeholder welcome visuals with photoreal roasted beans and was squash merged into `main`.
 - PR #79 added the original order submission date/time to admin order cards and was squash merged into `main`.
-- Current branch hardens dependencies, containers, origin exposure, security headers, and revocable admin sessions without changing the database schema.
+- PR #82 was squash merged into `main`: dependencies, containers, origin exposure, security headers, and revocable admin sessions were hardened without changing the database schema. Local `main` was synchronized afterward, and the merged `security/dependency-session-hardening` branch was deleted locally and remotely.
 
 ## Verification
-Security/dependency/session hardening (2026-09-13, `security/dependency-session-hardening`):
+Security/dependency/session hardening (2026-09-13, merged PR #82):
 - Admin JWTs now have unique `jti` values and 60-minute expiry, use `Secure`/`HttpOnly`/`SameSite=Strict` cookies, and require a TTL-bounded Redis allowlist entry. Protected REST and SSE authorization fails closed on session-store errors; logout revokes the server-side session, and connected admin streams revalidate every 15 seconds.
 - Live HTTPS session check: login `200`, authenticated dashboard `200`, logout `200`, then the copied bearer token returned `401`; cookie flags and 3600-second lifetime were confirmed without printing credentials.
 - Dependency checks: backend `pip-audit` reports no known vulnerabilities; frontend `npm audit --audit-level=high` reports 0 vulnerabilities. Backend 115 tests and frontend 87 tests passed; the frontend production build passed.
@@ -190,14 +190,14 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- PR #80 and menu photo performance PR #81 are merged. The current security hardening branch is deployed and awaits PR review/merge.
+- PRs #80, #81, and #82 are merged. This documentation-only status synchronization awaits PR review/merge; no feature or security implementation remains open.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
 - Guests with an order in flight at Phase 2 deploy time lose their old `/order/<int id>` tracking link (integer lookups now 404 by design); new orders use unguessable codes.
 
 ## Next recommended task
-- Configure Cloudflare Access MFA for the admin path through the guided dashboard workflow, then continue routine database/upload backups.
+- Continue routine database and uploaded-photo backups. Cloudflare Access/MFA remains deliberately deferred until sensitive data or a stronger protection need justifies it.
 
 ## Notes
 - `.env` remains ignored and must not be committed.
