@@ -190,7 +190,7 @@ Historical verification for earlier merged work lives in git history of this fil
 - Documentation
 
 ## What is pending
-- PRs #80, #81, and #82 are merged. This documentation-only status synchronization awaits PR review/merge; no feature or security implementation remains open.
+- PRs #80, #81, and #82 are merged. Documentation-only PR #83 awaits human review/merge; no feature or security implementation remains open.
 
 ## Known issues
 - The 2026-07-08 audit (`ledger/AUDIT-2026-07-08.md`) is fully closed: every finding (H1–H4, M1–M14, L1–L8) is fixed and merged.
